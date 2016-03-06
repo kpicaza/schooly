@@ -1,6 +1,8 @@
 /web/bundles/
+/web/coverage
 /app/bootstrap.php.cache
 /app/cache/*
+/app/var/*
 /app/config/parameters.yml
 /app/logs/*
 !app/cache/.gitkeep

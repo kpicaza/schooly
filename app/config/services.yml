@@ -7,3 +7,30 @@ services:
 #    service_name:
 #        class: AppBundle\Directory\ClassName
 #        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]
+
+    fos_user.doctrine_registry:
+        alias: doctrine
+
+    app.user_factory:
+        class: AppBundle\Entity\UserFactory
+
+    app.user_gateway:
+        class: AppBundle\Entity\UserGateway
+        factory: [ "@doctrine", getRepository]
+        arguments: [ "AppBundle:ORMUser" ]
+
+    app.user_repository:
+        class: AppBundle\Entity\UserRepository
+        arguments: [ "@app.user_gateway", "@app.user_factory" ]
+
+
+    security.access.user_voter:
+        class:      AppBundle\Security\UserVoter
+        public:     false
+        tags:
+           - { name: security.voter }
+
+    app.api_user_handler: 
+        class: AppBundle\Handler\ApiUserHandler
+        arguments: [ "@app.user_repository", "@form.factory" ]
+        
