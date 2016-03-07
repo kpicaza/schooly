@@ -94,3 +94,14 @@ fos_user:
     registration:
         confirmation:
             enabled: true
+
+lexik_jwt_authentication:
+    private_key_path: %jwt_private_key_path%
+    public_key_path:  %jwt_public_key_path%
+    pass_phrase:      %jwt_key_pass_phrase%
+    token_ttl:        %jwt_token_ttl%
+    
+gesdinet_jwt_refresh_token:
+    ttl: 2592000
+    ttl_update: true
+    firewall: api

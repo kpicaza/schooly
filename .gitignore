@@ -11,3 +11,6 @@
 /bin/
 /composer.phar
 /nbproject
+/app/var/jwt
+/web/coverage
+

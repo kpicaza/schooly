@@ -7,3 +7,8 @@ services:
 #    service_name:
 #        class: AppBundle\Directory\ClassName
 #        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]
+
+# @todo: implementar el refresh token como value object dentro del interface User
+#    gesdinet.jwtrefreshtoken.refresh_token_manager:
+#        class: Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager
+#        arguments: [@fos_user.entity_manager, %gesdinet.jwtrefreshtoken.refresh_token.class%]

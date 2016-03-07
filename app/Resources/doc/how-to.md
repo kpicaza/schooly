@@ -441,13 +441,132 @@ podemos comprobar las rutas que nos ha generado
     fos_user_resetting_reset            GET|POST   ANY      ANY    /resetting/reset/{token}           
     fos_user_change_password            GET|POST   ANY      ANY    /profile/change-password   
 
-Debemos crear un firewall para nuestro api, ya que más tarde lo utilizaremos para securizarla.
+Ahora descargaremos los bundles para implementar la autorización JWT
 
+    composer require lexik/jwt-authentication-bundle:^1.3
+    composer require gesdinet/jwt-refresh-token-bundle:^0.1.4
+
+Los activamos en el kernel y generamos las claves ssh
+
+    mkdir -p app/var/jwt
+    openssl genrsa -out app/var/jwt/private.pem -aes256 4096
+    openssl rsa -pubout -in app/var/jwt/private.pem -out app/var/jwt/public.pem
+
+También las de test
+
+    openssl genrsa -out app/var/jwt/private-test.pem -aes256 4096
+    openssl rsa -pubout -in app/var/jwt/private-test.pem -out app/var/jwt/public-test.pem
+
+Ahora deberíamos añadir las rutas al par de claves, como variables de entorno(Recordemos las buenas prácticas, la información sensible 
+es mejor tenerla fuera de nuestra aplicación). Si estamos utilizando el server que monta symfony con el comando server:run los meteremos en el `parameters.yml`
+
+Primero definimos los parametros necesarios en el `parameters.yml`
+
+    # app/config/parameters.yml.dist
+    jwt_private_key_path: %kernel.root_dir%/var/jwt/private.pem   # ssh private key path
+    jwt_public_key_path:  %kernel.root_dir%/var/jwt/public.pem    # ssh public key path
+    jwt_key_pass_phrase:  ''                                      # ssh key pass phrase
+    jwt_token_ttl:        86400
+
+    # app/config/parameters.yml
+    jwt_private_key_path: '%kernel.root_dir%/var/jwt/private.pem'
+    jwt_public_key_path: '%kernel.root_dir%/var/jwt/public.pem'
+    jwt_key_pass_phrase: demo
+    jwt_token_ttl: ~
+
+Ponemos los parametros definidos en sus respectivas configuraciones, primero en test
+
+    # app/config/config_test.yml
+    lexik_jwt_authentication:
+        private_key_path:   %kernel.root_dir%/var/jwt/private-test.pem
+        public_key_path:    %kernel.root_dir%/var/jwt/public-test.pem
+
+despues en el general, añadimos también las de GesdinetJwtRefreshTokenBundle, estas son más simples por que depende de LexicJWTAuthenticationBundle
+
+    # app/config/config.yml
+    lexik_jwt_authentication:
+        private_key_path: %jwt_private_key_path%
+        public_key_path:  %jwt_public_key_path%
+        pass_phrase:      %jwt_key_pass_phrase%
+        token_ttl:        %jwt_token_ttl%
+
+    gesdinet_jwt_refresh_token:
+        ttl: 2592000
+        ttl_update: true
+        firewall: api
+
+Pasamos a actualizar el `security.yml`
+
+    # app/config/security.yml
+    ...
         firewalls:
-            ...
+            login:
+                pattern:  ^/api/login
+                stateless: true
+                anonymous: true
+                form_login:
+                    check_path:               /api/login_check
+                    success_handler:          lexik_jwt_authentication.handler.authentication_success
+                    failure_handler:          lexik_jwt_authentication.handler.authentication_failure
+                    require_previous_session: false
+
+            refresh:
+                pattern:  ^/api/token/refresh
+                stateless: true
+                anonymous: true
+
             api:
                 pattern:   ^/api
                 stateless: true
+                lexik_jwt: ~
+            ...
+
+        access_control:
+            ...
+            - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+            - { path: ^/api/token/refresh, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+            - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+
+Imporamos las rutas en el `eouting.yml`
+
+    # app/config/routing.yml
+    api_login_check:
+        path: /api/login_check
+
+    gesdinet_jwt_refresh_token:
+        path:     /api/token/refresh
+        defaults: { _controller: gesdinet.jwtrefreshtoken:refresh }
+
+Si utilizamos apache, borrariamos las rutas a las claves privadas, por lo menos de producción y las añadimos al 
+virtualhost, para mejor rendimiento deberíamos pasar el .htaccess completo
+
+    <VirtualHost *:80>
+
+        ServerName dev.site.com
+
+        DocumentRoot /var/www/symfony2/web
+        <Directory /var/www/symfony2/web>
+            AllowOverride All
+            Require all granted
+        </Directory>
+
+        RewriteEngine On
+        RewriteCond %{HTTP:Authorization} ^(.*)
+        RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+
+    </VirtualHost>
+
+Comprobamos que todo funciona, primero generamos el token JWT
+
+    curl -X POST http://127.0.0.1:8000/api/login_check -d _username=admin -d _password=Demo1234
+    {"token":"eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXUyJ9.eyJleHAiOjE0NTc0NzQwMTAsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOiIxNDU3Mzg3NjEwIn0.jVeYIiZL7B50MVu-luDVJpwdkQdo7cI3rsBbZkCeDzYdLrQTv9HBVbUBzqd-e2GliOt9rThFJZd8HlmJtUcebiFxebN_fuCE3sjHtH3cg7Zu3JJt2J_Zyv8c1ANB5h7sftlbBoksfXoMO5q6VLckXPNeY9V1T3Fyq2u4jyntx4DtdGI6A-FUjhrICWhUFwZlrwURsH8Qj8bxYNC9A2xmns0_PNlIKHruRRh6Lo-dWYTTYpKanfj4XNwS_Xew9f0UDWcKAUYoBCxwdqwNSO0UAdFbao-R8dgvt9ww23iC1T0so2w1tEMuaIKfWQ7a3kI87ZWyCbjNMuFxgO47mDs35NmxtnXhJMe0LO3kpGM2sEoG5DxYA7xxmk-PHtp02-t-V4uLfbA4TyK4uKon7H8ZYFc5JnSIz1i-Ps6ETLWRSnfw9qPiXlkz9dqXATsXFsMGACNpcCwtmq0eSSkp4AB2BWEXyHWwyOLVMhLIVpZ5dO5eKRK4gWwvY0tsvgrI_354GhLBA7S1amdcsVRZi16Zz350stFCd5E0iHFsp62vJ0StuB_SzyVxSfCsOLixSNY9yoRMScw-kfZdHcvwrJcrdBWgVlF04sxIz0xEftYG4FefTO4DkANjt2z2A1JD8Ojx9rxaTaZMFIZeoegWkM8mfi0zIosMcfEWDHWumQ5AHjI","refresh_token":"e455a5c6de8a46124266cbf6013e4b2486e7807fced5da7ee04a3bfc10ce80ea49264602dd43ac2aed54d14f469685743c5b08c776f705b4dd387d64233e833c"}
+
+Nos tiene que devolver algo como esto, fijaos al final del token que tenemos la clave `refresh_token`. Lo probamos también
+
+    curl -X POST -d refresh_token="e455a5c6de8a46124" 'http://127.0.0.1:8000/app_dev.php/api/token/refresh'dd43ac2aed54d14f469685743c5b08c776f705b4dd387d64233e833c"
+
+
+
 
 
 ## Site 2
