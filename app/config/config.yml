@@ -10,7 +10,7 @@ parameters:
 
 framework:
     #esi:             ~
-    #translator:      { fallbacks: ["%locale%"] }
+    translator:      { fallbacks: ["%locale%"] }
     secret:          "%secret%"
     router:
         resource: "%kernel.root_dir%/config/routing.yml"
@@ -105,3 +105,13 @@ gesdinet_jwt_refresh_token:
     ttl: 2592000
     ttl_update: true
     firewall: api
+
+nelmio_api_doc: 
+    name: 'Educaedu práctica API docs'
+ #   exclude_sections: ["Some section"]
+    default_sections_opened:  true
+# Api Docs template
+#    motd:
+#        template: some/template.html.twig
+    sandbox:
+#        enabled: false

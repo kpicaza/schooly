@@ -3,16 +3,11 @@ security:
     encoders:
         FOS\UserBundle\Model\UserInterface: sha512
 
-    role_hierarchy:
-        ROLE_DEVELOPER:   ROLE_USER
-        ROLE_ADMIN:       ROLE_USER
-        ROLE_SUPER_ADMIN: ROLE_ADMIN
-
     providers:
         fos_userbundle:
             id: fos_user.user_provider.username
 
-    firewalls:
+    firewalls:        
         login:
             pattern:  ^/api/login
             stateless: true
@@ -27,12 +22,17 @@ security:
             pattern:  ^/api/token/refresh
             stateless: true
             anonymous: true
+        
+        docs:
+            pattern:  ^/api/doc
+            stateless: true
+            anonymous: true
 
         api:
             pattern:   ^/api
             stateless: true
             lexik_jwt: ~
-        
+
         main:
             pattern: ^/
             form_login:
@@ -41,11 +41,21 @@ security:
             logout:       true
             anonymous:    true
 
+    role_hierarchy:
+        ROLE_DEVELOPER:   ROLE_USER
+        ROLE_ADMIN:       ROLE_DEVELOPER
+        ROLE_SUPER_ADMIN: ROLE_ADMIN
+
+
+    access_decision_manager:
+        strategy: unanimous
+
     access_control:
         - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/register, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api/token/refresh, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/doc, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/admin/, role: ROLE_ADMIN }

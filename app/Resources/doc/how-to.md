@@ -18,11 +18,10 @@ Primero definiremos los user storys.
 
 ### User stories
 
-1. **Site 1:** Como usuario developer puedo acceder a la documentación y el sandbox del API.
+1. **Site 2:** Como usuario sin autenticar puedo puedo acceder a la página de login.
+1. **Site 2:** Como usuario sin autenticar puedo registrarme en el site.
 1. **Site 2:** Como usuario sin autenticar puedo ver listados de libros.
 1. **Site 2:** Como usuario sin autenticar puedo ver el detalle de libro.
-1. **Site 2:** Como usuario sin autenticar puedo registrarme en el site.
-1. **Site 2:** Como usuario sin autenticar puedo puedo acceder a la página de login.
 1. **Site 2:** Como usuario autenticado puedo ver listados de libros.
 1. **Site 2:** Como usuario autenticado puedo ver el detalle de libro.
 1. **Site 2:** Como usuario autenticado puedo valorar de 0 a 5 de libro.
@@ -376,6 +375,7 @@ Actualizamos nuestro security.yml
 
 y en el config selecionamos el tipo de base de datos, le asignamos la clase usuario, el firewall y activamos la confirmación por email(opcional).
 
+    # app/config/config.yml
     fos_user:
         db_driver: orm 
         # other valid values are 'mongodb', 'couchdb' and 'propel'
@@ -384,6 +384,13 @@ y en el config selecionamos el tipo de base de datos, le asignamos la clase usua
         registration:
             confirmation:
                 enabled: true
+
+En el config_dev haremos que todos los email nos lleguen a nosotros mismos
+
+    # app/config/config_dev.yml
+    swiftmailer:
+        delivery_address: 'tu@email.com'
+
 
 Importamos las rutas
 
@@ -565,7 +572,88 @@ Nos tiene que devolver algo como esto, fijaos al final del token que tenemos la 
 
     curl -X POST -d refresh_token="e455a5c6de8a46124" 'http://127.0.0.1:8000/app_dev.php/api/token/refresh'dd43ac2aed54d14f469685743c5b08c776f705b4dd387d64233e833c"
 
+Nos falta nelmio api doc bundle para dejar preparado el stack de nuestra aplicación, después de instalarlo, empezaremos 
+a aplicar tdd para implementar el el patrón repositorio y abstraer completamente el motor de bbdd de nuestra aplicación.
 
+    composer require nelmio/api-doc-bundle:^2.11
+
+Lo activamos en el kernel y vamos a las configs
+
+    nelmio_api_doc: 
+        name: 'Educaedu práctica API docs'
+    #    exclude_sections: ["Some section"]
+        default_sections_opened:  true
+    #Api Docs template
+    #    motd:
+    #        template: some/template.html.twig
+        sandbox:
+    #        enabled: false
+
+Importamos en el `routing.yml`
+    
+    NelmioApiDocBundle:
+        resource: "@NelmioApiDocBundle/Resources/config/routing.yml"
+        prefix:   /api/doc
+
+Añadimos un nuevo firewall para la documentación, justo antes de `api`, para evitar colisiones de firewall
+
+    # app/config/security.yml
+        ...
+        firewalls:
+            ...
+            docs:
+                pattern:  ^/api/doc
+                stateless: true
+                anonymous: true
+            ...
+        access_control:
+            ...
+            - { path: ^/api/doc, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+            ...
+
+Podemos documentar las rutas que tenemos disponibles, `api/login`, `api/token/refresh`
+Abrimos el default controller y añadimos los siguentes metodos
+    
+    // src/AppBundle/DefaultController.php
+    ...
+    use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+    use FOS\RestBundle\Controller\Annotations\Post;
+
+    class DefaultController extends Controller
+        ...
+
+        /**
+         * @ApiDoc(
+         *   description = "Generate JWT token.",
+         *   statusCodes = {
+         *     200 = "Return JWT token and refresh token.",
+         *     401 = "Authentication failure, user doesn’t have permission or API token is invalid or outdated.",
+         *   }
+         * )
+         * @Post("/api/login")
+         */
+        public function apiLoginAction()
+        {
+
+        }
+
+        /**
+         * @ApiDoc(
+         *   description = "Refresh JWT token.",
+         *   statusCodes = {
+         *     200 = "Return JWT token from refresh token.",
+         *     401 = "Authentication failure, user doesn’t have permission or API token is invalid or outdated.",
+         *   }
+         * )
+         * @Post("/api/token/refresh")
+         */
+        public function apiTokenRefreshAction()
+        {
+
+        }
+
+Y accedemos a nuestra recién creada documentación en 127.0.0.1:8000/app_dev.php/api/doc.
+Ya tenemos todo lo necesario, ahora podemos empezar a desarrollar nuestra aplicación.
 
 
 
