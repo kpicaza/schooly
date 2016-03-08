@@ -8,19 +8,25 @@ services:
 #        class: AppBundle\Directory\ClassName
 #        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]
 
-    fos_user.doctrine_registry:
-        alias: doctrine
+#   fos_user.doctrine_registry:
+#       alias: doctrine
 
     app.user_factory:
-        class: AppBundle\Entity\UserFactory
+        class: AppBundle\Model\UserFactory
+
+#    app.user_gateway:
+#        class: AppBundle\Entity\UserGateway
+#        factory: [ "@doctrine", getRepository]
+#        arguments: [ "AppBundle:User" ]
 
     app.user_gateway:
-        class: AppBundle\Entity\UserGateway
-        factory: [ "@doctrine", getRepository]
-        arguments: [ "AppBundle:ORMUser" ]
+        class: AppBundle\Document\UserGateway
+        factory_service: doctrine_mongodb
+        factory_method:  getRepository
+        arguments: [ "AppBundle:User" ]
 
     app.user_repository:
-        class: AppBundle\Entity\UserRepository
+        class: AppBundle\Model\UserRepository
         arguments: [ "@app.user_gateway", "@app.user_factory" ]
 
 
@@ -33,4 +39,3 @@ services:
     app.api_user_handler: 
         class: AppBundle\Handler\ApiUserHandler
         arguments: [ "@app.user_repository", "@form.factory" ]
-        

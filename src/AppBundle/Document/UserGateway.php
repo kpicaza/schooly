@@ -1,15 +1,15 @@
 <?php
 
-namespace AppBundle\Entity;
+namespace AppBundle\Document;
 
 use AppBundle\Model\UserInterface;
 use AppBundle\Model\UserGatewayInterface;
-use Doctrine\ORM\EntityRepository;
+use Doctrine\ODM\MongoDB\DocumentRepository;
 
 /**
  * UserGateway.
  */
-class UserGateway extends EntityRepository implements UserGatewayInterface
+class UserGateway extends DocumentRepository implements UserGatewayInterface
 {
     /**
      * @param User $user
@@ -46,8 +46,8 @@ class UserGateway extends EntityRepository implements UserGatewayInterface
      */
     public function insert(UserInterface $user)
     {
-        $this->_em->persist($user);
-        $this->_em->flush();
+        $this->dm->persist($user);
+        $this->dm->flush();
 
         return $user;
     }
@@ -57,7 +57,7 @@ class UserGateway extends EntityRepository implements UserGatewayInterface
      */
     public function update()
     {
-        $this->_em->flush();
+        $this->dm->flush();
     }
 
     /**
@@ -65,7 +65,7 @@ class UserGateway extends EntityRepository implements UserGatewayInterface
      */
     public function remove(UserInterface $user)
     {
-        $this->_em->remove($user);
-        $this->_em->flush();
+        $this->dm->remove($user);
+        $this->dm->flush();
     }
 }

@@ -1,80 +1,87 @@
 <?php
 
-// src/AppBundle/Entity/User.php
+// src/AppBundle/Document/User.php
 
-namespace AppBundle\Entity;
+namespace AppBundle\Document;
 
-use FOS\UserBundle\Model\User as BaseUser;
-use Doctrine\ORM\Mapping as ORM;
+use AppBundle\Model\UserInterface;
+use FOS\UserBundle\Document\User as BaseUser;
+use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
+use Doctrine\ODM\MongoDB\Mapping\Annotations\UniqueIndex;
 
 /**
- * @ORM\Entity
- * @ORM\Table(name = "user")
- * @ORM\Entity(repositoryClass="AppBundle\Entity\UserGateway")
+ * User.
+ * 
+ * @MongoDB\Document(repositoryClass="AppBundle\Entity\UserRepository")
  */
-class ORMUser extends BaseUser implements User
+class User extends BaseUser implements UserInterface
 {
     /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue(strategy="AUTO")
+     * @MongoDB\Id(strategy="auto")
      */
     protected $id;
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=255)
+     * 
+     * @MongoDB\String
      */
     protected $username;
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=255, unique=true )
+     * 
+     * @MongoDB\String
+     * @UniqueIndex
      */
     protected $usernameCanonical;
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=255)
+     * 
+     * @MongoDB\String
      */
     protected $email;
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=255, unique=true )
+     * 
+     * @MongoDB\String
+     * @UniqueIndex
      */
     protected $emailCanonical;
 
     /**
      * @var bool
-     * @ORM\Column(type="boolean")
+     * 
+     * @MongoDB\Bool
      */
     protected $enabled;
 
     /**
      * The salt to use for hashing.
      *
-     * @ORM\Column(type="string")
-     *
      * @var string
+     * 
+     * @MongoDB\String
      */
     protected $salt;
 
     /**
      * Encrypted password. Must be persisted.
      *
-     * @ORM\Column(type="string")
-     *
      * @var string
+     * 
+     * @MongoDB\String
      */
     protected $password;
 
     /**
      * User description.
      *
-     * @ORM\Column(type="text", nullable=true)
-     *
      * @var string
+     *
+     * @MongoDB\String(nullable=true)
      */
     protected $description = null;
 
@@ -86,67 +93,67 @@ class ORMUser extends BaseUser implements User
     protected $plainPassword;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
-     *
      * @var \DateTime
+     * 
+     * @MongoDB\Date(nullable=true)
      */
     protected $lastLogin;
 
     /**
      * Random string sent to the user email address in order to verify it.
      *
-     * @ORM\Column(type="string", nullable=true)
-     *
      * @var string
+     *
+     * @MongoDB\String(nullable=true)
      */
     protected $confirmationToken;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
-     *
      * @var \DateTime
+     * 
+     * @MongoDB\Date(nullable=true)
      */
     protected $passwordRequestedAt;
 
     /**
-     * @ORM\Column(type="boolean")
-     *
      * @var bool
+     * 
+     * @MongoDB\Bool
      */
     protected $locked = false;
 
     /**
-     * @ORM\Column(type="boolean")
-     *
      * @var bool
+     * 
+     * @MongoDB\Bool
      */
     protected $expired = false;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
-     *
      * @var \DateTime
+     * 
+     * @MongoDB\Date(nullable=true)
      */
     protected $expiresAt;
 
     /**
-     * @ORM\Column(type="array")
-     *
      * @var array
+     * 
+     * @MongoDB\Collection
      */
     protected $roles;
 
     /**
-     * @ORM\Column(type="boolean")
-     *
      * @var bool
+     * 
+     * @MongoDB\Bool
      */
     protected $credentialsExpired = false;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
-     *
      * @var \DateTime
+     * 
+     * @MongoDB\Date(nullable=true)
      */
     protected $credentialsExpireAt;
 
@@ -178,19 +185,6 @@ class ORMUser extends BaseUser implements User
         return $rawUser;
     }
 
-    /**
-     * @param \AppBundle\Entity\User $user
-     *
-     * @return \AppBundle\Entity\User
-     */
-    public static function toApi(User $user)
-    {
-        $user->salt = null;
-        $user->password = null;
-
-        return $user;
-    }
-
     public function addRole($role)
     {
         return parent::addRole($role);
@@ -217,5 +211,77 @@ class ORMUser extends BaseUser implements User
     public function setDescription($description)
     {
         $this->description = $description;
+    }
+
+    /**
+     * Get enabled
+     *
+     * @return bool $enabled
+     */
+    public function getEnabled()
+    {
+        return $this->enabled;
+    }
+
+    /**
+     * Set salt
+     *
+     * @param string $salt
+     * @return self
+     */
+    public function setSalt($salt)
+    {
+        $this->salt = $salt;
+        return $this;
+    }
+
+    /**
+     * Get locked
+     *
+     * @return bool $locked
+     */
+    public function getLocked()
+    {
+        return $this->locked;
+    }
+
+    /**
+     * Get expired
+     *
+     * @return bool $expired
+     */
+    public function getExpired()
+    {
+        return $this->expired;
+    }
+
+    /**
+     * Get expiresAt
+     *
+     * @return date $expiresAt
+     */
+    public function getExpiresAt()
+    {
+        return $this->expiresAt;
+    }
+
+    /**
+     * Get credentialsExpired
+     *
+     * @return bool $credentialsExpired
+     */
+    public function getCredentialsExpired()
+    {
+        return $this->credentialsExpired;
+    }
+
+    /**
+     * Get credentialsExpireAt
+     *
+     * @return date $credentialsExpireAt
+     */
+    public function getCredentialsExpireAt()
+    {
+        return $this->credentialsExpireAt;
     }
 }
