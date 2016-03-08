@@ -2,7 +2,7 @@
 
 namespace AppBundle\Entity;
 
-class UserFactory
+class UserFactory implements UserFactoryInterface
 {
     /**
      * @param \AppBundle\Entity\User $rawUser
@@ -33,7 +33,7 @@ class UserFactory
      *
      * @return \AppBundle\Entity\User
      */
-    private function make(User $rawUser)
+    public function make(User $rawUser)
     {
         // You can format object, in this case we left it to return as raw object, feedback is welcome!
         return $rawUser->toApi($rawUser);

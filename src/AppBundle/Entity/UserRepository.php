@@ -10,20 +10,20 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class UserRepository
 {
     /**
-     * @var \AppBundle\Entity\UserGateway
+     * @var \AppBundle\Entity\UserGatewayInterface
      */
     private $gateway;
 
     /**
-     * @var \AppBundle\Entity\UserFactory
+     * @var \AppBundle\Entity\UserFactoryInterface
      */
     private $factory;
 
     /**
-     * @param \AppBundle\Entity\UserGateway $gateway
-     * @param \AppBundle\Entity\UserFactory $factory
+     * @param \AppBundle\Entity\UserGatewayInterface $gateway
+     * @param \AppBundle\Entity\UserFactoryInterface $factory
      */
-    public function __construct(UserGateway $gateway, UserFactory $factory)
+    public function __construct(UserGatewayInterface $gateway, UserFactoryInterface $factory)
     {
         $this->gateway = $gateway;
         $this->factory = $factory;

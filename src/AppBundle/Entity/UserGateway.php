@@ -7,7 +7,7 @@ use Doctrine\ORM\EntityRepository;
 /**
  * UserGateway.
  */
-class UserGateway extends EntityRepository
+class UserGateway extends EntityRepository implements UserGatewayInterface
 {
     /**
      * @param User $user
