@@ -21,35 +21,4 @@ class DefaultController extends Controller
               'base_dir' => realpath($this->container->getParameter('kernel.root_dir') . '/..'),
         ));
     }
-
-    /**
-     * @ApiDoc(
-     *   description = "Generate JWT token.",
-     *   statusCodes = {
-     *     200 = "Return JWT token and refresh token.",
-     *     401 = "Authentication failure, user doesn’t have permission or API token is invalid or outdated.",
-     *   }
-     * )
-     * @Post("/api/login")
-     */
-    public function apiLoginAction()
-    {
-        
-    }
-
-    /**
-     * @ApiDoc(
-     *   description = "Refresh JWT token.",
-     *   statusCodes = {
-     *     200 = "Return JWT token from refresh token.",
-     *     401 = "Authentication failure, user doesn’t have permission or API token is invalid or outdated.",
-     *   }
-     * )
-     * @Post("/api/token/refresh")
-     */
-    public function apiTokenRefreshAction()
-    {
-        
-    }
-    
 }

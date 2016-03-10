@@ -12,3 +12,21 @@ services:
 #    gesdinet.jwtrefreshtoken.refresh_token_manager:
 #        class: Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenManager
 #        arguments: [@fos_user.entity_manager, %gesdinet.jwtrefreshtoken.refresh_token.class%]
+
+    app.user_factory:
+        class: AppBundle\Model\UserFactory
+
+    app.user_gateway:
+        class: AppBundle\Entity\UserGateway
+        factory: [ "@doctrine", getRepository]
+        arguments: [ "AppBundle:User" ]
+
+    app.user_repository:
+        class: AppBundle\Model\UserRepository
+        arguments: [ "@app.user_gateway", "@app.user_factory" ]
+
+    security.access.user_voter:
+        class:      AppBundle\Security\UserVoter
+        public:     false
+        tags:
+           - { name: security.voter }
