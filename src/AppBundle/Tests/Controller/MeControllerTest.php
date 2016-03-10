@@ -8,8 +8,10 @@ class MeControllerTest extends WebTestCase
 {
 
     const NAME = 'meco';
+    const MAIL = 'meco@mail.com';
     const PASS = 'Demo1234';
     const ROUTE = '/api/me.json';
+    const REGISTER_ROUTE = '/api/register/me.json';
 
     /**
      * Create a client with a default Authorization header. 
@@ -25,8 +27,8 @@ class MeControllerTest extends WebTestCase
         $client = static::createClient();
         $client->request(
             'POST', '/api/login_check', array(
-          '_username' => $username,
-          '_password' => $password,
+            '_username' => $username,
+            '_password' => $password,
             )
         );
 
@@ -40,6 +42,42 @@ class MeControllerTest extends WebTestCase
         return $client;
     }
 
+    protected function getClient($auth = false)
+    {
+        if (true === $auth) {
+            $client = $this->createAuthenticatedClient(self::NAME, self::PASS);
+        }
+        else {
+            $client = static::createClient();
+        }
+        return $client;
+    }
+
+    protected function post($uri, array $data, $auth = false)
+    {
+        $client = $this->getClient($auth);
+        $client->request('POST', $uri, $data);
+        return $client->getResponse();
+    }
+
+    public function testRegistrationFailedWithEmptyForm()
+    {
+        $client = static::createClient();
+        $client->request('POST', self::REGISTER_ROUTE);
+        $this->assertEquals(400, $client->getResponse()->getStatusCode());
+    }
+
+    public function testRegistration()
+    {
+        $response = $this->post(self::REGISTER_ROUTE, array(
+            'username' => self::NAME,
+            'email' => self::MAIL,
+            'plainPassword' => self::PASS,
+            'password' => self::PASS,
+            ), true);
+        $this->assertEquals(200, $response->getStatusCode());
+    }
+
     public function testValidGetMe()
     {
         $client = $this->createAuthenticatedClient(self::NAME, self::PASS);
@@ -48,5 +86,11 @@ class MeControllerTest extends WebTestCase
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
     }
-
+    
+    public function testDeleteMe()
+    {
+        $client = $this->createAuthenticatedClient(self::NAME, self::PASS);
+        $client->request('DELETE', self::ROUTE);
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+    }
 }

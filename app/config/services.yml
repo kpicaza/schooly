@@ -30,3 +30,8 @@ services:
         public:     false
         tags:
            - { name: security.voter }
+
+    app.api_user_handler: 
+        class: AppBundle\Handler\ApiUserHandler
+        arguments: [ "@app.user_repository", "@form.factory" ]
+        

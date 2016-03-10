@@ -1,6 +1,8 @@
  Práctica Symfony - Rest API, Oauth2, JWT, repository pattern.
 ===============================================================
 
+![Irontec](https://www.google.es/url?sa=i&rct=j&q=&esrc=s&source=images&cd=&cad=rja&uact=8&ved=0ahUKEwis-qbP8LXLAhUI6RQKHXOODdAQjRwIBw&url=http%3A%2F%2Fwww.eoi.es%2Fblogs%2F20abierta%2Firontec-software-de-codigo-abierto-y-negocios%2F&psig=AFQjCNHdot6F0mMY1uPBOx5OH9m6VtxHGA&ust=1457691084051890)
+
 
 ## Aplicación de práctica:
 
@@ -1293,9 +1295,691 @@ Y para terminar de implementar el patrón repositorio solo nos falta la clase `U
 Pasamos los tests, y tenemos que ver que está todo correcto, ahora podemos comitear. El siguiente paso es unir el controlador 
 con el modelo, lo harremos de la siguiente manera
 
+Actualizamos `MeController` para que utilice nuestro `Repository` y así lo desacoplamos del motor de base de datos
 
+        public function getMeAction()
+        {
+            $user = $this->get('app.user_repository')->find(
+                $this->container->get('security.token_storage')->getToken()->getUser()->getId()
+            );
+            $view = $this->view($user);
 
-Para terminar, comprobaremos la covertura que etamos dando a nuestro código con la herramienta code coverage de phpunit.
+            return $this->handleView($view);
+        }
+
+¿Como? hemos añadido una line más, es algo conceptual, la diferencia, es que antes nuestro controlador solo podía funcionar dependiendo 
+directamente de doctrine, de esta manera, el Authorization Provider nos devueve la entidad usuario a partir del Token JWT, pero podríamos 
+no querer mostrar el objeto tal cual está, seguramente nos interese mostrar la información filtrado o procesada. Otro ejemplo de porque hacemos 
+esto, sería si como en nuestro caso estamos haciendo un servicio rest, si no tubiesemos FosRestBundle(Quien se encarga de formatear nuestras respuestas),
+sería nuestro reposittorio el encargado de enviar los datos formateados al controlador.
+
+Si volvemos a pasar los test todo debe seguir funcionando correctamente y podemos volver a commitear nuestro trabajo.
+
+## Parte 4, 2º user Story
+
+Las verdad que al realizar el primer user story, nos hemos dejado todo bastante bien organizado para que sea mas sencillo continuar con los siguiente, 
+igualmente, todavía faltan piezas importantes del puzzle.
+
+comenzaremos implementando el user story 2 `Como usuario sin autenticar puedo registrarme en el site`, este user story, a parte de lo que ya tenemos 
+creado necesita un formulario y validación. empecemos por los tests. primero crearemos el método post, justo despues del método `createAuthenticatedClient` que nos ayudará a realizar las peticiones en 
+los diferentes tests.
+
+    <?php 
+    // src/AppBundle/Tests/Controller/MeControllerTest.php
+    
+    class MeControllerTest extends WebTestCase
+    {
+        ...
+        protected function post($uri, array $data, $auth = false)
+        {
+            $client = $this->getClient($auth);
+            $client->request('POST', $uri, $data);
+            return $client->getResponse();
+        }
+
+Y añadimos nuestro primer test para el registro, testeara el envío del formulario vacio, nos tiene que devolver un error 400.
+
+    <?php 
+    // src/AppBundle/Tests/Controller/MeControllerTest.php
+    
+    class MeControllerTest extends WebTestCase
+    {
+        const REGISTER_ROUTE = '/api/register/me.json';
+        ...
+        public function testRegistrationFailedWithEmptyForm()
+        {
+            $client = static::createClient();
+            $client->request('POST', self::REGISTER_ROUTE);
+            $this->assertEquals(400, $client->getResponse()->getStatusCode());
+        }
+
+Pasamos los test, y obtenemos un 404 en vez del 400 que esperamos, al igual que en nuestro primer user story, necesitaremos una 
+ruta a un controlador, y en este caso además necesitaremos un formulario, vamos con el controlador
+
+    <?php
+    // src/AppBundle/Controller/MeController.php
+
+    /**
+     * @Route("/api/register/me.{_format}", methods="POST")
+     * @ApiDoc(
+     *   description = "Register new user.",
+     *   statusCodes = {
+     *     200 = "User correctly added.",
+     *     401 = "Authentication failure, user doesn’t have permission or API token is invalid or outdated.",
+     *   },
+     *   requirements={
+     *      {
+     *          "name"="_format",
+     *          "dataType"="string",
+     *          "requirement"="json|xml|html",
+     *      }
+     *   }
+     * )
+     * 
+     * @param Request $request
+     *
+     * @return array
+     */
+    public function MeAction(Request $request)
+    {
+        $user = $request->request->all();
+        
+        $view = $this->view($user);
+        return $this->handleView($view);
+    }
+
+Vemos que en este caso hemos utilizado la anotación `@Route`, esto es porque la ruta que genera `FosRest` para este caso dería algo como 
+`/api/mes.{_format}`, en este caso esta ruta romería la coherencia de nuestro servicio rest, también podemos ver que no estamos haciendo 
+uso de formularios, esto será lo siguiente que hagamos. Para crear formularios y validarlos crearemos dos nuevas clases. antes de ello le 
+diremos a nuestro API firewall, que la ruta que acabamos de crear será accesible sin necesidad de autenticación.
+
+    # app/config/security.yml
+    security:
+        ...
+        firewalls:
+            ...
+            register:
+                pattern:  ^/api/register/me.json
+                anonymous: true
+
+        ...
+        access_control:
+            ...
+            - { path: ^/api/register/me.json, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+            - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+
+Ahora si pasamos a crear nuestro formulario, ara la validación crearemos un simple modelo de formulario, este a su vez nos ayudará a documentar el api,
+veamos como
+
+    <?php
+    namespace AppBundle\Form\Model;
+    use Symfony\Component\Validator\Constraints as Assert;
+    /**
+     * RegistrationFormModel.
+     */
+    class RegistrationFormModel
+    {
+        const NAME = 'username';
+        const MAIL = 'email';
+        const PLAIN = 'plainPassword';
+        const PASS = 'password';
+        /**
+         * @Assert\NotBlank()
+         * @Assert\Regex("/[a-zA-Z0-9]/")
+         *
+         * @var string
+         */
+        protected $username;
+        /**
+         * @Assert\NotBlank()
+         * @Assert\Email()
+         *
+         * @var string
+         */
+        protected $email;
+        /**
+         * @Assert\NotBlank()
+         *
+         * @var string
+         */
+        protected $plainPassword;
+        /**
+         * @Assert\NotBlank()
+         *
+         * @var string
+         */
+        protected $password;
+        public function __construct($username = null, $email = null, $plainPassword = null, $password = null)
+        {
+            $this->username = $username;
+            $this->email = $email;
+            $this->plainPassword = $plainPassword;
+            $this->password = $password;
+        }
+        /**
+         * @param array $user
+         *
+         * @return \self
+         */
+        public static function fromArray(array $user = array(self::NAME => null, self::MAIL => null, self::PLAIN => null, self::PASS => null))
+        {
+            return new self(
+                array_key_exists(self::NAME, $user) ? $user[self::NAME] : null,
+                array_key_exists(self::MAIL, $user) ? $user[self::MAIL] : null,
+                array_key_exists(self::PLAIN, $user) ? $user[self::PLAIN] : null,
+                array_key_exists(self::PASS, $user) ? $user[self::PASS] : null
+            );
+        }
+        public function setUsername($username)
+        {
+            $this->username = $username;
+        }
+        public function getUsername()
+        {
+            return $this->username;
+        }
+        public function setEmail($email)
+        {
+            $this->email = $email;
+        }
+        public function getEmail()
+        {
+            return $this->email;
+        }
+        public function setPlainPassword($plainPassword)
+        {
+            $this->plainPassword = $plainPassword;
+        }
+        public function getPlainPassword()
+        {
+            return $this->plainPassword;
+        }
+        public function setPassword($password)
+        {
+            $this->password = $password;
+        }
+        public function getPassword()
+        {
+            return $this->password;
+        }
+    }
+
+La parte más interesante de esta clase son las anotaciones escritas sobre la declaración de las variables, de esta manerá añadimos la capa de 
+validación al formulario por ejemplo las anotaciones NotBlack y Regex
+
+        /**
+         * @Assert\NotBlank()
+         * @Assert\Regex("/[a-zA-Z0-9]/")
+         *
+
+La primera obliga a que el campo no esté vacio en ningún caso, y la segunda, implementa una expresión regular que fuerza a que el texto tan solo 
+contenga caracteres alfanumericos, sin ningún tipo de símbolo, creamos el formulario para el modelo
+
+    <?php
+    // src/AppBundle/Form/Type/RegistrationFormType.php
+
+    namespace AppBundle\Form\Type;
+    use Symfony\Component\Form\AbstractType;
+    use Symfony\Component\Form\FormBuilderInterface;
+    use Symfony\Component\Form\Extension\Core\Type;
+    use Symfony\Component\OptionsResolver\OptionsResolver;
+    /**
+     * RegistrationFormType.
+     */
+    class RegistrationFormType extends AbstractType
+    {
+        public function buildForm(FormBuilderInterface $builder, array $options)
+        {
+            $builder
+                ->add('username', Type\TextType::class)
+                ->add('email', Type\EmailType::class)
+                ->add('plainPassword', Type\PasswordType::class)
+                ->add('password', Type\PasswordType::class)
+            ;
+        }
+        public function configureOptions(OptionsResolver $resolver)
+        {
+            $resolver->setDefaults(array(
+              'data_class' => 'AppBundle\Form\Model\RegistrationFormModel',
+              'csrf_protection' => false,
+            ));
+        }
+        public function getBlockPrefix()
+        {
+            return 'app_user_registration';
+        }
+    }
+
+Es un formulario muy simple de login, con los campos minimos para crear un usuario. Ahora le tenemos que decir a nuestro controlador que empiece a utilizarlo.
+Para ello utilizaremos las anotaciones de `nelmioApiDocs`, y forzaremos el envio del formulario.
+
+    <?php
+    // src/AppBundle/Controller/MeController.php
+    ...
+    use AppBundle\Form\Type\RegistrationFormType;
+    use AppBundle\Form\Model\RegistrationFormModel;
+    ...
+        /**
+         * @Route("/api/register/me.{_format}", methods="POST")
+         * @ApiDoc(
+         *   description = "Register new user.",
+         *   input = "AppBundle\Form\Model\RegistrationFormModel",
+         *   output = "AppBundle\Model\UserInterface",
+         *   statusCodes = {
+         *     200 = "User correctly added.",
+         *     401 = "Authentication failure, user doesn’t have permission or API token is invalid or outdated.",
+         *   },
+         *   requirements={
+         *      {
+         *          "name"="_format",
+         *          "dataType"="string",
+         *          "requirement"="json|xml|html",
+         *      }
+         *   }
+         * )
+         * 
+         * @param Request $request
+         *
+         * @return array
+         */
+        public function MeAction(Request $request)
+        {
+            $user = null;
+            $form = $this->createForm(RegistrationFormType::class, new RegistrationFormModel(), array('method' => 'POST'));
+
+            $form->submit($request->request->all());
+
+            if ($form->isValid()) {
+                try {
+                    $rawUser = $this->insertFromForm($form->getData());
+                    $user = $this->repository->insert($rawUser);
+                    $view = $this->view($user);
+                    return $this->handleView($view);
+                } catch (\Exception $ex) {
+                    //  throw new $ex;
+                    $form->addError(new FormError('Duplicate entry for email or username.'));
+                    // log this somewhere.
+                }
+            }
+            $view = $this->view($form);
+            return $this->handleView($view);
+        }
+
+Si pasamos los test estaríamos de nuevo en verde, pero como en el primer user story, esto no es más que un falso positivo, 
+crearemos otro test para comprobar los registros validos, para ello crearemos el método get client, para selecionar si 
+queremos un cliente autenticado o no
+
+    <?php 
+    // src/AppBundle/Tests/Controller/MeControllerTest.php
+    
+    class MeControllerTest extends WebTestCase
+    {
+        const MAIL = 'meco@mail.com';
+        ...
+        protected function getClient($auth = false)
+        {
+            if (true === $auth) {
+                $client = $this->createAuthenticatedClient(self::NAME, self::PASS);
+            } else {
+                $client = static::createClient();
+            }
+            return $client;
+        }
+        ...
+        public function testRegistration()
+        {
+            $response = $this->post(self::REGISTER_ROUTE, array(
+              'username' => self::NAME,
+              'email' => self::MAIL,
+              'plainPassword' => self::PASS,
+              'password' => self::PASS,
+                ), true);
+            $this->assertEquals(200, $response->getStatusCode());
+        }
+Si volvemos a paser los tests, vemos que tenemos una clase que existe, podríamos crearla en el mismo controlador, pero 
+para tener todo mejor organizado, y dejar un fina capa de controladores crearemos un handler para recivir sus valores. Primero 
+definiremos su interface
+
+    <?php
+    namespace AppBundle\Handler;
+    use AppBundle\Model\UserInterface;
+    /**
+     * ApiHandleInterface.
+     */
+    interface ApiUserHandlerInterface
+    {
+        /**
+         * Get user from repository.
+         * 
+         * @param User $user
+         */
+        public function get(UserInterface $user);
+        /**
+         * Insert User to repository.
+         * 
+         * @param array $params
+         */
+        public function post(array $params);
+    }
+
+Para después definimos su implementación
+
+    <?php
+    namespace AppBundle\Handler;
+    use AppBundle\Model\UserRepository;
+    use AppBundle\Model\UserInterface;
+    use AppBundle\Form\Type\RegistrationFormType;
+    use AppBundle\Form\Model\RegistrationFormModel;
+    use Symfony\Component\Form\FormFactoryInterface;
+    use Symfony\Component\Form\FormError;
+    /**
+     * ApiUserHandler.
+     */
+    class ApiUserHandler implements ApiUserHandlerInterface
+    {
+        /**
+         * @var UserRepository
+         */
+        protected $repository;
+        /**
+         * @var FormFactoryInterface
+         */
+        protected $formFactory;
+        /**
+         * Init Handler.
+         * 
+         * @param UserRepository       $repository
+         * @param FormFactoryInterface $formFactory
+         */
+        public function __construct(UserRepository $repository, FormFactoryInterface $formFactory)
+        {
+            $this->repository = $repository;
+            $this->formFactory = $formFactory;
+        }
+        /**
+         * Get user from repository.
+         * 
+         * @param User $user
+         *
+         * @return User
+         */
+        public function get(UserInterface $user)
+        {
+            return $this->repository->parse($user);
+        }
+        /**
+         * Insert User to repository.
+         * 
+         * @param array $params
+         *
+         * @return User
+         */
+        public function post(array $params)
+        {
+            $userModel = RegistrationFormModel::fromArray($params);
+            $form = $this->formFactory->create(RegistrationFormType::class, $userModel, array('method' => 'POST'));
+            $form->submit($params);
+            if ($form->isValid()) {
+                try {
+                    $rawUser = $this->insertFromForm($form->getData());
+                    $user = $this->repository->insert($rawUser);
+                    return $this->repository->parse($user);
+                } catch (\Exception $ex) {
+                    //  throw new $ex;
+                    $form->addError(new FormError('Duplicate entry for email or username.'));
+                    // log this somewhere.
+                }
+            }
+            return $form;
+        }
+        /**
+         * @param ProfileFormModel $userModel
+         *
+         * @return User
+         */
+        protected function insertFromForm(RegistrationFormModel $userModel)
+        {
+            $user = $this->repository->findNew();
+            $user
+                ->setUsername($userModel->getUsername())
+                ->setUsernameCanonical($userModel->getUsername())
+                ->setPlainPassword($userModel->getPlainPassword())
+            ;
+            return $this->fromForm($user, $userModel);
+        }
+        /**
+         * @param User             $user
+         * @param ProfileFormModel $userModel
+         *
+         * @return User
+         */
+        protected function fromForm(UserInterface $user, RegistrationFormModel $userModel)
+        {
+            $user
+                ->setEmailCanonical($userModel->getEmail())
+                ->setEmail($userModel->getEmail())
+            ;
+            return $user;
+        }
+    }
+
+Lo damos de alta como servicio en el `services.yml`
+
+    # spp/config/services.yml
+        app.api_user_handler: 
+            class: AppBundle\Handler\ApiUserHandler
+            arguments: [ "@app.user_repository", "@form.factory" ]
+
+Y actualizamos el controlador
+
+    // src/AppBundle/MeController.php
+    ...
+        public function MeAction(Request $request)
+        {
+            $user = $this->container->get('app.api_user_handler')->post(
+                $request->request->all()
+            );
+            $view = $this->view($user);
+            return $this->handleView($view);
+        }
+
+Ahora debemos añadir varios metodos a nuestro gateway y repository, empezzaremos por actualizar `GatewayInterface`
+
+    <?php
+    // src/AppBundle/Model/GatewayInterface.php
+
+    namespace AppBundle\Model;
+    /**
+     * UserGateway.
+     */
+    interface UserGatewayInterface
+    {
+        /**
+         * @param User $user
+         *
+         * @return User
+         */
+        public function apiInsert(UserInterface $user);
+
+        /**
+         * @return type
+         */
+        public function findNew();
+
+        /**
+         * @param User $user
+         *
+         * @return User
+         */
+        public function insert(UserInterface $user);
+    }
+
+Y añadimos los metodos al repository y al gateway respectivamente
+
+    <?php
+    // src/AppBundle/Entity/Gateway.php
+
+    namespace AppBundle\Entity;
+
+    use AppBundle\Model\UserInterface;
+    use AppBundle\Model\UserGatewayInterface;
+    use Doctrine\ORM\EntityRepository;
+
+    /**
+     * UserGateway.
+     */
+    class UserGateway extends EntityRepository implements UserGatewayInterface
+    {
+        /**
+         * @param User $user
+         *
+         * @return User
+         */
+        public function apiInsert(UserInterface $user)
+        {
+            $user
+                ->setEnabled(true)
+                ->setExpired(false)
+                ->setLocked(false)
+                ->addRole('read')
+                ->addRole('view')
+                ->addRole('edit')
+                ->addRole('ROLE_USER')
+                ->addRole('ROLE_API_USER')
+            ;
+            return self::insert($user);
+        }
+
+        /**
+         * @return type
+         */
+        public function findNew()
+        {
+            return User::fromArray();
+        }
+        /**
+         * @param User $user
+         *
+         * @return User
+         */
+        public function insert(UserInterface $user)
+        {
+            $this->_em->persist($user);
+            $this->_em->flush();
+            return $user;
+        }
+    }
+
+Y por último actualizamos nuestro repository
+
+    // src/AppBundle/Model/UserRepository
+    ...
+        /**
+         * @return User
+         */
+        public function findNew()
+        {
+            return $this->gateway->findNew();
+        }
+        /**
+         * @param User $user
+         *
+         * @return User
+         */
+        public function insert(UserInterface $user)
+        {
+            $rawUser = $this->gateway->apiInsert($user);
+            return $this->factory->makeOne($rawUser);
+        }
+
+Si pasamos ahora los test, fallarán, porque el usuario qu estmaos intentando crear está ya en la bbdd, 
+así que vamos a crear la accion de borrar usuario para recuperar nuestros tests,
+
+    // src/AppBundle/tests/MeControllerTest
+        ...
+        public function testDeleteMe()
+        {
+            $client = $this->createAuthenticatedClient(self::NAME, self::PASS);
+            $client->request('DELETE', self::ROUTE);
+            $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        }
+
+creamos el método delete en el controlador
+
+    // src/AppBundle/Controller/MeController.php
+        ...
+        /**
+         * @Security("is_granted('edit', user)")
+         * @ApiDoc(
+         *   description = "Delete own user.",
+         *   statusCodes = {
+         *     204 = "Do no return nothing.",
+         *     401 = "Authentication failure, user doesn’t have permission or API token is invalid or outdated.",
+         *   }
+         * )
+         * 
+         * @return array
+         */
+        public function deleteMeAction()
+        {
+            $this->container->get('app.api_user_handler')->delete(
+                $this->container->get('security.token_storage')->getToken()->getUser()
+            );
+            $view = $this->view(array());
+            return $this->handleView($view);
+        }
+
+Después nuestro handler
+
+    // src/AppBundle/Handler/ApiUserHandler.php
+    ...
+        /**
+         * Delete User.
+         * 
+         * @param User $user
+         */
+        public function delete(UserInterface $user)
+        {
+            $this->repository->remove($user);
+        }
+
+Y añadimos los metodos a nuestro modelo, primero al interface
+
+    // src/AppBundle/Model/GatewayInterface.php
+    ...
+        /**
+         * @param User $user
+         */
+        public function remove(UserInterface $user);
+
+Luego en la clase
+
+    // src/AppBundle/Entity/Gateway.php
+    ...
+        /**
+         * @param User $user
+         */
+        public function remove(UserInterface $user)
+        {
+            $this->_em->remove($user);
+            $this->_em->flush();
+        }
+
+y por último en el repository
+
+    // src/AppBundle/Model/UserRepository.php
+    ...
+        /**
+         * @param User $user
+         */
+        public function remove(UserInterface $user)
+        {
+            $this->gateway->remove($user);
+        }
+
+si pasamos los test tendremos un 403, por el usuario auque autenticado, no tiene un voter que le permita el acceso. Vamos a añadir la entrada edit al voter que creamos antes.
+
+Para terminar, comprobaremos la covertura que estamos dando a nuestro código con la herramienta code coverage de phpunit.
 
     phpunit -c app/ --coverage-html ./web/coverage # Para verlo en la intefaz gráfico o
     phpunit -c app/ --coverage-text # para ver en informe en consola.

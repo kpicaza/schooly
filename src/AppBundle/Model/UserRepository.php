@@ -1,20 +1,26 @@
 <?php
+
 namespace AppBundle\Model;
+
 use AppBundle\Model\UserGatewayInterface;
 use AppBundle\Model\UserFactoryInterface;
+
 /**
  * UserRepository.
  */
 class UserRepository
 {
+
     /**
      * @var \AppBundle\Model\UserGatewayInterface
      */
     private $gateway;
+
     /**
      * @var \AppBundle\Model\UserFactoryInterface
      */
     private $factory;
+
     /**
      * @param \AppBundle\Model\UserGatewayInterface $gateway
      * @param \AppBundle\Model\UserFactoryInterface $factory
@@ -24,6 +30,7 @@ class UserRepository
         $this->gateway = $gateway;
         $this->factory = $factory;
     }
+
     /**
      * @param User|int $id
      *
@@ -33,6 +40,7 @@ class UserRepository
     {
         return $this->gateway->find($id);
     }
+
     /**
      * @param array $criteria
      * @param array $orderBy
@@ -49,6 +57,34 @@ class UserRepository
         }
         return $this->factory->makeOne($user);
     }
+
+    /**
+     * @return User
+     */
+    public function findNew()
+    {
+        return $this->gateway->findNew();
+    }
+
+    /**
+     * @param User $user
+     *
+     * @return User
+     */
+    public function insert(UserInterface $user)
+    {
+        $rawUser = $this->gateway->apiInsert($user);
+        return $this->factory->makeOne($rawUser);
+    }
+
+    /**
+     * @param User $user
+     */
+    public function remove(UserInterface $user)
+    {
+        $this->gateway->remove($user);
+    }
+
     /**
      * @param User $user
      *
@@ -58,4 +94,5 @@ class UserRepository
     {
         return $this->factory->makeOne($user);
     }
+
 }
