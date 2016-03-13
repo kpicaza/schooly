@@ -7,7 +7,6 @@ namespace AppBundle\Model;
  */
 interface UserGatewayInterface
 {
-
     /**
      * @param User $user
      *
@@ -19,13 +18,16 @@ interface UserGatewayInterface
      * @return type
      */
     public function findNew();
-
     /**
      * @param User $user
      *
      * @return User
      */
     public function insert(UserInterface $user);
+    /**
+     * Update User
+     */
+    public function update();
     /**
      * @param $id
      */

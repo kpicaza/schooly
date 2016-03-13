@@ -1,17 +1,13 @@
 <?php
-
 namespace AppBundle\Entity;
-
 use AppBundle\Model\UserInterface;
 use AppBundle\Model\UserGatewayInterface;
 use Doctrine\ORM\EntityRepository;
-
 /**
  * UserGateway.
  */
 class UserGateway extends EntityRepository implements UserGatewayInterface
 {
-
     /**
      * @param User $user
      *
@@ -31,7 +27,6 @@ class UserGateway extends EntityRepository implements UserGatewayInterface
         ;
         return self::insert($user);
     }
-
     /**
      * @return type
      */
@@ -39,7 +34,6 @@ class UserGateway extends EntityRepository implements UserGatewayInterface
     {
         return User::fromArray();
     }
-
     /**
      * @param User $user
      *
@@ -51,8 +45,16 @@ class UserGateway extends EntityRepository implements UserGatewayInterface
         $this->_em->flush();
         return $user;
     }
-
     /**
+     * Update User.
+     */
+    public function update()
+    {
+        $this->_em->flush();
+    }
+    /**
+     * Delete User.
+     * 
      * @param $id
      */
     public function remove($id)
@@ -62,5 +64,4 @@ class UserGateway extends EntityRepository implements UserGatewayInterface
         $this->_em->remove($user);
         $this->_em->flush();
     }
-
 }

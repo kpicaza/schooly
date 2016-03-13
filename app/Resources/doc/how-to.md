@@ -2005,17 +2005,364 @@ Además también quitaremos la dependencia con doctrine en el voter
 Pasamos de nuevo los tests, devemos tener todo correcto, en este punto ya tenemos implementado el patrón repositorio, 
 haciendo uso del principio de inversión de dependencias.
 
+### Método PUT
+
 Ahora vamos a por el user story 3 `Como usuario autenticado puedo editar mi perfil`, para esto utilizaremos el método PUT 
 que vimos antes.
 
 Como en los demás user storys empezamos con un test
 
+    <?php
+    // src/AppBundle/Tests/Controller/UserControllerTest.php
 
+    namespace AppBundle\Tests\Controller;
+
+    use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+
+    class UserControllerTest extends WebTestCase
+    {
+        ...
+        const DESCRIPTION = 'ha sido el texto de relleno estándar de las industrias desde el año 1500, '
+            . 'cuando un impresor (N. del T. persona que se dedica a la imprenta) desconocido';
+        ...
+        protected function put($uri, array $data, $auth = false)
+        {
+            $client = $this->getClient($auth);
+
+            $client->request('PUT', $uri, $data);
+
+            return $client->getResponse();
+        }
+
+Agregamos el método put en nuestros tests, lo usaremos para no repetir las peticiones en los distintos tests.
+
+        // src/AppBundle/Tests/Controller/UserControllerTest.php
+    
+        public function testPutUserWithOutAuthentication()
+        {
+            $client = static::createClient();
+
+            $id = $this->getLast($client);
+
+            $client->request('PUT', sprintf(self::ROUTE, $id));
+
+            $this->assertEquals(401, $client->getResponse()->getStatusCode());
+        }
+
+        public function testPutUserWithOutRequiredParams()
+        {
+            $client = static::createClient();
+            $id = $this->getLast($client);
+
+            $response = $this->put(sprintf(self::ROUTE, $id), array(
+              'email' => null,
+              'description' => self::DESCRIPTION,
+                ), true);
+
+            $this->assertEquals(400, $response->getStatusCode());
+        }
+
+        public function testPutUser()
+        {
+            $client = static::createClient();
+            $id = $this->getLast($client);
+
+            $response = $this->put(sprintf(self::ROUTE, $id), array(
+              'email' => 'asd' . self::MAIL,
+              'description' => self::DESCRIPTION,
+                ), true);
+
+            $this->assertEquals(200, $response->getStatusCode());
+        }
+
+El primer test comprueba el comportamiento cuando el usuario intenta acceder sin autenticar, el segundo valida que el comportamiento
+cuando los campos obligatorios no se han rellenado y el tercero, comprueba que la actualizaci´on se realiza correctamente.
+
+Pasamos los test para obtener información. Como siempre, necesitmos una ruta y un controlador, en este caso, al igual que en el post 
+necesitamos un formualario. Empezamos por el controlador.
+
+    <?php
+    // src/AppBundle/Controller/UserController.php
+        ...
+        /**
+         * @Security("is_granted('edit', user)")
+         * @ApiDoc(
+         *   description = "Update own user.",
+         *   input = "AppBundle\Form\Model\ProfileFormModel",
+         *   output = "AppBundle\Entity\User",
+         *   statusCodes = {
+         *     200 = "User data updated.",
+         *     401 = "Authentication failure, user doesn’t have permission or API token is invalid or outdated.",
+         *   }
+         * )
+         * 
+         * @param Request $request
+         *
+         * @return array
+         */
+        public function putUserAction(Request $request, $id)
+        {
+            $user = $this->container->get('app.api_user_handler')->put(
+                $id, $request->request->all()
+            );
+
+            $view = $this->view($user);
+            return $this->handleView($view);
+        }
+        ...
+
+El método `put` de nuestro handler no existe, creemoslo... 
+
+Agregamos el método `put` al interface de nuestro handler
+
+    // src/AppBundle/Handler/UserHandlerInterface.php
+    ...
+        /**
+         * Update User from repository.
+         * 
+         * @param $id
+         * @param array $params
+         */
+        public function put($id, array $params);
+    }
+
+Lo implementamos en el handler
+
+    // src/AppBundle/Handler/UserHandler.php
+        ...
+        /**
+         * Update User from repository.
+         * 
+         * @param array $params
+         *
+         * @return type
+         */
+        public function put($id, array $params)
+        {
+            $userModel = ProfileFormModel::fromArray($params);
+
+            $form = $this->formFactory->create(ProfileFormType::class, $userModel, array('method' => 'POST'));
+            $form->submit($params);
+
+            if ($form->isValid()) {
+                $user = $this->updateFromForm($id, $form->getData());
+
+                $this->repository->update();
+
+                return $this->repository->parse($user->getId());
+            }
+
+            return $form;
+        }
+        ...
+
+Después actualizamos los métodos `insertFromForm` y `fromForm` para que utilicen el interface `UserFormModelInterface`, que crearemos a continuación.
+Además añadimos el método `updateFromForm`.
+
+        /**
+         * @param ProfileFormModel $userModel
+         *
+         * @return User
+         */
+        protected function insertFromForm(UserFormModelInterface $userModel)
+        ...
+        /**
+         * @param type             $id
+         * @param ProfileFormModel $userModel
+         *
+         * @return User
+         */
+        protected function updateFromForm($id, UserFormModelInterface $userModel)
+        {
+            $user = $this->repository->find($id);
+
+            $user->setDescription($userModel->getDescription());
+
+            return $this->fromForm($user, $userModel);
+        }
+        /**
+         * @param User             $user
+         * @param ProfileFormModel $userModel
+         *
+         * @return User
+         */
+        protected function fromForm(UserInterface $user, UserFormModelInterface $userModel)
+        ...
+
+Por último nos falta el formularío `ProfileFormType`, su modelo. Creamos el inrtface parapara los modelos de formulario de usurio
+
+    <?php
+    // src/AppBundle/Form/Model/UserFormModelInterface.php
+    namespace AppBundle\Form\Model;
+    interface UserFormModelInterface
+    {
+        /**
+         * @param array $user
+         *
+         * @return \self
+         */
+        public static function fromArray(array $user = array());
+        /**
+         * @param string $email
+         */
+        public function setEmail($email);
+
+        public function getEmail();
+    }
+
+Hacemos que el `RegisterFormModel` lo implemente, e implementamos el nuevo `ProfileFormModel`
+
+    <?php
+    // src/AppBundle/Form/Model/ProfileFormModel.php
+    namespace AppBundle\Form\Model;
+    use Symfony\Component\Validator\Constraints as Assert;
+    /**
+     * ProfileFormModel.
+     */
+    class ProfileFormModel implements UserFormModelInterface
+    {
+        const MAIL = 'email';
+        const DESC = 'description';
+        /**
+         * @Assert\NotBlank()
+         * @Assert\Email()
+         *
+         * @var string
+         */
+        protected $email;
+        /**
+         * @Assert\Regex("/[a-z\d\-_\s]+/")
+         *
+         * @var string
+         */
+        protected $description;
+        /**
+         * 
+         * @param type $username
+         * @param type $email
+         * @param type $description
+         */
+        public function __construct($username = null, $email = null, $description = null)
+        {
+            $this->username = $username;
+            $this->email = $email;
+            $this->description = $description;
+        }
+        /**
+         * @param array $user
+         *
+         * @return \self
+         */
+        public static function fromArray(array $user = array(self::MAIL => null, self::DESC => null))
+        {
+            return new self(
+                array_key_exists(self::MAIL, $user) ? $user[self::MAIL] : null,
+                array_key_exists(self::DESC, $user) ? $user[self::DESC] : null
+            );
+        }
+        public function setEmail($email)
+        {
+            $this->email = $email;
+        }
+        public function getEmail()
+        {
+            return $this->email;
+        }
+        public function setDescription($description)
+        {
+            $this->description = $description;
+        }
+        public function getDescription()
+        {
+            return $this->description;
+        }
+    }
+
+Nos falta el formulario `ProfileFormType`
+
+    <?php
+    // src/AppBundle/Form/Type/ProfileFormType.php
+    namespace AppBundle\Form\Type;
+    use Symfony\Component\Form\AbstractType;
+    use Symfony\Component\Form\FormBuilderInterface;
+    use Symfony\Component\Form\Extension\Core\Type;
+    use Symfony\Component\OptionsResolver\OptionsResolver;
+    /**
+     * ProfileFormType.
+     */
+    class ProfileFormType extends AbstractType
+    {
+        public function buildForm(FormBuilderInterface $builder, array $options)
+        {
+            $builder
+                ->add('username', Type\TextType::class)
+                ->add('email', Type\EmailType::class)
+                ->add('description', Type\EmailType::class)
+            ;
+        }
+
+        public function configureOptions(OptionsResolver $resolver)
+        {
+            $resolver->setDefaults(array(
+              'data_class' => 'AppBundle\Form\Model\ProfileFormModel',
+              'csrf_protection' => false,
+            ));
+        }
+
+        public function getBlockPrefix()
+        {
+            return 'app_user_registration';
+        }
+    }
+
+Si pasamos los tests, nos damos cuenta que nos falta por implementar el método `UserRepository::update()`, es más, 
+nos falta toda la parte de persistencia. Vamos a ello. Añadimos `Update` al `GatewayInterface`
+
+    // src/AppBundle/Model/GatewayInterface.php
+        ...
+        /**
+         * Update User
+         */
+        public function update();
+        ...
+
+Lo implementamos en el `Gateway`
+
+    // src/AppBundle/Entity/UserGateway.php
+        ...
+        /**
+         * Update User.
+         */
+        public function update()
+        {
+            $this->_em->flush();
+        }
+        ...
+
+Por último actualizamos nuestro `Repository`
+
+    // src/AppBundle/Model/UserRepository.php
+        ...
+        /**
+         * Update User.
+         */
+        public function update()
+        {
+            return $this->gateway->update();
+        }
+        ...
+
+
+Pasamos los tests y todo debe seguir correcto. Como ejecicio podríamos implementar el verbo `PATCH`.
 
 Para terminar, comprobaremos la covertura que estamos dando a nuestro código con la herramienta code coverage de phpunit.
 
     phpunit -c app/ --coverage-html ./web/coverage # Para verlo en la intefaz gráfico o
     phpunit -c app/ --coverage-text # para ver en informe en consola.
+
+## Demostrando la Inversión de dependencias
+
+
 
 ## Site 2
 

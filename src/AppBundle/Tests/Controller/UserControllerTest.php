@@ -10,6 +10,8 @@ class UserControllerTest extends WebTestCase
     const NAME = 'meco';
     const MAIL = 'meco@mail.com';
     const PASS = 'Demo1234';
+    const DESCRIPTION = 'ha sido el texto de relleno estándar de las industrias desde el año 1500, '
+        . 'cuando un impresor (N. del T. persona que se dedica a la imprenta) desconocido';
     const ROUTE = '/api/users/%s';
     const REGISTER_ROUTE = '/api/users';
 
@@ -45,9 +47,9 @@ class UserControllerTest extends WebTestCase
     protected function getLast($client)
     {
         $em = $client->getContainer()->get('doctrine')->getManager();
-        $user = $em->getRepository('AppBundle:User')->findOneByUsername('meco');
+        $user = $em->getRepository('AppBundle:User')->findOneByUsername(self::NAME);
         
-        return $user->getId();
+        return null === $user ? $user : $user->getId();
     }
 
     protected function getClient($auth = false)
@@ -64,14 +66,27 @@ class UserControllerTest extends WebTestCase
     protected function post($uri, array $data, $auth = false)
     {
         $client = $this->getClient($auth);
+        
         $client->request('POST', $uri, $data);
+        
         return $client->getResponse();
     }
 
+    protected function put($uri, array $data, $auth = false)
+    {
+        $client = $this->getClient($auth);
+
+        $client->request('PUT', $uri, $data);
+
+        return $client->getResponse();
+    }
+    
     public function testRegistrationFailedWithEmptyForm()
     {
         $client = static::createClient();
+        
         $client->request('POST', self::REGISTER_ROUTE);
+        
         $this->assertEquals(400, $client->getResponse()->getStatusCode());
     }
 
@@ -95,6 +110,43 @@ class UserControllerTest extends WebTestCase
         $client->request('GET', sprintf(self::ROUTE, $id));
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
+    }
+    
+    public function testPutUserWithOutAuthentication()
+    {
+        $client = static::createClient();
+
+        $id = $this->getLast($client);
+        
+        $client->request('PUT', sprintf(self::ROUTE, $id));
+
+        $this->assertEquals(401, $client->getResponse()->getStatusCode());
+    }
+
+    public function testPutUserWithOutRequiredParams()
+    {
+        $client = static::createClient();
+        $id = $this->getLast($client);
+
+        $response = $this->put(sprintf(self::ROUTE, $id), array(
+          'email' => null,
+          'description' => self::DESCRIPTION,
+            ), true);
+
+        $this->assertEquals(400, $response->getStatusCode());
+    }
+
+    public function testPutUser()
+    {
+        $client = static::createClient();
+        $id = $this->getLast($client);
+
+        $response = $this->put(sprintf(self::ROUTE, $id), array(
+          'email' => 'asd' . self::MAIL,
+          'description' => self::DESCRIPTION,
+            ), true);
+
+        $this->assertEquals(200, $response->getStatusCode());
     }
     
     public function testDeleteUser()

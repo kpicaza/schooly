@@ -17,4 +17,11 @@ interface ApiUserHandlerInterface
      * @param array $params
      */
     public function post(array $params);
+    /**
+     * Update User from repository.
+     * 
+     * @param $id
+     * @param array $params
+     */
+    public function put($id, array $params);
 }

@@ -60,7 +60,31 @@ class UserController extends FOSRestController
         $view = $this->view($user);
         return $this->handleView($view);
     }
+    /**
+     * @Security("is_granted('edit', user)")
+     * @ApiDoc(
+     *   description = "Update own user.",
+     *   input = "AppBundle\Form\Model\ProfileFormModel",
+     *   output = "AppBundle\Model\UserInterface",
+     *   statusCodes = {
+     *     200 = "User data updated.",
+     *     401 = "Authentication failure, user doesn’t have permission or API token is invalid or outdated.",
+     *   }
+     * )
+     * 
+     * @param Request $request
+     *
+     * @return array
+     */
+    public function putUserAction(Request $request, $id)
+    {
+        $user = $this->container->get('app.api_user_handler')->put(
+            $id, $request->request->all()
+        );
 
+        $view = $this->view($user);
+        return $this->handleView($view);
+    }
     /**
      * @Security("is_granted('edit', user)")
      * @ApiDoc(

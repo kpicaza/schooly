@@ -78,7 +78,15 @@ class UserRepository
     }
 
     /**
-     * @param User $user
+     * 
+     */
+    public function update()
+    {
+        return $this->gateway->update();
+    }
+
+    /**
+     * @param $id
      */
     public function remove($id)
     {
@@ -86,7 +94,7 @@ class UserRepository
     }
 
     /**
-     * @param User $user
+     * @param $id
      *
      * @return User
      */

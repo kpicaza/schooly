@@ -4,7 +4,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * RegistrationFormModel.
  */
-class RegistrationFormModel
+class RegistrationFormModel implements UserFormModelInterface
 {
     const NAME = 'username';
     const MAIL = 'email';
@@ -36,6 +36,12 @@ class RegistrationFormModel
      * @var string
      */
     protected $password;
+    /**
+     * @param type $username
+     * @param type $email
+     * @param type $plainPassword
+     * @param type $password
+     */
     public function __construct($username = null, $email = null, $plainPassword = null, $password = null)
     {
         $this->username = $username;

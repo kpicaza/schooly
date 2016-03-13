@@ -4,6 +4,9 @@ use AppBundle\Model\UserRepository;
 use AppBundle\Model\UserInterface;
 use AppBundle\Form\Type\RegistrationFormType;
 use AppBundle\Form\Model\RegistrationFormModel;
+use AppBundle\Form\Type\ProfileFormType;
+use AppBundle\Form\Model\ProfileFormModel;
+use AppBundle\Form\Model\UserFormModelInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormError;
 /**
@@ -67,6 +70,30 @@ class ApiUserHandler implements ApiUserHandlerInterface
         return $form;
     }
     /**
+     * Update User to repository.
+     * 
+     * @param array $params
+     *
+     * @return type
+     */
+    public function put($id, array $params)
+    {
+        $userModel = ProfileFormModel::fromArray($params);
+
+        $form = $this->formFactory->create(ProfileFormType::class, $userModel, array('method' => 'POST'));
+        $form->submit($params);
+
+        if ($form->isValid()) {
+            $user = $this->updateFromForm($id, $form->getData());
+
+            $this->repository->update();
+
+            return $this->repository->parse($user->getId());
+        }
+
+        return $form;
+    }
+    /**
      * Delete User.
      * 
      * @param User $user
@@ -80,7 +107,7 @@ class ApiUserHandler implements ApiUserHandlerInterface
      *
      * @return User
      */
-    protected function insertFromForm(RegistrationFormModel $userModel)
+    protected function insertFromForm(UserFormModelInterface $userModel)
     {
         $user = $this->repository->findNew();
         $user
@@ -91,12 +118,26 @@ class ApiUserHandler implements ApiUserHandlerInterface
         return $this->fromForm($user, $userModel);
     }
     /**
+     * @param type             $id
+     * @param ProfileFormModel $userModel
+     *
+     * @return User
+     */
+    protected function updateFromForm($id, UserFormModelInterface $userModel)
+    {
+        $user = $this->repository->find($id);
+
+        $user->setDescription($userModel->getDescription());
+
+        return $this->fromForm($user, $userModel);
+    }
+    /**
      * @param User             $user
      * @param ProfileFormModel $userModel
      *
      * @return User
      */
-    protected function fromForm(UserInterface $user, RegistrationFormModel $userModel)
+    protected function fromForm(UserInterface $user, UserFormModelInterface $userModel)
     {
         $user
             ->setEmailCanonical($userModel->getEmail())
