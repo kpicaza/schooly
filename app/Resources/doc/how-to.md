@@ -2135,7 +2135,7 @@ Además también quitaremos la dependencia con doctrine en el voter
             return false;
         }
     }
-```php
+```
 
 Pasamos de nuevo los tests, debemos tener todo correcto, en este punto ya tenemos implementado el patrón repositorio, 
 haciendo uso del principio de inversión de dependencias.
