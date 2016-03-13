@@ -21,8 +21,9 @@ services:
 
     app.user_gateway:
         class: AppBundle\Document\UserGateway
-        factory_service: doctrine_mongodb
-        factory_method:  getRepository
+        factory: [ "@doctrine_mongodb", getRepository]
+#        factory_service: doctrine_mongodb
+#        factory_method:  getRepository
         arguments: [ "AppBundle:User" ]
 
     app.user_repository:

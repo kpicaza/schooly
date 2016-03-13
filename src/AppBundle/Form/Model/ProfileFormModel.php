@@ -26,7 +26,22 @@ class ProfileFormModel implements UserFormModelInterface
      * @var string
      */
     protected $description;
-
+    
+    /**
+     * @Assert\File(
+     *     maxSize = "1024k",
+     *     mimeTypes = {"image/png", "image/jpg", "image/jpeg", "image/gif"},
+     *     mimeTypesMessage = "Please upload a valid image"
+     * )
+     */
+    //protected $picture;
+    
+    /**
+     * 
+     * @param type $username
+     * @param type $email
+     * @param type $description
+     */
     public function __construct($username = null, $email = null, $description = null)
     {
         $this->username = $username;
@@ -66,4 +81,15 @@ class ProfileFormModel implements UserFormModelInterface
     {
         return $this->description;
     }
+    /*
+    public function setPicture(File $file = null)
+    {
+        $this->picture = $file;
+    }
+
+    public function getPicture()
+    {
+        return $this->picture;
+    }
+    */
 }

@@ -16,7 +16,7 @@ NelmioApiDocBundle:
 app_user:
     type: rest
     prefix: /api
-    resource: AppBundle\Controller\MeController
+    resource: AppBundle\Controller\UserController
     
 # app/config/routing.yml
 fos_user_security:

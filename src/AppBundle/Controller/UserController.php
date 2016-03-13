@@ -7,12 +7,17 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use AppBundle\Model\UserInterface;
 
 /**
- * MeController.
+ * UserController.
  */
-class MeController extends FOSRestController
+class UserController extends FOSRestController
 {
+
+    const URI = '/api/users/%s';
+
     /**
      * @Security("is_granted('view', user)")
      * @ApiDoc(
@@ -22,22 +27,35 @@ class MeController extends FOSRestController
      *     401 = "Authentication failure, user doesn’t have permission or API token is invalid or outdated.",
      *   }
      * )
+     *
      * 
      * @return array
      */
-    public function getMeAction()
+    public function getUserAction(Request $request, $id)
     {
-        $user = $this->container->get('app.api_user_handler')->get(
-            $this->container->get('security.token_storage')->getToken()->getUser()
-        );
 
+        $user = $this->container->get('app.api_user_handler')->get($id);
         $view = $this->view($user);
+        $response = $this->handleView($view);
 
-        return $this->handleView($view);
+        if (!$user instanceof UserInterface) {
+            return $response;
+        }
+
+        $response->setMaxAge(100);
+        $response->setEtag(md5($user . $user->getEmail() . $user->getDescription()));
+        $response->setPublic(); // make sure the response is public/cacheable
+        if ($response->getStatusCode(200) && '"' . $request->headers->get('If-None-Match') . '"' == $response->getEtag()) {
+            $response->isNotModified($request);
+            $response->setStatusCode(304);
+            $response->setContent(null);
+            $response->headers->set('Content-Length', 0);
+        }
+
+        return $response;
     }
 
     /**
-     * @Route("/api/register/me.{_format}", methods="POST")
      * @ApiDoc(
      *   description = "Register new user.",
      *   input = "AppBundle\Form\Model\RegistrationFormModel",
@@ -59,15 +77,20 @@ class MeController extends FOSRestController
      *
      * @return array
      */
-    public function MeAction(Request $request)
+    public function postUserAction(Request $request)
     {
         $user = $this->container->get('app.api_user_handler')->post(
             $request->request->all()
         );
 
         $view = $this->view($user);
+        $response = $this->handleView($view);
+        if (200 == $response->getStatusCode()) {
+            $response->setStatusCode(201, $response);
+            $response->headers->set('Location', sprintf(self::URI, $user->getId()));
+        }
 
-        return $this->handleView($view);
+        return $response;
     }
 
     /**
@@ -93,17 +116,28 @@ class MeController extends FOSRestController
      *
      * @return array
      */
-    public function putMeAction(Request $request)
+    public function putUserAction(Request $request, $id)
     {
-        $me = $this->container->get('security.token_storage')->getToken()->getUser();
-
         $user = $this->container->get('app.api_user_handler')->put(
-            $me->getId(), $request->request->all()
+            $id, $request->request->all()
         );
 
         $view = $this->view($user);
+        $response = $this->handleView($view);
 
-        return $this->handleView($view);
+        if (!$user instanceof UserInterface) {
+            return $response;
+        }
+
+        $response->setMaxAge(100);
+        $response->setEtag(md5($user . $user->getEmail() . $user->getDescription()));
+        $response->setPublic(); // make sure the response is public/cacheable
+        if (200 == $response->getStatusCode() && true === $response->isNotModified($request)) {
+            $response->setStatusCode(304);
+            $response->setContent(null);
+        }
+
+        return $response;
     }
 
     /**
@@ -118,14 +152,31 @@ class MeController extends FOSRestController
      * 
      * @return array
      */
-    public function deleteMeAction()
+    public function deleteUserAction($id)
     {
-        $this->container->get('app.api_user_handler')->delete(
-            $this->container->get('security.token_storage')->getToken()->getUser()
-        );
+        $this->container->get('app.api_user_handler')->delete($id);
 
-        $view = $this->view(array());
+        $view = $this->view(array(), 204);
 
         return $this->handleView($view);
     }
+
+    /**
+     * @Security("is_granted('edit', user)")
+     * @ApiDoc(
+     *   description = "Post user picture.",
+     *   statusCodes = {
+     *     204 = "Do no terurn nothing.",
+     *     401 = "Authentication failure, user doesn’t have permission or API token is invalid or outdated.",
+     *   }
+     * )
+     * 
+     * @param Request $request
+     * @param type $id
+     */
+    public function postUserPictureAction(Request $request, $id)
+    {
+        
+    }
+
 }

@@ -4,15 +4,18 @@ namespace AppBundle\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class MeControllerTest extends WebTestCase
+class UserControllerTest extends WebTestCase
 {
+
     const NAME = 'meco';
     const MAIL = 'meco@mail.com';
     const PASS = 'Demo1234';
     const DESCRIPTION = 'ha sido el texto de relleno estándar de las industrias desde el año 1500, '
-        .'cuando un impresor (N. del T. persona que se dedica a la imprenta) desconocido';
-    const ROUTE = '/api/me.json';
-    const REGISTER_ROUTE = '/api/register/me.json';
+        . 'cuando un impresor (N. del T. persona que se dedica a la imprenta) desconocido';
+    const ROUTE = '/api/users/%s';
+    const REGISTER_ROUTE = '/api/users';
+
+    protected $id;
 
     /**
      * Create a client with a default Authorization header.
@@ -60,11 +63,20 @@ class MeControllerTest extends WebTestCase
         return $client->getResponse();
     }
 
+    protected function getLast($client)
+    {
+        $em = $client->getContainer()->get('doctrine_mongodb')->getManager();
+        $user = $em->getRepository('AppBundle:User')->findOneByUsername('meco');
+        
+        return $user->getId();
+    }
+
     protected function getClient($auth = false)
     {
         if (true === $auth) {
             $client = $this->createAuthenticatedClient(self::NAME, self::PASS);
-        } else {
+        }
+        else {
             $client = static::createClient();
         }
 
@@ -101,7 +113,7 @@ class MeControllerTest extends WebTestCase
           'password' => self::PASS,
             ), true);
 
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals(201, $response->getStatusCode());
     }
 
     public function testRegistrationTwiceMustFail()
@@ -116,18 +128,23 @@ class MeControllerTest extends WebTestCase
         $this->assertEquals(400, $response->getStatusCode());
     }
 
-    public function testPutMeWithOutAuthentication()
+    public function testPutUserWithOutAuthentication()
     {
         $client = static::createClient();
 
-        $client->request('PUT', self::ROUTE);
+        $id = $this->getLast($client);
+        
+        $client->request('PUT', sprintf(self::ROUTE, $id));
 
         $this->assertEquals(401, $client->getResponse()->getStatusCode());
     }
 
-    public function testPutMeWithOutRequiredParams()
+    public function testPutUserWithOutRequiredParams()
     {
-        $response = $this->put(self::ROUTE, array(
+        $client = static::createClient();
+        $id = $this->getLast($client);
+
+        $response = $this->put(sprintf(self::ROUTE, $id), array(
           'email' => null,
           'description' => self::DESCRIPTION,
             ), true);
@@ -135,59 +152,71 @@ class MeControllerTest extends WebTestCase
         $this->assertEquals(400, $response->getStatusCode());
     }
 
-    public function testPutMe()
+    public function testPutUser()
     {
-        $response = $this->put(self::ROUTE, array(
-          'email' => 'asd'.self::MAIL,
+        $client = static::createClient();
+        $id = $this->getLast($client);
+
+        $response = $this->put(sprintf(self::ROUTE, $id), array(
+          'email' => 'asd' . self::MAIL,
           'description' => self::DESCRIPTION,
+          'picture' => ''
             ), true);
 
         $this->assertEquals(200, $response->getStatusCode());
     }
 
-    public function testPutMeDeleteDescription()
+    public function testPutUserDeleteDescription()
     {
-        $response = $this->put(self::ROUTE, array(
-          'email' => 'asd'.self::MAIL,
+        $client = static::createClient();
+        $id = $this->getLast($client);
+
+        $response = $this->put(sprintf(self::ROUTE, $id), array(
+          'email' => 'asd' . self::MAIL,
           'description' => '',
             ), true);
 
         $this->assertEquals(200, $response->getStatusCode());
     }
 
-    public function testUnauthorizedGetMe()
+    public function testUnauthorizedGetUser()
     {
         $client = static::createClient();
+        $id = $this->getLast($client);
 
-        $client->request('GET', self::ROUTE);
+        $client->request('GET', sprintf(self::ROUTE, $id));
 
         $this->assertEquals(401, $client->getResponse()->getStatusCode());
     }
 
-    public function testInvalidCredentialsGetMe()
+    public function testInvalidCredentialsGetUser()
     {
         $client = $this->createAuthenticatedClient('bad', 'pass');
+        $id = $this->getLast($client);
 
-        $client->request('GET', self::ROUTE);
+        $client->request('GET', sprintf(self::ROUTE, $id));
 
         $this->assertEquals(401, $client->getResponse()->getStatusCode());
     }
 
-    public function testValidGetMe()
+    public function testValidGetUser()
     {
         $client = $this->createAuthenticatedClient(self::NAME, self::PASS);
+        $id = $this->getLast($client);
 
-        $client->request('GET', self::ROUTE);
+        $client->request('GET', sprintf(self::ROUTE, $id));
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
     }
 
-    public function testDeleteMe()
+    public function testDeleteUser()
     {
         $client = $this->createAuthenticatedClient(self::NAME, self::PASS);
+        $id = $this->getLast($client);
 
-        $client->request('DELETE', self::ROUTE);
+        $client->request('DELETE', sprintf(self::ROUTE, $id));
 
-        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $this->assertEquals(204, $client->getResponse()->getStatusCode());
     }
+
 }

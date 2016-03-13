@@ -23,9 +23,9 @@ class UserGateway extends DocumentRepository implements UserGatewayInterface
             ->setExpired(false)
             ->setLocked(false)
             ->addRole('read')
+            ->addRole('view')
             ->addRole('edit')
             ->addRole('ROLE_USER')
-            ->addRole('ROLE_API_USER')
         ;
 
         return self::insert($user);
@@ -56,15 +56,16 @@ class UserGateway extends DocumentRepository implements UserGatewayInterface
      * Update user.
      */
     public function update()
-    {
+    {   
         $this->dm->flush();
     }
 
     /**
      * @param User $user
      */
-    public function remove(UserInterface $user)
+    public function remove($id)
     {
+        $user = $this->find($id);
         $this->dm->remove($user);
         $this->dm->flush();
     }

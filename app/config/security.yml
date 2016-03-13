@@ -17,6 +17,12 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
+
+        register:
+            pattern:  ^/api/users
+            methods: [POST]
+            anonymous: true
+
         login:
             pattern:  ^/api/login
             stateless: true
@@ -35,10 +41,6 @@ security:
         docs:
             pattern:  ^/api/doc
             stateless: true
-            anonymous: true
-
-        register:
-            pattern:  ^/api/register/me.json
             anonymous: true
             
         api:
@@ -63,7 +65,7 @@ security:
         - { path: ^/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api/doc, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/api/register/me.json, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/users, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
 #        - { path: ^/api/token/refresh, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/admin/, role: ROLE_ADMIN }        

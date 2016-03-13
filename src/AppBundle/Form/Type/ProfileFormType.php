@@ -21,6 +21,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class ProfileFormType extends AbstractType
 {
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
@@ -42,4 +43,5 @@ class ProfileFormType extends AbstractType
     {
         return 'app_user_registration';
     }
+
 }

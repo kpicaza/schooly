@@ -15,7 +15,7 @@ use Symfony\Component\Form\FormError;
 /**
  * ApiUserHandler.
  */
-class ApiUserHandler implements ApiUserHandlerInterface
+class ApiUserHandler implements ApiHandlerInterface
 {
     /**
      * @var UserRepository
@@ -42,13 +42,13 @@ class ApiUserHandler implements ApiUserHandlerInterface
     /**
      * Get user from repository.
      * 
-     * @param User $user
+     * @param uuid $id
      *
      * @return User
      */
-    public function get(UserInterface $user)
+    public function get($id)
     {
-        return $this->repository->parse($user);
+        return $this->repository->parse($id);
     }
 
     /**
@@ -70,7 +70,7 @@ class ApiUserHandler implements ApiUserHandlerInterface
 
                 $user = $this->repository->insert($rawUser);
 
-                return $this->repository->parse($user);
+                return $this->repository->parse($user->getId());
             } catch (\Exception $ex) {
                 //  throw new $ex;
                 $form->addError(new FormError('Duplicate entry for email or username.'));
@@ -101,7 +101,7 @@ class ApiUserHandler implements ApiUserHandlerInterface
 
             $this->repository->update();
 
-            return $this->repository->parse($user);
+            return $this->repository->parse($user->getId());
         }
 
         return $form;
@@ -110,11 +110,11 @@ class ApiUserHandler implements ApiUserHandlerInterface
     /**
      * Delete User.
      * 
-     * @param User $user
+     * @param User $id
      */
-    public function delete(UserInterface $user)
+    public function delete($id)
     {
-        $this->repository->remove($user);
+        $this->repository->remove($id);
     }
 
     /**
