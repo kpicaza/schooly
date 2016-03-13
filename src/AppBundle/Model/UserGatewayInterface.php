@@ -27,7 +27,7 @@ interface UserGatewayInterface
      */
     public function insert(UserInterface $user);
     /**
-     * @param User $user
+     * @param $id
      */
-    public function remove(UserInterface $user);
+    public function remove($id);
 }

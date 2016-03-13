@@ -13,7 +13,7 @@ use AppBundle\Form\Model\RegistrationFormModel;
 /**
  * MeController.
  */
-class MeController extends FOSRestController
+class UserController extends FOSRestController
 {
 
     /**
@@ -29,31 +29,22 @@ class MeController extends FOSRestController
      * 
      * @return array
      */
-    public function getMeAction()
+    public function getUserAction($id)
     {
-        $user = $this->get('app.user_repository')->find(
-            $this->container->get('security.token_storage')->getToken()->getUser()->getId()
-        );
+        $user = $this->container->get('app.api_user_handler')->get($id);
+
         $view = $this->view($user);
 
         return $this->handleView($view);
     }
 
     /**
-     * @Route("/api/register/me.{_format}", methods="POST")
      * @ApiDoc(
      *   description = "Register new user.",
      *   input = "AppBundle\Form\Model\RegistrationFormModel",
      *   output = "AppBundle\Model\UserInterface",
      *   statusCodes = {
      *     200 = "User correctly added.",
-     *   },
-     *   requirements={
-     *      {
-     *          "name"="_format",
-     *          "dataType"="string",
-     *          "requirement"="json|xml|html",
-     *      }
      *   }
      * )
      * 
@@ -61,7 +52,7 @@ class MeController extends FOSRestController
      *
      * @return array
      */
-    public function MeAction(Request $request)
+    public function postUserAction(Request $request)
     {
         $user = $this->container->get('app.api_user_handler')->post(
             $request->request->all()
@@ -82,11 +73,9 @@ class MeController extends FOSRestController
      * 
      * @return array
      */
-    public function deleteMeAction()
+    public function deleteUserAction($id)
     {
-        $this->container->get('app.api_user_handler')->delete(
-            $this->container->get('security.token_storage')->getToken()->getUser()
-        );
+        $this->container->get('app.api_user_handler')->delete($id);
         $view = $this->view(array());
         return $this->handleView($view);
     }

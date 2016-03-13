@@ -136,6 +136,9 @@ Lo activamos en el kernel y pasamos a la configuración
     fos_rest:
         param_fetcher_listener: true
         disable_csrf_role: ROLE_USER
+        routing_loader:
+            default_format:       json
+            include_format:       false
 
 Con esta configuración básica nos servirá, para más detalle sobre las configuraciones podemos mira la [documentación del bundle](http://symfony.com/doc/master/bundles/FOSRestBundle/configuration-reference.html).
 
@@ -421,7 +424,7 @@ Y generamos el schema
 
     php app/console doctrine:schema:create
 
-Ahora generamos un asuario administrador con los comandos que nos provee fos user bundle
+Ahora generamos un usuario administrador con los comandos que nos provee fos user bundle
 
     php app/console fos:user:create admin admin@admin.mail --super-admin ROLE_SUPER_ADMIN
     php app/console fos:user:change-password admin Demo1234
@@ -444,7 +447,7 @@ podemos comprobar las rutas que nos ha generado
     fos_user_resetting_reset            GET|POST   ANY      ANY    /resetting/reset/{token}           
     fos_user_change_password            GET|POST   ANY      ANY    /profile/change-password   
 
-Ahora descargaremos los bundles para implementar la autorización JWT
+Ahora descargaremos el bundle para implementar la autorización JWT
 
     composer require lexik/jwt-authentication-bundle:^1.3
 
@@ -459,8 +462,8 @@ También las de test
     openssl genrsa -out app/var/jwt/private-test.pem -aes256 4096
     openssl rsa -pubout -in app/var/jwt/private-test.pem -out app/var/jwt/public-test.pem
 
-Ahora deberíamos añadir las rutas al par de claves, como variables de entorno(Recordemos las buenas prácticas, la información sensible 
-es mejor tenerla fuera de nuestra aplicación). Si estamos utilizando el server que monta symfony con el comando server:run los meteremos en el `parameters.yml`
+Ahora deberíamos añadir las rutas al par de claves, como variables de entorno. Si estamos utilizando el server que monta 
+symfony con el comando server:run los meteremos en el `parameters.yml`
 
 Primero definimos los parametros necesarios en el `parameters.yml`
 
@@ -518,35 +521,13 @@ Pasamos a actualizar el `security.yml`
             - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
             - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
-Imporamos las rutas en el `eouting.yml`
+Importamos las rutas en el `routing.yml`
 
     # app/config/routing.yml
     api_login_check:
         path: /api/login_check
 
-Si utilizamos apache, borrariamos las rutas a las claves privadas, por lo menos de producción y las añadimos al 
-virtualhost, para mejor rendimiento deberíamos pasar el .htaccess completo
-
-    <VirtualHost *:80>
-
-        ServerName dev.site.com
-
-        DocumentRoot /var/www/symfony2/web
-        <Directory /var/www/symfony2/web>
-            AllowOverride All
-            Require all granted
-        </Directory>
-
-        SetEnv  PRIVATE_KEY_PAIR   /var/jwt/private.pem
-        SetEnv  PUBLIC_KEY_PAIR    /var/jwt/public.pem
-
-        RewriteEngine On
-        RewriteCond %{HTTP:Authorization} ^(.*)
-        RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
-
-    </VirtualHost>
-
-Actualizamos el `parameter.yml`
+Actualizamos el `parameters.yml`
 
     # app/config/parameters.yml.dist
     jwt_private_key_path: %kernel.root_dir%%private.key.pair%   # ssh private key path
@@ -605,21 +586,21 @@ Ya tenemos todo lo necesario, ahora podemos empezar a desarrollar nuestra aplica
 ## Parte 2, TDD 1:
 
 Empezaremos con el user story 4 `Como usuario autenticado puedo obtener la información de mi perfil.`. No es el más sencillo,
-pero será un buen punto de partida. Creamos el archivo `MeControllerTest`, y creamos nuestro primer test con PHPUnit. Para la 
+pero será un buen punto de partida. Creamos el archivo `UserControllerTest`, y creamos nuestro primer test con PHPUnit. Para la 
 acción get de nuestro servicio rest.
 
     <?php
-    // src/AppBundle/Tests/Controller/MeControllerTest.php
+    // src/AppBundle/Tests/Controller/UserControllerTest.php
 
     namespace AppBundle\Tests\Controller;
 
     use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-    class MeControllerTest extends WebTestCase
+    class UserControllerTest extends WebTestCase
     {
         const NAME = 'meco';
         const PASS = 'Demo1234';
-        const ROUTE = '/api/me.json';
+        const ROUTE = '/api/users/%s';
 
         /**
          * Create a client with a default Authorization header. 
@@ -649,12 +630,22 @@ acción get de nuestro servicio rest.
 
             return $client;
         }
+    
+        protected function getLast($client)
+        {
+            $em = $client->getContainer()->get('doctrine')->getManager();
+            $user = $em->getRepository('AppBundle:User')->findOneByUsername('meco');
 
-        public function testValidGetMe()
+            return $user->getId();
+        }
+
+        public function testValidGetUser()
         {
             $client = $this->createAuthenticatedClient(self::NAME, self::PASS);
 
-            $client->request('GET', self::ROUTE);
+            $id = $this->getLast($client);
+
+            $client->request('GET', sprintf(self::ROUTE, $id));
 
             $this->assertEquals(200, $client->getResponse()->getStatusCode());
         }
@@ -671,10 +662,10 @@ Si corremos el test, es obvio, que fallará.
 
     There was 1 failure:
 
-    1) AppBundle\Tests\Controller\MeControllerTest::testValidGetMe
+    1) AppBundle\Tests\Controller\UserControllerTest::testValidGetMe
     Failed asserting that 404 matches expected 200.
 
-    /educaedu/practica-final/src/AppBundle/Tests/Controller/MeControllerTest.php:49
+    /educaedu/practica-final/src/AppBundle/Tests/Controller/UserControllerTest.php:49
 
     FAILURES!
     Tests: 2, Assertions: 3, Failures: 1.
@@ -683,7 +674,7 @@ Esto está muy bien, la información de este test, es nuestro siguiente paso a s
 controlador. Primero crearemos nuestro controlador dentro del AppBundle.
 
     <?php
-    // src/AppBundle/Controller/MeController
+    // src/AppBundle/Controller/UserController
 
     namespace AppBundle\Controller;
 
@@ -694,9 +685,9 @@ controlador. Primero crearemos nuestro controlador dentro del AppBundle.
     use Symfony\Component\HttpFoundation\Request;
 
     /**
-     * MeController.
+     * UserController.
      */
-    class MeController extends FOSRestController
+    class UserController extends FOSRestController
     {
         /**
          * @Security("is_granted('view', user)")
@@ -711,7 +702,7 @@ controlador. Primero crearemos nuestro controlador dentro del AppBundle.
          * 
          * @return json|xml
          */
-        public function getMeAction(Request $request)
+        public function getUserAction(Request $request)
         {
             $user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -729,7 +720,7 @@ Damos de alta la ruta en el `routin.yml`
     app_user:
         type: rest
         prefix: /api
-        resource: AppBundle\Controller\MeController
+        resource: AppBundle\Controller\UserController
     ...
 
 Por ultimo creamos el usuario de test.
@@ -794,7 +785,7 @@ Para esto crearemos una clase `Voter`, dentro de el directorio `Security`
         }
     }
 
-Como hemos explicado antes, los voter son la forma adecuada de permitir accesos a deferentes arte de la 
+Como hemos explicado antes, los voter son la forma adecuada de permitir accesos a deferentes partes de la 
 aplicación, todavía nos falta dar de alta el voter en el `services.yml`.
 
     # app/config/services.yml
@@ -806,7 +797,7 @@ aplicación, todavía nos falta dar de alta el voter en el `services.yml`.
             tags:
                - { name: security.voter }
 
-Ahora los test está en verde, es un buen momento para comitear, pero no es más que un falso positivo. Como podemos 
+Ahora si pasamos los tests, están en verde, es un buen momento para comitear, pero no es más que un falso positivo. Como podemos 
 ver, nuestro controlador está directamente acoplado con el motor de Base de datos, en este caso MySQL.
 
 
@@ -879,8 +870,8 @@ o `Gateway` y el repositorio o `Repository`. vamos a añadir el test al final de
     }
 
 Pasamos los test, y nos encontramos la primera escepción, la clase `UserFactory` no existe, vamos a crearla. Bueno, paremos un segundo y pensemos,
-Si queremos seguir el principio de inversión de dependencias necesitamos abstraer nuestra clases, para ello haremos uso de `Interfaces` o contratos
-que definirán la estructuras que deben recibir las clases de nivel superior, en nuestro caso el controlador. Creamos nuestro UserFactoryInterface en 
+Si queremos seguir el principio de inversión de dependencias necesitamos abstraer nuestras clases, para ello haremos uso de `Interfaces` o contratos
+que definirán la estructuras que deben recibir las clases de nivel superior, en nuestro caso el controlador. Creamos nuestro `UserFactoryInterface` en 
 el directorio `Model`.
 
     <?php
@@ -1210,7 +1201,8 @@ Y por último la clase `Factory` dentro del directorio `Model`
         }
     }
 
-ya os habeís fijado que el user gateway y su interface están vacios, es porque de momento utilizaremos los metodos de doctrine
+ya os habeís fijado que el user gateway y su interface están vacios, es porque de momento utilizaremos los metodos de doctrine.
+
 Ahora necesitamos implementar la configuración para atar todas estas piezas, Symfony nos ofrece la inyección de dependencias como solución,
 veamos como se hace, abrimos el archivo `services.yml`
 
@@ -1282,52 +1274,46 @@ Y para terminar de implementar el patrón repositorio solo nos falta la clase `U
             return $this->factory->makeOne($user);
         }
         /**
-         * @param User $user
+         * @param $id
          *
          * @return User
          */
-        public function parse(UserInterface $user)
+        public function parse($id)
         {
-            return $this->factory->makeOne($user);
+            $rawUser = $this->gateway->find($id);
+
+            return $this->factory->makeOne($rawUser);
         }
     }
 
 Pasamos los tests, y tenemos que ver que está todo correcto, ahora podemos comitear. El siguiente paso es unir el controlador 
 con el modelo, lo harremos de la siguiente manera
 
-Actualizamos `MeController` para que utilice nuestro `Repository` y así lo desacoplamos del motor de base de datos
+Actualizamos `UserController` para que utilice nuestro `Repository` y así lo desacoplamos del motor de base de datos
 
-        public function getMeAction()
+        public function getUserAction($id)
         {
-            $user = $this->get('app.user_repository')->find(
-                $this->container->get('security.token_storage')->getToken()->getUser()->getId()
-            );
+            $user = $this->get('app.user_repository')->find($id);
             $view = $this->view($user);
 
             return $this->handleView($view);
         }
 
-¿Como? hemos añadido una line más, es algo conceptual, la diferencia, es que antes nuestro controlador solo podía funcionar dependiendo 
-directamente de doctrine, de esta manera, el Authorization Provider nos devueve la entidad usuario a partir del Token JWT, pero podríamos 
-no querer mostrar el objeto tal cual está, seguramente nos interese mostrar la información filtrado o procesada. Otro ejemplo de porque hacemos 
-esto, sería si como en nuestro caso estamos haciendo un servicio rest, si no tubiesemos FosRestBundle(Quien se encarga de formatear nuestras respuestas),
-sería nuestro reposittorio el encargado de enviar los datos formateados al controlador.
-
 Si volvemos a pasar los test todo debe seguir funcionando correctamente y podemos volver a commitear nuestro trabajo.
 
 ## Parte 4, 2º user Story
 
-Las verdad que al realizar el primer user story, nos hemos dejado todo bastante bien organizado para que sea mas sencillo continuar con los siguiente, 
+Las verdad que al realizar el primer user story, nos hemos dejado todo bastante bien organizado, para que sea mas sencillo continuar con los siguientes, 
 igualmente, todavía faltan piezas importantes del puzzle.
 
-comenzaremos implementando el user story 2 `Como usuario sin autenticar puedo registrarme en el site`, este user story, a parte de lo que ya tenemos 
-creado necesita un formulario y validación. empecemos por los tests. primero crearemos el método post, justo despues del método `createAuthenticatedClient` que nos ayudará a realizar las peticiones en 
-los diferentes tests.
+Comenzaremos implementando el user story 2 `Como usuario sin autenticar puedo registrarme en el site`, este user story, a parte de lo que ya tenemos 
+creado necesita un formulario y validación. empecemos por los tests. primero crearemos el método post, justo despues del método `createAuthenticatedClient` 
+que nos ayudará a realizar las peticiones en los diferentes tests.
 
     <?php 
-    // src/AppBundle/Tests/Controller/MeControllerTest.php
+    // src/AppBundle/Tests/Controller/UserControllerTest.php
     
-    class MeControllerTest extends WebTestCase
+    class UserControllerTest extends WebTestCase
     {
         ...
         protected function post($uri, array $data, $auth = false)
@@ -1340,11 +1326,11 @@ los diferentes tests.
 Y añadimos nuestro primer test para el registro, testeara el envío del formulario vacio, nos tiene que devolver un error 400.
 
     <?php 
-    // src/AppBundle/Tests/Controller/MeControllerTest.php
+    // src/AppBundle/Tests/Controller/UserControllerTest.php
     
-    class MeControllerTest extends WebTestCase
+    class UserControllerTest extends WebTestCase
     {
-        const REGISTER_ROUTE = '/api/register/me.json';
+        const REGISTER_ROUTE = '/api/users';
         ...
         public function testRegistrationFailedWithEmptyForm()
         {
@@ -1357,22 +1343,14 @@ Pasamos los test, y obtenemos un 404 en vez del 400 que esperamos, al igual que 
 ruta a un controlador, y en este caso además necesitaremos un formulario, vamos con el controlador
 
     <?php
-    // src/AppBundle/Controller/MeController.php
+    // src/AppBundle/Controller/UserController.php
 
     /**
-     * @Route("/api/register/me.{_format}", methods="POST")
      * @ApiDoc(
      *   description = "Register new user.",
      *   statusCodes = {
      *     200 = "User correctly added.",
      *     401 = "Authentication failure, user doesn’t have permission or API token is invalid or outdated.",
-     *   },
-     *   requirements={
-     *      {
-     *          "name"="_format",
-     *          "dataType"="string",
-     *          "requirement"="json|xml|html",
-     *      }
      *   }
      * )
      * 
@@ -1380,7 +1358,7 @@ ruta a un controlador, y en este caso además necesitaremos un formulario, vamos
      *
      * @return array
      */
-    public function MeAction(Request $request)
+    public function postUserAction(Request $request)
     {
         $user = $request->request->all();
         
@@ -1388,8 +1366,7 @@ ruta a un controlador, y en este caso además necesitaremos un formulario, vamos
         return $this->handleView($view);
     }
 
-Vemos que en este caso hemos utilizado la anotación `@Route`, esto es porque la ruta que genera `FosRest` para este caso dería algo como 
-`/api/mes.{_format}`, en este caso esta ruta romería la coherencia de nuestro servicio rest, también podemos ver que no estamos haciendo 
+Lo bueno de Fos Rest es que se encarga de la pluralización de las URIs de nuestros recursos, también podemos ver que no estamos haciendo 
 uso de formularios, esto será lo siguiente que hagamos. Para crear formularios y validarlos crearemos dos nuevas clases. antes de ello le 
 diremos a nuestro API firewall, que la ruta que acabamos de crear será accesible sin necesidad de autenticación.
 
@@ -1399,16 +1376,17 @@ diremos a nuestro API firewall, que la ruta que acabamos de crear será accesibl
         firewalls:
             ...
             register:
-                pattern:  ^/api/register/me.json
+                pattern:  ^/api/users
+                methods: [POST]
                 anonymous: true
 
         ...
         access_control:
             ...
-            - { path: ^/api/register/me.json, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+            - { path: ^/api/users, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
             - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
-Ahora si pasamos a crear nuestro formulario, ara la validación crearemos un simple modelo de formulario, este a su vez nos ayudará a documentar el api,
+Ahora si pasamos a crear nuestro formulario, para la validación crearemos un simple modelo de formulario, este a su vez nos ayudará a documentar el api,
 veamos como
 
     <?php
@@ -1504,8 +1482,8 @@ veamos como
         }
     }
 
-La parte más interesante de esta clase son las anotaciones escritas sobre la declaración de las variables, de esta manerá añadimos la capa de 
-validación al formulario por ejemplo las anotaciones NotBlack y Regex
+La parte más interesante de esta clase, son las anotaciones escritas sobre la declaración de las variables, de esta manerá añadimos la capa de 
+validación al formulario por ejemplo las anotaciones NotBlank y Regex
 
         /**
          * @Assert\NotBlank()
@@ -1550,17 +1528,18 @@ contenga caracteres alfanumericos, sin ningún tipo de símbolo, creamos el form
         }
     }
 
-Es un formulario muy simple de login, con los campos minimos para crear un usuario. Ahora le tenemos que decir a nuestro controlador que empiece a utilizarlo.
+Es un formulario muy simple de login, con los campos minimos para crear un usuario. Ahora le tenemos que decir a nuestro controlador 
+que empiece a utilizarlo.
+
 Para ello utilizaremos las anotaciones de `nelmioApiDocs`, y forzaremos el envio del formulario.
 
     <?php
-    // src/AppBundle/Controller/MeController.php
+    // src/AppBundle/Controller/UserController.php
     ...
     use AppBundle\Form\Type\RegistrationFormType;
     use AppBundle\Form\Model\RegistrationFormModel;
     ...
         /**
-         * @Route("/api/register/me.{_format}", methods="POST")
          * @ApiDoc(
          *   description = "Register new user.",
          *   input = "AppBundle\Form\Model\RegistrationFormModel",
@@ -1568,13 +1547,6 @@ Para ello utilizaremos las anotaciones de `nelmioApiDocs`, y forzaremos el envio
          *   statusCodes = {
          *     200 = "User correctly added.",
          *     401 = "Authentication failure, user doesn’t have permission or API token is invalid or outdated.",
-         *   },
-         *   requirements={
-         *      {
-         *          "name"="_format",
-         *          "dataType"="string",
-         *          "requirement"="json|xml|html",
-         *      }
          *   }
          * )
          * 
@@ -1582,7 +1554,7 @@ Para ello utilizaremos las anotaciones de `nelmioApiDocs`, y forzaremos el envio
          *
          * @return array
          */
-        public function MeAction(Request $request)
+        public function postUserAction(Request $request)
         {
             $user = null;
             $form = $this->createForm(RegistrationFormType::class, new RegistrationFormModel(), array('method' => 'POST'));
@@ -1610,9 +1582,9 @@ crearemos otro test para comprobar los registros validos, para ello crearemos el
 queremos un cliente autenticado o no
 
     <?php 
-    // src/AppBundle/Tests/Controller/MeControllerTest.php
+    // src/AppBundle/Tests/Controller/UserControllerTest.php
     
-    class MeControllerTest extends WebTestCase
+    class UserControllerTest extends WebTestCase
     {
         const MAIL = 'meco@mail.com';
         ...
@@ -1636,15 +1608,16 @@ queremos un cliente autenticado o no
                 ), true);
             $this->assertEquals(200, $response->getStatusCode());
         }
-Si volvemos a paser los tests, vemos que tenemos una clase que existe, podríamos crearla en el mismo controlador, pero 
+
+Si volvemos a paser los tests, vemos que tenemos un método que no existe, podríamos crearlo en el mismo controlador, pero 
 para tener todo mejor organizado, y dejar un fina capa de controladores crearemos un handler para recivir sus valores. Primero 
 definiremos su interface
 
     <?php
+    // src/AppBundle/Handler/ApiUserHandlerInterface.php
     namespace AppBundle\Handler;
-    use AppBundle\Model\UserInterface;
     /**
-     * ApiHandleInterface.
+     * ApiHandlerInterface.
      */
     interface ApiUserHandlerInterface
     {
@@ -1653,7 +1626,7 @@ definiremos su interface
          * 
          * @param User $user
          */
-        public function get(UserInterface $user);
+        public function get($id);
         /**
          * Insert User to repository.
          * 
@@ -1665,6 +1638,7 @@ definiremos su interface
 Para después definimos su implementación
 
     <?php
+    // src/AppBundle/Handler/ApiUserHandler.php
     namespace AppBundle\Handler;
     use AppBundle\Model\UserRepository;
     use AppBundle\Model\UserInterface;
@@ -1699,13 +1673,13 @@ Para después definimos su implementación
         /**
          * Get user from repository.
          * 
-         * @param User $user
+         * @param $id
          *
          * @return User
          */
-        public function get(UserInterface $user)
+        public function get($id)
         {
-            return $this->repository->parse($user);
+            return $this->repository->parse($id);
         }
         /**
          * Insert User to repository.
@@ -1772,9 +1746,9 @@ Lo damos de alta como servicio en el `services.yml`
 
 Y actualizamos el controlador
 
-    // src/AppBundle/MeController.php
+    // src/AppBundle/UserController.php
     ...
-        public function MeAction(Request $request)
+        public function postUserAction(Request $request)
         {
             $user = $this->container->get('app.api_user_handler')->post(
                 $request->request->all()
@@ -1845,7 +1819,6 @@ Y añadimos los metodos al repository y al gateway respectivamente
                 ->addRole('view')
                 ->addRole('edit')
                 ->addRole('ROLE_USER')
-                ->addRole('ROLE_API_USER')
             ;
             return self::insert($user);
         }
@@ -1892,21 +1865,25 @@ Y por último actualizamos nuestro repository
             return $this->factory->makeOne($rawUser);
         }
 
-Si pasamos ahora los test, fallarán, porque el usuario qu estmaos intentando crear está ya en la bbdd, 
+Si pasamos ahora los test, fallarán, porque el usuario qu estmamos intentando crear existe ya en la bbdd, 
 así que vamos a crear la accion de borrar usuario para recuperar nuestros tests,
 
-    // src/AppBundle/tests/MeControllerTest
+    // src/AppBundle/tests/UserControllerTest
         ...
-        public function testDeleteMe()
+        public function testDeleteUser()
         {
             $client = $this->createAuthenticatedClient(self::NAME, self::PASS);
-            $client->request('DELETE', self::ROUTE);
+
+            $id = $this->getLast($client);
+
+            $client->request('DELETE', sprintf(self::ROUTE, $id));
+
             $this->assertEquals(200, $client->getResponse()->getStatusCode());
         }
 
 creamos el método delete en el controlador
 
-    // src/AppBundle/Controller/MeController.php
+    // src/AppBundle/Controller/UserController.php
         ...
         /**
          * @Security("is_granted('edit', user)")
@@ -1920,27 +1897,26 @@ creamos el método delete en el controlador
          * 
          * @return array
          */
-        public function deleteMeAction()
+        public function deleteUserAction($id)
         {
-            $this->container->get('app.api_user_handler')->delete(
-                $this->container->get('security.token_storage')->getToken()->getUser()
-            );
+            $this->container->get('app.api_user_handler')->delete($id);
+
             $view = $this->view(array());
             return $this->handleView($view);
         }
 
-Después nuestro handler
+Después lo creamos en nuestro handler
 
     // src/AppBundle/Handler/ApiUserHandler.php
     ...
         /**
          * Delete User.
          * 
-         * @param User $user
+         * @param $id
          */
-        public function delete(UserInterface $user)
+        public function delete($id)
         {
-            $this->repository->remove($user);
+            $this->repository->remove($id);
         }
 
 Y añadimos los metodos a nuestro modelo, primero al interface
@@ -1948,36 +1924,93 @@ Y añadimos los metodos a nuestro modelo, primero al interface
     // src/AppBundle/Model/GatewayInterface.php
     ...
         /**
-         * @param User $user
+         * @param $id
          */
-        public function remove(UserInterface $user);
+        public function remove($id);
 
 Luego en la clase
 
     // src/AppBundle/Entity/Gateway.php
     ...
         /**
-         * @param User $user
+         * @param $id
          */
-        public function remove(UserInterface $user)
+        public function remove($id)
         {
+            $user = $this->find($id);
+
             $this->_em->remove($user);
             $this->_em->flush();
         }
+
 
 y por último en el repository
 
     // src/AppBundle/Model/UserRepository.php
     ...
         /**
-         * @param User $user
+         * @param $id
          */
-        public function remove(UserInterface $user)
+        public function remove($id)
         {
-            $this->gateway->remove($user);
+            $this->gateway->remove($id);
         }
 
-si pasamos los test tendremos un 403, por el usuario auque autenticado, no tiene un voter que le permita el acceso. Vamos a añadir la entrada edit al voter que creamos antes.
+si pasamos los test tendremos un 403, porque el usuario aunque autenticado, no tiene un voter que le permita el acceso. Vamos a añadir 
+la entrada edit al voter que creamos antes.
+
+Además también quitaremos la dependencia con doctrine en el voter
+
+    <?php
+    // src/AppBundle/Security/UserVoter.php
+    namespace AppBundle\Security;
+    use Symfony\Component\Security\Core\Authorization\Voter\Voter;
+    use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+    use AppBundle\Model\UserInterface;
+    class UserVoter extends Voter
+    {
+        const EDIT = 'edit';
+        const VIEW = 'view';
+        public function supports($attribute, $subject)
+        {
+            return $subject instanceof UserInterface && in_array($attribute, array(
+                  self::VIEW, self::EDIT,
+            ));
+        }
+        protected function voteOnAttribute($attribute, $currentUser, TokenInterface $token)
+        {
+            $user = $token->getUser();
+            if (!$user instanceof UserInterface) {
+                return false;
+            }
+            $roles = $user->getRoles();
+            if (
+                in_array(strtoupper(self::EDIT), $roles) &&
+                $attribute == self::EDIT &&
+                $user->getEmail() == $currentUser->getEmail()
+            ) {
+                return true;
+            }
+            if (
+                in_array('ROLE_USER', $roles) &&
+                $attribute == self::VIEW &&
+                $user->getEmail() == $currentUser->getEmail()
+            ) {
+                return true;
+            }
+            return false;
+        }
+    }
+
+Pasamos de nuevo los tests, devemos tener todo correcto, en este punto ya tenemos implementado el patrón repositorio, 
+haciendo uso del principio de inversión de dependencias.
+
+Ahora vamos a por el user story 3 `Como usuario autenticado puedo editar mi perfil`, para esto utilizaremos el método PUT 
+que vimos antes.
+
+Como en los demás user storys empezamos con un test
+
+
 
 Para terminar, comprobaremos la covertura que estamos dando a nuestro código con la herramienta code coverage de phpunit.
 

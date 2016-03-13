@@ -65,9 +65,24 @@ swiftmailer:
     password:  "%mailer_password%"
     spool:     { type: memory }
 
+nelmio_api_doc: 
+    name: 'Sf2 App API docs'
+ #   exclude_sections: ["Mobile app"]
+    default_sections_opened:  true
+# Api Docs template
+#    motd:
+#        template: ::base_print.html.twig
+    sandbox:
+#        enabled: false
+        request_format:
+            method: accept_header
+
 fos_rest:
     param_fetcher_listener: true
     disable_csrf_role: ROLE_USER
+    routing_loader:
+        default_format:       json
+        include_format:       false
 
 nelmio_cors:
     defaults:
@@ -101,17 +116,3 @@ lexik_jwt_authentication:
     pass_phrase:      %jwt_key_pass_phrase%
     token_ttl:        %jwt_token_ttl%
     
-gesdinet_jwt_refresh_token:
-    ttl: 2592000
-    ttl_update: true
-    firewall: api
-
-nelmio_api_doc: 
-    name: 'Educaedu práctica API docs'
- #   exclude_sections: ["Some section"]
-    default_sections_opened:  true
-# Api Docs template
-#    motd:
-#        template: some/template.html.twig
-    sandbox:
-#        enabled: false

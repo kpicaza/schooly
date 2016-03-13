@@ -4,14 +4,14 @@ namespace AppBundle\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class MeControllerTest extends WebTestCase
+class UserControllerTest extends WebTestCase
 {
 
     const NAME = 'meco';
     const MAIL = 'meco@mail.com';
     const PASS = 'Demo1234';
-    const ROUTE = '/api/me.json';
-    const REGISTER_ROUTE = '/api/register/me.json';
+    const ROUTE = '/api/users/%s';
+    const REGISTER_ROUTE = '/api/users';
 
     /**
      * Create a client with a default Authorization header. 
@@ -40,6 +40,14 @@ class MeControllerTest extends WebTestCase
         }
 
         return $client;
+    }
+    
+    protected function getLast($client)
+    {
+        $em = $client->getContainer()->get('doctrine')->getManager();
+        $user = $em->getRepository('AppBundle:User')->findOneByUsername('meco');
+        
+        return $user->getId();
     }
 
     protected function getClient($auth = false)
@@ -78,19 +86,25 @@ class MeControllerTest extends WebTestCase
         $this->assertEquals(200, $response->getStatusCode());
     }
 
-    public function testValidGetMe()
+    public function testValidGetUser()
     {
         $client = $this->createAuthenticatedClient(self::NAME, self::PASS);
 
-        $client->request('GET', self::ROUTE);
+        $id = $this->getLast($client);
+
+        $client->request('GET', sprintf(self::ROUTE, $id));
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
     }
     
-    public function testDeleteMe()
+    public function testDeleteUser()
     {
         $client = $this->createAuthenticatedClient(self::NAME, self::PASS);
-        $client->request('DELETE', self::ROUTE);
+        
+        $id = $this->getLast($client);
+
+        $client->request('DELETE', sprintf(self::ROUTE, $id));
+        
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
     }
 }

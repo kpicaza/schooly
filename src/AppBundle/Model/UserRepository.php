@@ -80,9 +80,9 @@ class UserRepository
     /**
      * @param User $user
      */
-    public function remove(UserInterface $user)
+    public function remove($id)
     {
-        $this->gateway->remove($user);
+        $this->gateway->remove($id);
     }
 
     /**
@@ -90,9 +90,10 @@ class UserRepository
      *
      * @return User
      */
-    public function parse(UserInterface $user)
+    public function parse($id)
     {
-        return $this->factory->makeOne($user);
+        $rawUser = $this->gateway->find($id);
+        
+        return $this->factory->makeOne($rawUser);
     }
-
 }

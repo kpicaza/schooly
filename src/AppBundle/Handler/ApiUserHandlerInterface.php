@@ -1,6 +1,5 @@
 <?php
 namespace AppBundle\Handler;
-use AppBundle\Model\UserInterface;
 /**
  * ApiHandleInterface.
  */
@@ -11,7 +10,7 @@ interface ApiUserHandlerInterface
      * 
      * @param User $user
      */
-    public function get(UserInterface $user);
+    public function get($id);
     /**
      * Insert User to repository.
      * 

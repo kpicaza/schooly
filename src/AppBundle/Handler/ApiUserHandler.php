@@ -37,9 +37,9 @@ class ApiUserHandler implements ApiUserHandlerInterface
      *
      * @return User
      */
-    public function get(UserInterface $user)
+    public function get($id)
     {
-        return $this->repository->parse($user);
+        return $this->repository->parse($id);
     }
     /**
      * Insert User to repository.
@@ -71,9 +71,9 @@ class ApiUserHandler implements ApiUserHandlerInterface
      * 
      * @param User $user
      */
-    public function delete(UserInterface $user)
+    public function delete($id)
     {
-        $this->repository->remove($user);
+        $this->repository->remove($id);
     }
     /**
      * @param ProfileFormModel $userModel

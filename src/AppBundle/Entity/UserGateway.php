@@ -53,10 +53,12 @@ class UserGateway extends EntityRepository implements UserGatewayInterface
     }
 
     /**
-     * @param User $user
+     * @param $id
      */
-    public function remove(UserInterface $user)
+    public function remove($id)
     {
+        $user = $this->find($id);
+        
         $this->_em->remove($user);
         $this->_em->flush();
     }

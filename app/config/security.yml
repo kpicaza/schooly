@@ -6,8 +6,23 @@ security:
     providers:
         fos_userbundle:
             id: fos_user.user_provider.username
+            
+    role_hierarchy:
+        ROLE_ADMIN:       ROLE_USER
+        ROLE_SUPER_ADMIN: ROLE_ADMIN
 
-    firewalls:        
+    firewalls:
+        # disables authentication for assets and the profiler, adapt it according to your needs
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+
+        register:
+            pattern:  ^/api/users
+            methods: [POST]
+            anonymous: true
+
         login:
             pattern:  ^/api/login
             stateless: true
@@ -18,18 +33,14 @@ security:
                 failure_handler:          lexik_jwt_authentication.handler.authentication_failure
                 require_previous_session: false
         
-        refresh:
-            pattern:  ^/api/token/refresh
-            stateless: true
-            anonymous: true
-        
+#        refresh:
+#            pattern:  ^/api/token/refresh
+#            stateless: true
+#            anonymous: true
+#            
         docs:
             pattern:  ^/api/doc
             stateless: true
-            anonymous: true
-            
-        register:
-            pattern:  ^/api/register/me.json
             anonymous: true
             
         api:
@@ -41,15 +52,12 @@ security:
             pattern: ^/
             form_login:
                 provider: fos_userbundle
-                csrf_provider: security.csrf.token_manager # Use form.csrf_provider instead for Symfony <2.4
+                csrf_token_generator: security.csrf.token_manager
+                # if you are using Symfony < 2.8, use the following config instead:
+                # csrf_provider: form.csrf_provider
+
             logout:       true
             anonymous:    true
-
-    role_hierarchy:
-        ROLE_DEVELOPER:   ROLE_USER
-        ROLE_ADMIN:       ROLE_DEVELOPER
-        ROLE_SUPER_ADMIN: ROLE_ADMIN
-
 
     access_decision_manager:
         strategy: unanimous
@@ -58,9 +66,8 @@ security:
         - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/register, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/api/token/refresh, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/api/register/me.json, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api/doc, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/users, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
-        - { path: ^/admin/, role: ROLE_ADMIN }
+        - { path: ^/admin/, role: ROLE_ADMIN }        
