@@ -46,10 +46,10 @@ class UserControllerTest extends WebTestCase
     
     protected function getLast($client)
     {
-        $em = $client->getContainer()->get('doctrine')->getManager();
+        $em = $client->getContainer()->get('doctrine_mongodb')->getManager();
         $user = $em->getRepository('AppBundle:User')->findOneByUsername(self::NAME);
         
-        return null === $user ? $user : $user->getId();
+        return $user->getId();
     }
 
     protected function getClient($auth = false)
@@ -97,7 +97,7 @@ class UserControllerTest extends WebTestCase
             'email' => self::MAIL,
             'plainPassword' => self::PASS,
             'password' => self::PASS,
-            ), true);
+            ));
         $this->assertEquals(200, $response->getStatusCode());
     }
 

@@ -2,8 +2,8 @@
 
 namespace AppBundle\Tests\Model;
 
-use AppBundle\Entity\User;
-use AppBundle\Entity\UserGateway;
+use AppBundle\Document\User;
+use AppBundle\Document\UserGateway;
 use AppBundle\Model\UserFactory;
 use AppBundle\Model\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -31,7 +31,7 @@ class UserRepositoryTest extends WebTestCase
     public function setUp()
     {
         parent::setUp();
-        $gatewayClassname = 'AppBundle\Entity\UserGateway';
+        $gatewayClassname = 'AppBundle\Document\UserGateway';
         $this->gateway = $this->prophesize($gatewayClassname);
         $this->factory = new UserFactory();
         $this->repository = new UserRepository($this->gateway->reveal(), $this->factory);

@@ -60,9 +60,9 @@ class ApiUserHandler implements ApiUserHandlerInterface
             try {
                 $rawUser = $this->insertFromForm($form->getData());
                 $user = $this->repository->insert($rawUser);
-                return $this->repository->parse($user);
+                return $this->repository->parse($user->getId());
             } catch (\Exception $ex) {
-                //  throw new $ex;
+                // throw new $ex;
                 $form->addError(new FormError('Duplicate entry for email or username.'));
                 // log this somewhere.
             }
