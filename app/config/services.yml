@@ -14,17 +14,17 @@ services:
     app.user_factory:
         class: AppBundle\Model\UserFactory
 
-#    app.user_gateway:
-#        class: AppBundle\Entity\UserGateway
-#        factory: [ "@doctrine", getRepository]
-#        arguments: [ "AppBundle:User" ]
-
     app.user_gateway:
-        class: AppBundle\Document\UserGateway
-        factory: [ "@doctrine_mongodb", getRepository]
-#        factory_service: doctrine_mongodb
-#        factory_method:  getRepository
+        class: AppBundle\Entity\UserGateway
+        factory: [ "@doctrine", getRepository]
         arguments: [ "AppBundle:User" ]
+
+#    app.user_gateway:
+#        class: AppBundle\Document\UserGateway
+#        factory: [ "@doctrine_mongodb", getRepository]
+##        factory_service: doctrine_mongodb
+##        factory_method:  getRepository
+#        arguments: [ "AppBundle:User" ]
 
     app.user_repository:
         class: AppBundle\Model\UserRepository

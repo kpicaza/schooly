@@ -1,4 +1,5 @@
 /web/bundles/
+/web/uploads/
 /web/coverage
 /app/bootstrap.php.cache
 /app/cache/*

@@ -2,8 +2,8 @@
 
 namespace AppBundle\Tests\Entity;
 
-use AppBundle\Document\User;
-use AppBundle\Document\UserGateway;
+use AppBundle\Entity\User;
+use AppBundle\Entity\UserGateway;
 use AppBundle\Model\UserFactory;
 use AppBundle\Model\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;

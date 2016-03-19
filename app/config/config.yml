@@ -2,6 +2,7 @@ imports:
     - { resource: parameters.yml }
     - { resource: security.yml }
     - { resource: services.yml }
+    - { resource: admin/ }
 
 # Put parameters here that don't need to change on each machine where the app is deployed
 # http://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
@@ -36,36 +37,36 @@ twig:
     strict_variables: "%kernel.debug%"
 
 # Doctrine Configuration
-#doctrine:
-#    dbal:
-#        driver:   pdo_mysql
-#        host:     "%database_host%"
-#        port:     "%database_port%"
-#        dbname:   "%database_name%"
-#        user:     "%database_user%"
-#        password: "%database_password%"
-#        charset:  UTF8
-#        # if using pdo_sqlite as your database driver:
-#        #   1. add the path in parameters.yml
-#        #     e.g. database_path: "%kernel.root_dir%/data/data.db3"
-#        #   2. Uncomment database_path in parameters.yml.dist
-#        #   3. Uncomment next line:
-#        #     path:     "%database_path%"
-#
-#    orm:
-#        auto_generate_proxy_classes: "%kernel.debug%"
-#        naming_strategy: doctrine.orm.naming_strategy.underscore
-#        auto_mapping: true
+doctrine:
+    dbal:
+        driver:   pdo_mysql
+        host:     "%database_host%"
+        port:     "%database_port%"
+        dbname:   "%database_name%"
+        user:     "%database_user%"
+        password: "%database_password%"
+        charset:  UTF8
+        # if using pdo_sqlite as your database driver:
+        #   1. add the path in parameters.yml
+        #     e.g. database_path: "%kernel.root_dir%/data/data.db3"
+        #   2. Uncomment database_path in parameters.yml.dist
+        #   3. Uncomment next line:
+        #     path:     "%database_path%"
 
-doctrine_mongodb:
-    connections:
-        default:
-            server: mongodb://localhost:27017
-            options: {}
-    default_database: test_database
-    document_managers:
-        default:
-            auto_mapping: true
+    orm:
+        auto_generate_proxy_classes: "%kernel.debug%"
+        naming_strategy: doctrine.orm.naming_strategy.underscore
+        auto_mapping: true
+
+#doctrine_mongodb:
+#    connections:
+#        default:
+#            server: mongodb://localhost:27017
+#            options: {}
+#    default_database: test_database
+#    document_managers:
+#        default:
+#            auto_mapping: true
 
 # Swiftmailer Configuration
 swiftmailer:
@@ -76,15 +77,11 @@ swiftmailer:
     spool:     { type: memory }
 
 vich_uploader:
-    db_driver: mongodb # orm or propel or phpcr
+    db_driver: orm #mongodb, orm or propel or phpcr
     mappings:
         user_image:
-            uri_prefix:         /images/users
-            upload_destination: %kernel.root_dir%/../web/images/users
-            
-            inject_on_load:     false
-            delete_on_update:   true
-            delete_on_remove:   true
+            uri_prefix:         %app.path.user_image%
+            upload_destination: %kernel.root_dir%/../web/uploads/images/users
 
 bazinga_hateoas:
     metadata:
@@ -123,9 +120,9 @@ fos_rest:
         include_format:       false
         
 fos_user:
-    db_driver: mongodb #orm # other valid values are 'mongodb', 'couchdb' and 'propel'
+    db_driver: orm #orm # other valid values are 'mongodb', 'couchdb' and 'propel'
     firewall_name: main
-    user_class: AppBundle\Document\User    
+    user_class: AppBundle\Entity\User    
     registration:
         confirmation:
             enabled: true

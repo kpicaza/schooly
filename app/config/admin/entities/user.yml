@@ -1,0 +1,47 @@
+# This file sets the configuration of the 'User' entity.
+#
+# NOTE: this demo application splits the backend configuration into several
+# small files for educational purposes. In your application you can put the
+# entire backend configuration in just one file.
+#
+# The configuration options are explained in detail in the bundle documentation,
+# which is published at https://github.com/javiereguiluz/EasyAdminBundle
+easy_admin:
+    entities:
+        User:
+            class: AppBundle\Entity\User
+            label: 'Users'
+            list:
+                fields: 
+                    - 'id' 
+                    - { property: 'imageName', type: 'image', base_path: %app.path.user_image% }
+                    - 'enabled'
+                    - 'username'
+                    - 'email'
+                actions:
+                    #- { name: "admin_delete_element", label: "Delete element", "type": "route" }
+            show:
+                fields: 
+                    - 'id'
+                    - { property: 'imageName', type: 'image', base_path: %app.path.user_image% }
+                    - 'enabled'
+                    - 'username'
+                    - 'email'
+            form:
+                fields: 
+                    - 'enabled'
+                    - 'username'
+                    - { property: 'plainPassword', type: 'password' }
+                    - 'email'
+                    - 'description'
+                    - 'roles'
+                    - { property: 'imageFile', type: 'vich_image' }
+            edit:
+                fields: 
+                    - 'enabled'
+                    - 'username'
+                    - { property: 'plainPassword', type: 'password', type_options: { required: false } }
+                    - 'email'
+                    - 'description'
+                    - 'roles'
+                    - { property: 'imageFile', type: 'vich_image' }

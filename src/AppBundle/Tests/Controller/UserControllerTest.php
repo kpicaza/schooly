@@ -65,7 +65,7 @@ class UserControllerTest extends WebTestCase
 
     protected function getLast($client)
     {
-        $em = $client->getContainer()->get('doctrine_mongodb')->getManager();
+        $em = $client->getContainer()->get('doctrine')->getManager();
         $user = $em->getRepository('AppBundle:User')->findOneByUsername('meco');
         
         return $user->getId();
@@ -160,7 +160,6 @@ class UserControllerTest extends WebTestCase
         $response = $this->put(sprintf(self::ROUTE, $id), array(
           'email' => 'asd' . self::MAIL,
           'description' => self::DESCRIPTION,
-          'picture' => ''
             ), true);
 
         $this->assertEquals(200, $response->getStatusCode());
