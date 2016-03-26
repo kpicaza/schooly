@@ -7,27 +7,25 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 /**
  * ProfileFormType.
  */
-class ProfileFormType extends AbstractType
+class CourseFormType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('username', Type\TextType::class)
-            ->add('email', Type\EmailType::class)
-            ->add('description', Type\EmailType::class)
+            ->add('name', Type\TextType::class)
         ;
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-          'data_class' => 'AppBundle\Form\Model\ProfileFormModel',
+          'data_class' => 'AppBundle\Form\Model\CourseFormModel',
           'csrf_protection' => false,
         ));
     }
 
     public function getBlockPrefix()
     {
-        return 'app_user_registration';
+        return 'app_course';
     }
 }

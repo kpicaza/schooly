@@ -2,7 +2,7 @@
 namespace AppBundle\Security;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use AppBundle\Model\UserInterface;
+use AppBundle\Model\User\UserInterface;
 class UserVoter extends Voter
 {
     const EDIT = 'edit';

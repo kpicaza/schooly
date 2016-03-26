@@ -2,18 +2,16 @@
 
 namespace AppBundle\Tests\Model;
 
-use AppBundle\Document\User;
-use AppBundle\Document\UserGateway;
-use AppBundle\Model\UserFactory;
-use AppBundle\Model\UserRepository;
+use AppBundle\Document\Course\Course;
+use AppBundle\Document\Course\CourseGateway;
+use AppBundle\Model\Course\CourseFactory;
+use AppBundle\Model\Course\CourseRepository;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class UserRepositoryTest extends WebTestCase
+class CourseRepositoryTest extends WebTestCase
 {
-    const USER = 'koldo';
-    const EMAIL = 'koldo@koldo.mail';
-    const PASS = 'Demo1234';
-    const DESC = 'Hola mondo';
+
+    const NAME = 'Test course';
 
     /**
      * @var UserGateway
@@ -31,31 +29,45 @@ class UserRepositoryTest extends WebTestCase
     public function setUp()
     {
         parent::setUp();
-        $gatewayClassname = 'AppBundle\Document\UserGateway';
+        $gatewayClassname = 'AppBundle\Document\Course\CourseGateway';
         $this->gateway = $this->prophesize($gatewayClassname);
-        $this->factory = new UserFactory();
-        $this->repository = new UserRepository($this->gateway->reveal(), $this->factory);
+        $this->factory = new CourseFactory();
+        $this->repository = new CourseRepository($this->gateway->reveal(), $this->factory);
     }
 
-    public function testUser()
+    public function testCourse()
     {
-        $user = new User();
+        $course = new Course();
     }
-    
+
     public function testFindOneByWithParams()
     {
-        $fakeUser = new User();
-        $fakeUser = $fakeUser->fromArray(array('username' => self::USER, 'email' => self::EMAIL, 'password' => self::PASS, 'description' => self::DESC));
+        $fakeCourse = new Course();
+        $fakeCourse = $fakeCourse->setName(self::NAME);
 
-        $this->gateway->findOneBy(array('username' => self::USER), array())->willReturn($fakeUser);
-        $fakeUser = $this->factory->makeOne($fakeUser);
+        $this->gateway->findOneBy(array('name' => self::NAME), array())->willReturn($fakeCourse);
+        $fakeCourse = $this->factory->makeOne($fakeCourse);
 
-        $user = $this->repository->findOneBy(array('username' => self::USER));
+        $course = $this->repository->findOneBy(array('name' => self::NAME));
 
-        $this->assertTrue($user instanceof User);
-        $this->assertEquals($user->getUsername(), $fakeUser->getUsername());
-        $this->assertEquals($user->getEmail(), $fakeUser->getEmail());
-        $this->assertEquals($user->getDescription(), $fakeUser->getDescription());
-        $this->assertEquals($user->getUsername(), $user->__toString());
+        $this->assertTrue($course instanceof Course);
+        $this->assertEquals($course->getName(), $fakeCourse->getName());
     }
+
+    public function testFindByWithParams()
+    {
+        $fakeCourse = new Course();
+        $fakeCourse = $fakeCourse->setName(self::NAME);
+
+        $this->gateway->findBy(array('name' => self::NAME), null, null, null)->willReturn(array($fakeCourse));
+        $fakeCourses = $this->factory->makeAll(array($fakeCourse));
+
+        $courses = $this->repository->findBy(array('name' => self::NAME), null, null, null);
+        foreach ($courses as $key => $course) {
+
+            $this->assertTrue($course instanceof Course);
+            $this->assertEquals($course->getName(), $fakeCourses[$key]->getName());
+        }
+    }
+
 }

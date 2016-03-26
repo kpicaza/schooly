@@ -17,6 +17,11 @@ app_user:
     type: rest
     prefix: /api
     resource: AppBundle\Controller\UserController
+       
+app_course:
+    type: rest
+    prefix: /api
+    resource: AppBundle\Controller\CourseController
 
 # app/config/routing.yml
 fos_user_security:

@@ -26,6 +26,11 @@
         <whitelist>
             <directory>../src</directory>
             <exclude>
+                <!-- If you are using Doctrine ORM coment aut this line
+                    <directory>../src/*Bundle/Document</directory>
+                -->
+                <!-- If you are using Doctrine ORM coment the next line -->
+                <directory>../src/*Bundle/Entity</directory>
                 <directory>../src/*Bundle/Resources</directory>
                 <directory>../src/*Bundle/Tests</directory>
                 <directory>../src/*/*Bundle/Resources</directory>

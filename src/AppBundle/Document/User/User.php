@@ -2,9 +2,9 @@
 
 // src/AppBundle/Document/User.php
 
-namespace AppBundle\Document;
+namespace AppBundle\Document\User;
 
-use AppBundle\Model\UserInterface;
+use AppBundle\Model\User\UserInterface;
 use FOS\UserBundle\Document\User as BaseUser;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use Doctrine\ODM\MongoDB\Mapping\Annotations\UniqueIndex;
@@ -13,7 +13,7 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations\UniqueIndex;
 /**
  * User.
  * 
- * @MongoDB\Document(repositoryClass="AppBundle\Document\UserGateway")
+ * @MongoDB\Document(repositoryClass="AppBundle\Document\User\UserGateway")
  */
 class User extends BaseUser implements UserInterface
 {
@@ -223,18 +223,6 @@ class User extends BaseUser implements UserInterface
     public function getEnabled()
     {
         return $this->enabled;
-    }
-
-    /**
-     * Set salt
-     *
-     * @param string $salt
-     * @return self
-     */
-    public function setSalt($salt)
-    {
-        $this->salt = $salt;
-        return $this;
     }
 
     /**

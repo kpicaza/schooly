@@ -1,31 +1,48 @@
 <?php
 
-namespace AppBundle\Model;
+namespace AppBundle\Model\Course;
 
-use AppBundle\Model\UserInterface;
-use AppBundle\Model\UserFactoryInterface;
+use AppBundle\Model\Course\CourseInterface;
+use AppBundle\Model\FactoryInterface;
 /**
- * UserFactory implements UserFactoryInterface.
+ * Factory implements FactoryInterface.
  */
-class UserFactory implements UserFactoryInterface
+class CourseFactory implements FactoryInterface
 {
     /**
-     * @param \AppBundle\Entity\User $rawUser
-     *
-     * @return \AppBundle\Entity\User
+     * @param array $rawCourses
+     * @param array $params
+     * @return array
      */
-    public function makeOne(UserInterface $rawUser)
+    public function makeAll(array $rawCourses, array $params = array())
     {
-        return $this->make($rawUser);
+        $courses = array();
+        
+        foreach ($rawCourses as $rawCourse) {
+            $courses[] = $this->make($rawCourse, $params);
+        }
+        
+        return $courses;
     }
     /**
-     * @param \AppBundle\Entity\User $rawUser
-     *
-     * @return \AppBundle\Entity\User
+     * @param type $rawUser
+     * @return type
      */
-    public function make(UserInterface $rawUser)
+    public function makeOne($rawCourse, array $params = array())
     {
+        return $this->make($rawCourse, $params);
+    }
+    /**
+     * @param type $rawUser
+     * @return type
+     */
+    public function make($rawCourse, array $params = array())
+    {
+        if (!$rawCourse instanceof CourseInterface) {
+            return null;
+        }
+        
         // You can format object, in this case we left it to return as raw object, feedback is welcome!
-        return $rawUser;
+        return $rawCourse;
     }
 }

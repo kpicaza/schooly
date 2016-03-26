@@ -1,18 +1,19 @@
 <?php
-namespace AppBundle\Handler;
-use AppBundle\Model\UserRepository;
-use AppBundle\Model\UserInterface;
+namespace AppBundle\Handler\User;
+use AppBundle\Model\User\UserRepository;
+use AppBundle\Model\User\UserInterface;
 use AppBundle\Form\Type\RegistrationFormType;
 use AppBundle\Form\Model\RegistrationFormModel;
 use AppBundle\Form\Type\ProfileFormType;
 use AppBundle\Form\Model\ProfileFormModel;
 use AppBundle\Form\Model\UserFormModelInterface;
+use AppBundle\Handler\ApiHandlerInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormError;
 /**
  * ApiUserHandler.
  */
-class ApiUserHandler implements ApiUserHandlerInterface
+class ApiUserHandler implements ApiHandlerInterface
 {
     /**
      * @var UserRepository
@@ -34,9 +35,21 @@ class ApiUserHandler implements ApiUserHandlerInterface
         $this->formFactory = $formFactory;
     }
     /**
+     * Get object list from repository.
+     * 
+     * @param array $criteria
+     * @param array $sort
+     * @param integer $limit
+     * @param integer $skip
+     */
+    public function getList(array $criteria, array $sort = null, $limit = null, $skip = null)
+    {
+        return $this->repository->findBy($criteria, $sort , $limit , $skip );
+    }
+    /**
      * Get user from repository.
      * 
-     * @param User $user
+     * @param integer $id
      *
      * @return User
      */
@@ -96,7 +109,7 @@ class ApiUserHandler implements ApiUserHandlerInterface
     /**
      * Delete User.
      * 
-     * @param User $user
+     * @param $id
      */
     public function delete($id)
     {

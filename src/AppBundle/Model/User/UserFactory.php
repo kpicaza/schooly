@@ -1,29 +1,42 @@
 <?php
 
-namespace AppBundle\Model;
+namespace AppBundle\Model\User;
 
-use AppBundle\Model\UserInterface;
-use AppBundle\Model\UserFactoryInterface;
+use AppBundle\Model\User\UserInterface;
+use AppBundle\Model\FactoryInterface;
 /**
- * UserFactory implements UserFactoryInterface.
+ * Factory implements FactoryInterface.
  */
-class UserFactory implements UserFactoryInterface
+class UserFactory implements FactoryInterface
 {
     /**
-     * @param \AppBundle\Entity\User $rawUser
-     *
-     * @return \AppBundle\Entity\User
+     * @param array $rawUsers
+     * @param array $params
+     * @return array
      */
-    public function makeOne(UserInterface $rawUser)
+    public function makeAll(array $rawUsers, array $params = array())
     {
-        return $this->make($rawUser);
+        $users = array();
+        
+        foreach ($rawUsers as $rawUser) {
+            $users[] = $this->make($rawUser, $params);
+        }
+        
+        return $users;
     }
     /**
-     * @param \AppBundle\Entity\User $rawUser
-     *
-     * @return \AppBundle\Entity\User
+     * @param type $rawUser
+     * @return type
      */
-    public function make(UserInterface $rawUser)
+    public function makeOne($rawUser, array $params = array())
+    {
+        return $this->make($rawUser, $params);
+    }
+    /**
+     * @param type $rawUser
+     * @return type
+     */
+    public function make($rawUser, array $params = array())
     {
         // You can format object, in this case we left it to return as raw object, feedback is welcome!
         return $rawUser;

@@ -2,10 +2,10 @@
 
 namespace AppBundle\Tests\Model;
 
-use AppBundle\Document\User;
-use AppBundle\Document\UserGateway;
-use AppBundle\Model\UserFactory;
-use AppBundle\Model\UserRepository;
+use AppBundle\Document\User\User;
+use AppBundle\Document\User\UserGateway;
+use AppBundle\Model\User\UserFactory;
+use AppBundle\Model\User\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class UserRepositoryTest extends WebTestCase
@@ -31,7 +31,7 @@ class UserRepositoryTest extends WebTestCase
     public function setUp()
     {
         parent::setUp();
-        $gatewayClassname = 'AppBundle\Document\UserGateway';
+        $gatewayClassname = 'AppBundle\Document\User\UserGateway';
         $this->gateway = $this->prophesize($gatewayClassname);
         $this->factory = new UserFactory();
         $this->repository = new UserRepository($this->gateway->reveal(), $this->factory);
@@ -57,5 +57,11 @@ class UserRepositoryTest extends WebTestCase
         $this->assertEquals($user->getEmail(), $fakeUser->getEmail());
         $this->assertEquals($user->getDescription(), $fakeUser->getDescription());
         $this->assertEquals($user->getUsername(), $user->__toString());
+        $this->assertEquals($user->getEnabled(), $fakeUser->getEnabled());
+        $this->assertEquals($user->getLocked(), $fakeUser->getLocked());
+        $this->assertEquals($user->getExpired(), $fakeUser->getExpired());
+        $this->assertEquals($user->getExpiresAt(), $fakeUser->getExpiresAt());
+        $this->assertEquals($user->getCredentialsExpired(), $fakeUser->getCredentialsExpired());
+        $this->assertEquals($user->getCredentialsExpireAt(), $fakeUser->getCredentialsExpireAt());
     }
 }

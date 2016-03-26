@@ -1,20 +1,20 @@
 <?php
 namespace AppBundle\Model;
 /**
- * UserFactoryInterface.
+ * FactoryInterface.
  */
-interface UserFactoryInterface
+interface FactoryInterface
 {
     /**
-     * @param \AppBundle\Model\UserInterface $rawUser
-     *
-     * @return \AppBundle\Model\UserInterface
+     * @param array $array
      */
-    public function makeOne(UserInterface $rawUser);
+    public function makeAll(array $array);
     /**
-     * @param \AppBundle\Model\UserInterface $rawUser
-     *
-     * @return \AppBundle\Model\UserInterface
+     * @param type $raw
      */
-    public function make(UserInterface $rawUser);
+    public function makeOne($raw);
+    /**
+     * @param type $raw
+     */
+    public function make($raw);
 }

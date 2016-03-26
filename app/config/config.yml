@@ -115,7 +115,7 @@ fos_user:
     db_driver: mongodb 
     # other valid values are 'mongodb', 'couchdb' and 'propel'
     firewall_name: main
-    user_class: AppBundle\Document\User
+    user_class: AppBundle\Document\User\User
     registration:
         confirmation:
             enabled: true

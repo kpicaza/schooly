@@ -1,24 +1,33 @@
 <?php
 namespace AppBundle\Handler;
 /**
- * ApiHandleInterface.
+ * ApiHandlerInterface.
  */
-interface ApiUserHandlerInterface
+interface ApiHandlerInterface
 {
     /**
-     * Get user from repository.
+     * Get object list from repository.
      * 
-     * @param User $user
+     * @param array $criteria
+     * @param array $sort
+     * @param integer $limit
+     * @param integer $skip
+     */
+    public function getList(array $criteria, array $sort = null, $limit = null, $skip = null);
+    /**
+     * Get object from repository.
+     * 
+     * @param integer $id
      */
     public function get($id);
     /**
-     * Insert User to repository.
+     * Insert object to repository.
      * 
      * @param array $params
      */
     public function post(array $params);
     /**
-     * Update User from repository.
+     * Update object from repository.
      * 
      * @param $id
      * @param array $params

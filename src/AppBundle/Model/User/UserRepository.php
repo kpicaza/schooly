@@ -1,36 +1,43 @@
 <?php
-
-namespace AppBundle\Model;
-
-use AppBundle\Model\UserGatewayInterface;
-use AppBundle\Model\UserFactoryInterface;
-
+namespace AppBundle\Model\User;
+use AppBundle\Model\User\UserGatewayInterface;
+use AppBundle\Model\FactoryInterface;
 /**
  * UserRepository.
  */
 class UserRepository
 {
-
     /**
-     * @var \AppBundle\Model\UserGatewayInterface
+     * @var \AppBundle\Model\User\UserGatewayInterface
      */
     private $gateway;
-
     /**
-     * @var \AppBundle\Model\UserFactoryInterface
+     * @var \AppBundle\Model\FactoryInterface
      */
     private $factory;
-
     /**
-     * @param \AppBundle\Model\UserGatewayInterface $gateway
-     * @param \AppBundle\Model\UserFactoryInterface $factory
+     * @param \AppBundle\Model\User\UserGatewayInterface $gateway
+     * @param \AppBundle\Model\FactoryInterface $factory
      */
-    public function __construct(UserGatewayInterface $gateway, UserFactoryInterface $factory)
+    public function __construct(UserGatewayInterface $gateway, FactoryInterface $factory)
     {
         $this->gateway = $gateway;
         $this->factory = $factory;
     }
-
+    /**
+     * 
+     * @param array $criteria
+     * @param array $sort
+     * @param integer $limit
+     * @param integer $skip
+     * @return array
+     */
+    public function findBy(array $criteria = array(), $sort = null, $limit = null, $skip = null)
+    {
+        $rawUsers = $this->gateway->findBy($criteria, $sort, $limit, $skip);
+        
+        return $this->factory->makeAll($rawUsers);
+    }
     /**
      * @param User|int $id
      *
@@ -38,9 +45,10 @@ class UserRepository
      */
     public function find($id)
     {
-        return $this->gateway->find($id);
+        $rawUser = $this->gateway->find($id);
+        
+        return $this->factory->makeOne($rawUser);
     }
-
     /**
      * @param array $criteria
      * @param array $orderBy
@@ -55,17 +63,18 @@ class UserRepository
         if (null === $user) {
             return null;
         }
+        
         return $this->factory->makeOne($user);
     }
-
     /**
      * @return User
      */
     public function findNew()
     {
-        return $this->gateway->findNew();
+        $rawUser = $this->gateway->findNew();
+        
+        return $this->factory->makeOne($rawUser);
     }
-
     /**
      * @param User $user
      *
@@ -74,9 +83,9 @@ class UserRepository
     public function insert(UserInterface $user)
     {
         $rawUser = $this->gateway->apiInsert($user);
+        
         return $this->factory->makeOne($rawUser);
     }
-
     /**
      * 
      */
@@ -84,7 +93,6 @@ class UserRepository
     {
         return $this->gateway->update();
     }
-
     /**
      * @param $id
      */
@@ -92,7 +100,6 @@ class UserRepository
     {
         $this->gateway->remove($id);
     }
-
     /**
      * @param $id
      *

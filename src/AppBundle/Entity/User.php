@@ -4,7 +4,7 @@
 
 namespace AppBundle\Entity;
 
-use AppBundle\Model\UserInterface;
+use AppBundle\Model\User\UserInterface;
 use FOS\UserBundle\Model\User as BaseUser;
 use Doctrine\ORM\Mapping as ORM;
 

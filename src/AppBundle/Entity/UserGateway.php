@@ -1,7 +1,7 @@
 <?php
 namespace AppBundle\Entity;
-use AppBundle\Model\UserInterface;
-use AppBundle\Model\UserGatewayInterface;
+use AppBundle\Model\User\UserInterface;
+use AppBundle\Model\User\UserGatewayInterface;
 use Doctrine\ORM\EntityRepository;
 /**
  * UserGateway.

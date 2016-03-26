@@ -14,7 +14,7 @@ services:
 #        arguments: [@fos_user.entity_manager, %gesdinet.jwtrefreshtoken.refresh_token.class%]
 
     app.user_factory:
-        class: AppBundle\Model\UserFactory
+        class: AppBundle\Model\User\UserFactory
 
 #    app.user_gateway:
 #        class: AppBundle\Entity\UserGateway
@@ -22,15 +22,34 @@ services:
 #        arguments: [ "AppBundle:User" ]
 
     app.user_gateway:
-        class: AppBundle\Document\UserGateway
+        class: AppBundle\Document\User\UserGateway
 #        factory: [ "@doctrine_mongodb", getRepository]
         factory_service: doctrine_mongodb
         factory_method:  getRepository
-        arguments: [ "AppBundle:User" ]
+        arguments: [ AppBundle\Document\User\User ]
 
     app.user_repository:
-        class: AppBundle\Model\UserRepository
+        class: AppBundle\Model\User\UserRepository
         arguments: [ "@app.user_gateway", "@app.user_factory" ]
+
+    app.course_factory:
+        class: AppBundle\Model\Course\CourseFactory
+
+#    app.user_gateway:
+#        class: AppBundle\Entity\UserGateway
+#        factory: [ "@doctrine", getRepository]
+#        arguments: [ "AppBundle:User" ]
+
+    app.course_gateway:
+        class: AppBundle\Document\Course\CourseGateway
+#        factory: [ "@doctrine_mongodb", getRepository]
+        factory_service: doctrine_mongodb
+        factory_method:  getRepository
+        arguments: [ AppBundle\Document\Course\Course ]
+
+    app.course_repository:
+        class: AppBundle\Model\Course\CourseRepository
+        arguments: [ "@app.course_gateway", "@app.course_factory" ]
 
     security.access.user_voter:
         class:      AppBundle\Security\UserVoter
@@ -39,6 +58,10 @@ services:
            - { name: security.voter }
 
     app.api_user_handler: 
-        class: AppBundle\Handler\ApiUserHandler
+        class: AppBundle\Handler\User\ApiUserHandler
         arguments: [ "@app.user_repository", "@form.factory" ]
+
+    app.api_course_handler: 
+        class: AppBundle\Handler\Course\ApiCourseHandler
+        arguments: [ "@app.course_repository", "@form.factory" ]
         
