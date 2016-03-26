@@ -2,7 +2,7 @@
 
 // src/AppBundle/Entity/User.php
 
-namespace AppBundle\Entity;
+namespace AppBundle\Entity\User;
 
 use AppBundle\Model\UserInterface;
 use FOS\UserBundle\Model\User as BaseUser;
@@ -16,7 +16,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity
  * @Vich\Uploadable
  * @ORM\Table(name = "user")
- * @ORM\Entity(repositoryClass="AppBundle\Entity\UserGateway")
+ * @ORM\Entity(repositoryClass="AppBundle\Entity\User\UserGateway")
  * @Hateoas\Relation(
  *      "get_user",
  *      href = @Hateoas\Route(
@@ -217,7 +217,6 @@ class User extends BaseUser implements UserInterface
     public function __construct($username = null, $email = null, $pass = null)
     {
         parent::__construct();
-
         $this->username = $username;
         $this->email = $email;
         $this->password = $pass;
@@ -286,6 +285,30 @@ class User extends BaseUser implements UserInterface
             $this->updatedAt = new \DateTime('now');
         }
 
+        return $rawUser;
+    }
+
+    /**
+     * Get enabled
+     *
+     * @return boolean
+     */
+    public function getEnabled()
+    {
+        return $this->enabled;
+    }
+
+    /**
+     * Set salt
+     *
+     * @param string $salt
+     *
+     * @return User
+     */
+    public function setSalt($salt)
+    {
+        $this->salt = $salt;
+
         return $this;
     }
 
@@ -350,6 +373,56 @@ class User extends BaseUser implements UserInterface
         }
         
         return $this;
+    }
+
+    /**
+     * Get locked
+     *
+     * @return boolean
+     */
+    public function getLocked()
+    {
+        return $this->locked;
+    }
+
+    /**
+     * Get expired
+     *
+     * @return boolean
+     */
+    public function getExpired()
+    {
+        return $this->expired;
+    }
+
+    /**
+     * Get expiresAt
+     *
+     * @return \DateTime
+     */
+    public function getExpiresAt()
+    {
+        return $this->expiresAt;
+    }
+
+    /**
+     * Get credentialsExpired
+     *
+     * @return boolean
+     */
+    public function getCredentialsExpired()
+    {
+        return $this->credentialsExpired;
+    }
+
+    /**
+     * Get credentialsExpireAt
+     *
+     * @return \DateTime
+     */
+    public function getCredentialsExpireAt()
+    {
+        return $this->credentialsExpireAt;
     }
 
 }

@@ -1,36 +1,31 @@
 <?php
 namespace AppBundle\Form\Type;
-
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-
 /**
- * RegistrationFormType.
+ * ProfileFormType.
  */
-class RegistrationFormType extends AbstractType
+class CourseFormType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('username', Type\TextType::class)
-            ->add('email', Type\EmailType::class)
-            ->add('plainPassword', Type\PasswordType::class)
-            ->add('password', Type\PasswordType::class)
+            ->add('name', Type\TextType::class)
         ;
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => 'AppBundle\Form\Model\RegistrationFormModel',
-            'csrf_protection' => false,
+          'data_class' => 'AppBundle\Form\Model\CourseFormModel',
+          'csrf_protection' => false,
         ));
     }
 
     public function getBlockPrefix()
     {
-        return 'app_user_registration';
+        return 'app_course';
     }
 }

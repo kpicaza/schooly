@@ -8,16 +8,21 @@ api_login_check:
 gesdinet_jwt_refresh_token:
     path:     /api/token/refresh
     defaults: { _controller: gesdinet.jwtrefreshtoken:refresh }
-    
+
 NelmioApiDocBundle:
     resource: "@NelmioApiDocBundle/Resources/config/routing.yml"
     prefix:   /api/doc
-    
+       
 app_user:
     type: rest
     prefix: /api
     resource: AppBundle\Controller\UserController
-    
+       
+app_course:
+    type: rest
+    prefix: /api
+    resource: AppBundle\Controller\CourseController
+
 # app/config/routing.yml
 fos_user_security:
     resource: "@FOSUserBundle/Resources/config/routing/security.xml"

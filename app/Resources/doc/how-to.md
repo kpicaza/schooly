@@ -1,13 +1,21 @@
- Práctica Symfony - Rest API, Oauth2, JWT, repository pattern.
-===============================================================
+![ ](/home/kpicaza/server/educaedu/practica-final/app/Resources/doc/irontec.png)
+
+# Rest API, JWT, Repository Pattern con TDD.
+
+Por: Koldo Picaza
+
+@kpikaza
 
 
-## Aplicación de práctica:
+# Rest API, JWT, Repository Pattern con TDD.
+
+
+# 1. Aplicación de práctica:
 
 Lo importante en este caso no es desarrollar una lógica extraordinaria, el objetivo reside en comprender las diferentes secciones que hemos analizado 
 durante la parte teórica.
 
-La aplicación consiste en un sistema de registro/login con autenticación JWT via Rest, siguiendo el patrón repositorio, aplicando el principio de 
+La aplicación consiste en un sistema de registro/login con autenticación JWT vía Rest, siguiendo el patrón repositorio, aplicando el principio de 
 inversión de dependencias y programando dirigidos por tests.
 
 Primero definiremos los user storys.
@@ -24,6 +32,9 @@ Al final tendremos un sistema de usuarios independiente del motor de base de dat
 cuarquier aplicación creada con frameworks de frontend como angular o ember
 
 Una vez definidos los `user stories`, pasamos a diferenciar la distintas parte de la aplicación en su conjunto:
+
+-----------------------------------
+
 
 ### Entidades
 
@@ -80,13 +91,13 @@ Una vez definidos los `user stories`, pasamos a diferenciar la distintas parte d
                 "nelmio/api-doc-bundle": "^2.11"
 
 
-## Parte 1, Bundles contribuidos:
+# 2. Bundles contribuidos:
 
 Instalar Symfony 2.8.* standard edition
 
     composer create-project symfony/framework-standard-edition practica "2.8.*"
 
-podemos comprobar la version que hemos descargado
+podemos comprobar la versión que hemos descargado
 
     php app/console --version
     Symfony version 2.8.3 - app/dev/debug
@@ -94,6 +105,7 @@ podemos comprobar la version que hemos descargado
 Iremos instalando y configurando, uno por uno, los módulos que necesitaremos. Para instalar el serializer 
 necesitamos subir la versión de php en el composer.json antes de instalar el nuevo bundle.
 
+```json
     // composer.json
         ...
         "config": {
@@ -103,6 +115,7 @@ necesitamos subir la versión de php en el composer.json antes de instalar el nu
             }
         },
         ...
+```
 
 Ahora si, podemos instalar el bundle.
 
@@ -110,6 +123,7 @@ Ahora si, podemos instalar el bundle.
 
 Lo actvamos en el kernel
 
+```php
     // app/AppKernel.php
     class AppKernel extends Kernel
     {
@@ -119,9 +133,10 @@ Lo actvamos en el kernel
             $bundles = array(
               ...
               new JMS\SerializerBundle\JMSSerializerBundle(),
+```
 
 JmsSerializerBundle no necesita ninguna configuración inicial para funcionar, para más detalle la 
-[documentacción del bundle](http://jmsyst.com/bundles/JMSSerializerBundle/master/configuration) es bastante detallada.
+[documentación del bundle](http://jmsyst.com/bundles/JMSSerializerBundle/master/configuration) es bastante detallada.
 
 El siguiente bundle que instalaremos es el Rest Bundle de Friends of symfony 
 
@@ -129,11 +144,16 @@ El siguiente bundle que instalaremos es el Rest Bundle de Friends of symfony
 
 Lo activamos en el kernel y pasamos a la configuración
 
+```yaml
     # app/config/config.ymls
     ...
     fos_rest:
         param_fetcher_listener: true
         disable_csrf_role: ROLE_USER
+        routing_loader:
+            default_format:       json
+            include_format:       false
+```
 
 Con esta configuración básica nos servirá, para más detalle sobre las configuraciones podemos mira la [documentación del bundle](http://symfony.com/doc/master/bundles/FOSRestBundle/configuration-reference.html).
 
@@ -143,8 +163,10 @@ Lo instalamos del modo habitual:
 
     composer require nelmio/cors-bundle:^1.4
 
-Y pasamos a configurarlo, es conveniente repasar el [README](https://github.com/nelmio/NelmioCorsBundle) del bundle para revisar los parametros de configuración.
+Y pasamos a configurarlo, es conveniente repasar el [README](https://github.com/nelmio/NelmioCorsBundle) del bundle para revisar los parámetros de configuración.
 
+```yaml
+    # app/config/config.yml
     nelmio_cors:
         defaults:
             allow_credentials: false
@@ -161,24 +183,28 @@ Y pasamos a configurarlo, es conveniente repasar el [README](https://github.com/
                 allow_headers: ['*']
                 allow_methods: ['POST', 'PUT', 'GET', 'DELETE']
                 max_age: 3600
+```
 
 Vamos con otro bundle de friends of symfony, este es uno de los bundle más utilizados por la comunidad de symfony, sin duda el principal en gestión de usuarios.
 
     composer require friendsofsymfony/user-bundle:^1.3
 
-Este módulo no nos da todo echo, pero nos facilita mucha lógica en la gestion de usuarios, según el caso puede ser muy util.
-De momento dejaremos la configuración basica con Doctrine ORM, pero siguiendo el patrón repositorio, abstraeremos casi completamente 
-nuestra aplicación del motor de base de dato que bayamos a utilizar, el objetivo es no depender de ningún motor de bbdd en particular.
+Este módulo no nos da todo echo, pero nos facilita mucha lógica en la gestión de usuarios, según el caso puede ser muy útil.
+De momento dejaremos la configuración básica con Doctrine ORM, pero siguiendo el patrón repositorio, abstraeremos casi completamente 
+nuestra aplicación del motor de base de dato que vayamos a utilizar, el objetivo es no depender de ningún motor de bbdd en particular.
 
 Activamos el bundle en el kernel y vamos a las configuraciones, primero activamos las traducciones
 
-    #app/config/config.yml
+```yaml
+    # app/config/config.yml
     ...
     framework:
         translator: ~
+```
 
 Ahora necesitamos crear la Entidad Usuario, en el primer caso la crearemos en Mysql con Doctrine ORM, el bundle nos permite diferentes tipos como veremos más adelante.
 
+```php
     <?php
 
     // src/AppBundle/Entity/User.php
@@ -329,12 +355,14 @@ Ahora necesitamos crear la Entidad Usuario, en el primer caso la crearemos en My
          * @var \DateTime
          */
         protected $credentialsExpireAt;
+```
 
-Como podeís ver hemos llamado a la clase `User` esto es porque a nuestra aplicación no tiene porque importarle de donde vengan los usuarios.
+Como podéis ver hemos llamado a la clase `User` esto es porque a nuestra aplicación no tiene porque importarle de donde vengan los usuarios.
 Hemos mapeado los campos de la tabla user mediante las anotaciones de doctrine. 
 
 Actualizamos nuestro security.yml
 
+```yaml
     # app/config/security.yml
     security:
         encoders:
@@ -362,9 +390,11 @@ Actualizamos nuestro security.yml
             - { path: ^/register, role: IS_AUTHENTICATED_ANONYMOUSLY }
             - { path: ^/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY }
             - { path: ^/admin/, role: ROLE_ADMIN }
+```
 
-y en el config selecionamos el tipo de base de datos, le asignamos la clase usuario, el firewall y activamos la confirmación por email(opcional).
+y en el config seleccionamos el tipo de base de datos, le asignamos la clase usuario, el firewall y activamos la confirmación por email(opcional).
 
+```yaml
     # app/config/config.yml
     fos_user:
         db_driver: orm 
@@ -374,6 +404,15 @@ y en el config selecionamos el tipo de base de datos, le asignamos la clase usua
         registration:
             confirmation:
                 enabled: true
+```
+
+En el config_dev haremos que todos los email nos lleguen a nosotros mismos
+
+```yaml
+    # app/config/config_dev.yml
+    swiftmailer:
+        delivery_address: 'tu@email.com'
+```
 
 En el config_dev haremos que todos los email nos lleguen a nosotros mismos
 
@@ -384,6 +423,7 @@ En el config_dev haremos que todos los email nos lleguen a nosotros mismos
 
 Importamos las rutas
 
+```yaml
     # app/config/routing.yml
     fos_user_security:
         resource: "@FOSUserBundle/Resources/config/routing/security.xml"
@@ -403,11 +443,11 @@ Importamos las rutas
     fos_user_change_password:
         resource: "@FOSUserBundle/Resources/config/routing/change_password.xml"
         prefix: /profile
-    
+```
 
 En este caso necesitaremos una bbdd para persistir nuestras tablas.
 
-Primero generamos los getters y setters de nuestras entidades.
+Primero generamos los `getters` y `setters` de nuestras entidades.
 
     php app/console doctrine:generate:entities AppBundle
 
@@ -419,7 +459,7 @@ Y generamos el schema
 
     php app/console doctrine:schema:create
 
-Ahora generamos un asuario administrador con los comandos que nos provee fos user bundle
+Ahora generamos un usuario administrador con los comandos que nos provee fos user bundle
 
     php app/console fos:user:create admin admin@admin.mail --super-admin ROLE_SUPER_ADMIN
     php app/console fos:user:change-password admin Demo1234
@@ -442,7 +482,7 @@ podemos comprobar las rutas que nos ha generado
     fos_user_resetting_reset            GET|POST   ANY      ANY    /resetting/reset/{token}           
     fos_user_change_password            GET|POST   ANY      ANY    /profile/change-password   
 
-Ahora descargaremos los bundles para implementar la autorización JWT
+Ahora descargaremos el bundle para implementar la autorización JWT
 
     composer require lexik/jwt-authentication-bundle:^1.3
 
@@ -457,41 +497,50 @@ También las de test
     openssl genrsa -out app/var/jwt/private-test.pem -aes256 4096
     openssl rsa -pubout -in app/var/jwt/private-test.pem -out app/var/jwt/public-test.pem
 
-Ahora deberíamos añadir las rutas al par de claves, como variables de entorno(Recordemos las buenas prácticas, la información sensible 
-es mejor tenerla fuera de nuestra aplicación). Si estamos utilizando el server que monta symfony con el comando server:run los meteremos en el `parameters.yml`
+Ahora deberíamos añadir las rutas al par de claves, como variables de entorno. Si estamos utilizando el server que monta 
+symfony con el comando server:run los meteremos en el `parameters.yml`
 
-Primero definimos los parametros necesarios en el `parameters.yml`
+Primero definimos los parámetros necesarios en el `parameters.yml`
 
+```yaml
     # app/config/parameters.yml.dist
     jwt_private_key_path: %kernel.root_dir%/var/jwt/private.pem   # ssh private key path
     jwt_public_key_path:  %kernel.root_dir%/var/jwt/public.pem    # ssh public key path
     jwt_key_pass_phrase:  ''                                      # ssh key pass phrase
     jwt_token_ttl:        86400
+```
 
+```yaml
     # app/config/parameters.yml
     jwt_private_key_path: '%kernel.root_dir%/var/jwt/private.pem'
     jwt_public_key_path: '%kernel.root_dir%/var/jwt/public.pem'
     jwt_key_pass_phrase: demo
     jwt_token_ttl: ~
+```
 
-Ponemos los parametros definidos en sus respectivas configuraciones, primero en test
+Ponemos los parámetros definidos en sus respectivas configuraciones, primero en test
 
+```yaml
     # app/config/config_test.yml
     lexik_jwt_authentication:
         private_key_path:   %kernel.root_dir%/var/jwt/private-test.pem
         public_key_path:    %kernel.root_dir%/var/jwt/public-test.pem
+```
 
 Despues en el config general.
 
+```yaml
     # app/config/config.yml
     lexik_jwt_authentication:
         private_key_path: %jwt_private_key_path%
         public_key_path:  %jwt_public_key_path%
         pass_phrase:      %jwt_key_pass_phrase%
         token_ttl:        %jwt_token_ttl%
+```
 
 Pasamos a actualizar el `security.yml`
 
+```yaml
     # app/config/security.yml
     ...
         firewalls:
@@ -515,45 +564,28 @@ Pasamos a actualizar el `security.yml`
             ...
             - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
             - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+```
 
-Imporamos las rutas en el `eouting.yml`
+Importamos las rutas en el `routing.yml`
 
+```yaml
     # app/config/routing.yml
     api_login_check:
         path: /api/login_check
+```
 
-Si utilizamos apache, borrariamos las rutas a las claves privadas, por lo menos de producción y las añadimos al 
-virtualhost, para mejor rendimiento deberíamos pasar el .htaccess completo
+Actualizamos el `parameters.yml`
 
-    <VirtualHost *:80>
-
-        ServerName dev.site.com
-
-        DocumentRoot /var/www/symfony2/web
-        <Directory /var/www/symfony2/web>
-            AllowOverride All
-            Require all granted
-        </Directory>
-
-        SetEnv  PRIVATE_KEY_PAIR   /var/jwt/private.pem
-        SetEnv  PUBLIC_KEY_PAIR    /var/jwt/public.pem
-
-        RewriteEngine On
-        RewriteCond %{HTTP:Authorization} ^(.*)
-        RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
-
-    </VirtualHost>
-
-Actualizamos el `parameter.yml`
-
+```yaml
     # app/config/parameters.yml.dist
     jwt_private_key_path: %kernel.root_dir%%private.key.pair%   # ssh private key path
     jwt_public_key_path:  %kernel.root_dir%%public.key.pair%    # ssh public key path
+```
 
 Comprobamos que todo funciona, primero generamos el token JWT
 
     curl -X POST http://127.0.0.1:8000/api/login_check -d _username=admin -d _password=Demo1234
-    {"token":"eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXUyJ9.eyJleHAiOjE0NTc0NzQwMTAsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOiIxNDU3Mzg3NjEwIn0.jVeYIiZL7B50MVu-luDVJpwdkQdo7cI3rsBbZkCeDzYdLrQTv9HBVbUBzqd-e2GliOt9rThFJZd8HlmJtUcebiFxebN_fuCE3sjHtH3cg7Zu3JJt2J_Zyv8c1ANB5h7sftlbBoksfXoMO5q6VLckXPNeY9V1T3Fyq2u4jyntx4DtdGI6A-FUjhrICWhUFwZlrwURsH8Qj8bxYNC9A2xmns0_PNlIKHruRRh6Lo-dWYTTYpKanfj4XNwS_Xew9f0UDWcKAUYoBCxwdqwNSO0UAdFbao-R8dgvt9ww23iC1T0so2w1tEMuaIKfWQ7a3kI87ZWyCbjNMuFxgO47mDs35NmxtnXhJMe0LO3kpGM2sEoG5DxYA7xxmk-PHtp02-t-V4uLfbA4TyK4uKon7H8ZYFc5JnSIz1i-Ps6ETLWRSnfw9qPiXlkz9dqXATsXFsMGACNpcCwtmq0eSSkp4AB2BWEXyHWwyOLVMhLIVpZ5dO5eKRK4gWwvY0tsvgrI_354GhLBA7S1amdcsVRZi16Zz350stFCd5E0iHFsp62vJ0StuB_SzyVxSfCsOLixSNY9yoRMScw-kfZdHcvwrJcrdBWgVlF04sxIz0xEftYG4FefTO4DkANjt2z2A1JD8Ojx9rxaTaZMFIZeoegWkM8mfi0zIosMcfEWDHWumQ5AHjI"}
+    {"token":"eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXUyJ9.eyJleHAiOjE0NTc0NzQwMTAsInVzZXJuYW1lIj....."}
 
 Nos tiene que devolver el token JWT.
 
@@ -564,6 +596,8 @@ a aplicar tdd para implementar el el patrón repositorio y abstraer completament
 
 Lo activamos en el kernel y vamos a las configs
 
+```yaml
+    # app/config/config.yml
     nelmio_api_doc: 
         name: 'Educaedu práctica API docs'
     #    exclude_sections: ["Some section"]
@@ -573,15 +607,20 @@ Lo activamos en el kernel y vamos a las configs
     #        template: some/template.html.twig
         sandbox:
     #        enabled: false
+```
 
 Importamos en el `routing.yml`
     
+```yaml
+    # app/config/routing.yml
     NelmioApiDocBundle:
         resource: "@NelmioApiDocBundle/Resources/config/routing.yml"
         prefix:   /api/doc
+```
 
 Añadimos un nuevo firewall para la documentación, justo antes de `api`, para evitar colisiones de firewall
 
+```yaml
     # app/config/security.yml
         ...
         firewalls:
@@ -595,29 +634,31 @@ Añadimos un nuevo firewall para la documentación, justo antes de `api`, para e
             ...
             - { path: ^/api/doc, roles: IS_AUTHENTICATED_ANONYMOUSLY }
             ...
+```
 
 Y accedemos a nuestra recién creada documentación en 127.0.0.1:8000/app_dev.php/api/doc.
 Ya tenemos todo lo necesario, ahora podemos empezar a desarrollar nuestra aplicación y hacer el primer commit.
 
 
-## Parte 2, TDD 1:
+# 3. TDD 1:
 
 Empezaremos con el user story 4 `Como usuario autenticado puedo obtener la información de mi perfil.`. No es el más sencillo,
-pero será un buen punto de partida. Creamos el archivo `MeControllerTest`, y creamos nuestro primer test con PHPUnit. Para la 
+pero será un buen punto de partida. Creamos el archivo `UserControllerTest`, y creamos nuestro primer test con PHPUnit. Para la 
 acción get de nuestro servicio rest.
 
+```php
     <?php
-    // src/AppBundle/Tests/Controller/MeControllerTest.php
+    // src/AppBundle/Tests/Controller/UserControllerTest.php
 
     namespace AppBundle\Tests\Controller;
 
     use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-    class MeControllerTest extends WebTestCase
+    class UserControllerTest extends WebTestCase
     {
         const NAME = 'meco';
         const PASS = 'Demo1234';
-        const ROUTE = '/api/me.json';
+        const ROUTE = '/api/users/%s';
 
         /**
          * Create a client with a default Authorization header. 
@@ -647,20 +688,31 @@ acción get de nuestro servicio rest.
 
             return $client;
         }
+    
+        protected function getLast($client)
+        {
+            $em = $client->getContainer()->get('doctrine')->getManager();
+            $user = $em->getRepository('AppBundle:User')->findOneByUsername('meco');
 
-        public function testValidGetMe()
+            return $user->getId();
+        }
+
+        public function testValidGetUser()
         {
             $client = $this->createAuthenticatedClient(self::NAME, self::PASS);
 
-            $client->request('GET', self::ROUTE);
+            $id = $this->getLast($client);
+
+            $client->request('GET', sprintf(self::ROUTE, $id));
 
             $this->assertEquals(200, $client->getResponse()->getStatusCode());
         }
     }
+```
 
 Si corremos el test, es obvio, que fallará.
 
-    kpicaza@localhost:~/server/educaedu/practica-final$ phpunit -c app/
+    phpunit -c app/
     PHPUnit 4.8.23 by Sebastian Bergmann and contributors.
 
     .F
@@ -669,10 +721,10 @@ Si corremos el test, es obvio, que fallará.
 
     There was 1 failure:
 
-    1) AppBundle\Tests\Controller\MeControllerTest::testValidGetMe
+    1) AppBundle\Tests\Controller\UserControllerTest::testValidGetMe
     Failed asserting that 404 matches expected 200.
 
-    /educaedu/practica-final/src/AppBundle/Tests/Controller/MeControllerTest.php:49
+    /educaedu/practica-final/src/AppBundle/Tests/Controller/UserControllerTest.php:49
 
     FAILURES!
     Tests: 2, Assertions: 3, Failures: 1.
@@ -680,8 +732,9 @@ Si corremos el test, es obvio, que fallará.
 Esto está muy bien, la información de este test, es nuestro siguiente paso a seguir, necesitamos una ruta y un 
 controlador. Primero crearemos nuestro controlador dentro del AppBundle.
 
+```php
     <?php
-    // src/AppBundle/Controller/MeController
+    // src/AppBundle/Controller/UserController
 
     namespace AppBundle\Controller;
 
@@ -692,9 +745,9 @@ controlador. Primero crearemos nuestro controlador dentro del AppBundle.
     use Symfony\Component\HttpFoundation\Request;
 
     /**
-     * MeController.
+     * UserController.
      */
-    class MeController extends FOSRestController
+    class UserController extends FOSRestController
     {
         /**
          * @Security("is_granted('view', user)")
@@ -709,7 +762,7 @@ controlador. Primero crearemos nuestro controlador dentro del AppBundle.
          * 
          * @return json|xml
          */
-        public function getMeAction(Request $request)
+        public function getUserAction(Request $request)
         {
             $user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -719,16 +772,19 @@ controlador. Primero crearemos nuestro controlador dentro del AppBundle.
         }
 
     }
+```
 
 Damos de alta la ruta en el `routin.yml`
    
+```yaml
     # app/config/routing.yml
     ...
     app_user:
         type: rest
         prefix: /api
-        resource: AppBundle\Controller\MeController
+        resource: AppBundle\Controller\UserController
     ...
+```
 
 Por ultimo creamos el usuario de test.
 
@@ -741,11 +797,12 @@ Por ultimo creamos el usuario de test.
     php app/console fos:user:promote meco VIEW
 
 Ahora corremos los tests. Seguimos en rojo, no tenemos permiso para acceder a esa url, está protegida por JWT token, además
-hemos puesto la anotacion `Security`. Si nos fijamos en el error, es un 403, como hemos visto en el curso es un fallo de autorización,
-esto es porque nuestro user tiene ambos roles `ROLE_USER` y `VIEW` pero todavía no hemos implementado ninguna politica de seguridad.
+hemos puesto la anotación `Security`. Si nos fijamos en el error, es un 403, como hemos visto en el curso es un fallo de autorización,
+esto es porque nuestro user tiene ambos roles `ROLE_USER` y `VIEW` pero todavía no hemos implementado ninguna política de seguridad.
 
 Para esto crearemos una clase `Voter`, dentro de el directorio `Security`
 
+```php
     <?php
     // src/AppBundle/Security/UserVoter.php
 
@@ -791,10 +848,12 @@ Para esto crearemos una clase `Voter`, dentro de el directorio `Security`
             return false;
         }
     }
+```
 
-Como hemos explicado antes, los voter son la forma adecuada de permitir accesos a deferentes arte de la 
+Como hemos explicado antes, los voter son la forma adecuada de permitir accesos a deferentes partes de la 
 aplicación, todavía nos falta dar de alta el voter en el `services.yml`.
 
+```yaml
     # app/config/services.yml
     services:
         ...
@@ -803,17 +862,19 @@ aplicación, todavía nos falta dar de alta el voter en el `services.yml`.
             public:     false
             tags:
                - { name: security.voter }
+```
 
-Ahora los test está en verde, es un buen momento para comitear, pero no es más que un falso positivo. Como podemos 
+Ahora si pasamos los tests, están en verde, es un buen momento para commitear, pero no es más que un falso positivo. Como podemos 
 ver, nuestro controlador está directamente acoplado con el motor de Base de datos, en este caso MySQL.
 
 
-## Parte 3, Repository pattern 1 y TDD 2:
+# 4. Repository pattern 1 y TDD 2:
 
-Como hemos visto durante el curso uno de los objetivos principales es desacoplar lo máximo posíble nuestro código, para 
-hacerlo reutilizable. Para lograr esto seguiremos los patrones de diseño que vimos antes, en particular del patrón repositorio.
+Como hemos visto durante el curso uno de los objetivos principales es desacoplar lo máximo posible nuestro código, para 
+hacerlo re-utilizable. Para lograr esto seguiremos los patrones de diseño que vimos antes, en particular del patrón repositorio.
 Necesitamos abstraer la capa de base de datos del resto de la aplicación, empezaremos creando un test para nuestro repositorio
 
+```php
     <?php
     // src/Tests/Model/UserRepositoryTest.php
 
@@ -854,17 +915,21 @@ Necesitamos abstraer la capa de base de datos del resto de la aplicación, empez
             $this->repository = new UserRepository($this->gateway->reveal(), $this->factory);
         }
     }
+```
 
 Si nos fijamos en el método `setUp()`, para crear el repositorio, necesitamos tres clases, La factoría o `Factory`, la puerta de enlace
 o `Gateway` y el repositorio o `Repository`. vamos a añadir el test al final de la clase.
 
+```php
     <?php
     // src/Tests/Model/UserRepositoryTest.php
         ...
         public function testFindOneByWithParams()
         {
             $fakeUser = new User();
-            $fakeUser = $fakeUser->fromArray(array('username' => self::USER, 'email' => self::EMAIL, 'password' => self::PASS, 'description' => self::DESC));
+            $fakeUser = $fakeUser->fromArray(array(
+                'username' => self::USER, 'email' => self::EMAIL, 'password' => self::PASS, 'description' => self::DESC
+            ));
             $this->gateway->findOneBy(array('username' => self::USER), array())->willReturn($fakeUser);
             $fakeUser = $this->factory->makeOne($fakeUser);
             $user = $this->repository->findOneBy(array('username' => self::USER));
@@ -875,12 +940,14 @@ o `Gateway` y el repositorio o `Repository`. vamos a añadir el test al final de
             $this->assertEquals($user->getUsername(), $user->__toString());
         }
     }
+```
 
-Pasamos los test, y nos encontramos la primera escepción, la clase `UserFactory` no existe, vamos a crearla. Bueno, paremos un segundo y pensemos,
-Si queremos seguir el principio de inversión de dependencias necesitamos abstraer nuestra clases, para ello haremos uso de `Interfaces` o contratos
-que definirán la estructuras que deben recibir las clases de nivel superior, en nuestro caso el controlador. Creamos nuestro UserFactoryInterface en 
+Pasamos los test, y nos encontramos la primera excepción, la clase `UserFactory` no existe, vamos a crearla. Bueno, paremos un segundo y pensemos,
+Si queremos seguir el principio de inversión de dependencias necesitamos abstraer nuestras clases, para ello haremos uso de `Interfaces` o contratos
+que definirán la estructuras que deben recibir las clases de nivel superior, en nuestro caso el controlador. Creamos nuestro `UserFactoryInterface` en 
 el directorio `Model`.
 
+```php
     <?php
     // src/AppBundle/Model/UserFactoryInterface.php
 
@@ -909,10 +976,12 @@ el directorio `Model`.
          */
         public function make(UserInterface $rawUser);
     }
+```
 
 Creamos también `GatewayInterface` y `UserInterface`, queremos una abstracción total del motor de base de datos y sabemos que las clases
 `User` y `UserGateway`, dependen directamente del motor de base de datos.
 
+```php
     <?php
     // src/AppBundle/Model/UserGatewayInterface.php
 
@@ -924,10 +993,12 @@ Creamos también `GatewayInterface` y `UserInterface`, queremos una abstracción
     {
         
     }
+```
 
 Creamos el `Interface` del el objeto user de `FosUserBundle`, en este caso lo utilizaremos como está, pero quien sabe si el día de 
 mañana tenemos que cambiar de framework?
 
+```php
     <?php
 
     // src/AppBundle/Model/User.php
@@ -1133,9 +1204,11 @@ mañana tenemos que cambiar de framework?
 
         public function __toString();
     }
+```
 
 Modificamos la clase `User` para que implemente `UserInterface`
 
+```php
     <?php
 
     // src/AppBundle/Entity/User.php
@@ -1153,11 +1226,13 @@ Modificamos la clase `User` para que implemente `UserInterface`
      */
     class User extends BaseUser implements UserInterface
     {
-
+        ...
+```
 
 
 creamos sus respectivas implementaciones, `UserGateway` la situaremos junto con `User` dentro de la carpeta `Entity`
 
+```php
     <?php
     // src/AppBundle/Entity/UserGateway
 
@@ -1172,9 +1247,11 @@ creamos sus respectivas implementaciones, `UserGateway` la situaremos junto con 
     {
 
     }
+```
 
 Y por último la clase `Factory` dentro del directorio `Model`
 
+```php
     <?php
     // src/AppBundle/Model/UserFactory
 
@@ -1207,11 +1284,14 @@ Y por último la clase `Factory` dentro del directorio `Model`
             return $rawUser;
         }
     }
+```
 
-ya os habeís fijado que el user gateway y su interface están vacios, es porque de momento utilizaremos los metodos de doctrine
+ya os habéis fijado que el user gateway y su interface están vacíos, es porque de momento utilizaremos los métodos de doctrine.
+
 Ahora necesitamos implementar la configuración para atar todas estas piezas, Symfony nos ofrece la inyección de dependencias como solución,
 veamos como se hace, abrimos el archivo `services.yml`
 
+```yaml
     services:
         ...
         app.user_factory:
@@ -1225,9 +1305,11 @@ veamos como se hace, abrimos el archivo `services.yml`
         app.user_repository:
             class: AppBundle\Entity\UserRepository
             arguments: [ "@app.user_gateway", "@app.user_factory" ]
+```
 
 Y para terminar de implementar el patrón repositorio solo nos falta la clase `UserRepository`
 
+```php
     <?php
     namespace AppBundle\Model;
     use AppBundle\Model\UserGatewayInterface;
@@ -1280,27 +1362,1617 @@ Y para terminar de implementar el patrón repositorio solo nos falta la clase `U
             return $this->factory->makeOne($user);
         }
         /**
+         * @param $id
+         *
+         * @return User
+         */
+        public function parse($id)
+        {
+            $rawUser = $this->gateway->find($id);
+
+            return $this->factory->makeOne($rawUser);
+        }
+    }
+```
+
+Pasamos los tests, y tenemos que ver que está todo correcto, ahora podemos commitear. El siguiente paso es unir el controlador 
+con el modelo, lo haremos de la siguiente manera
+
+Actualizamos `UserController` para que utilice nuestro `Repository` y así lo desacoplamos del motor de base de datos
+
+```php
+    // src/AppBundle/Controller/UserController.php
+        ...
+        public function getUserAction($id)
+        {
+            $user = $this->get('app.user_repository')->find($id);
+            $view = $this->view($user);
+
+            return $this->handleView($view);
+        }
+```
+
+Si volvemos a pasar los test todo debe seguir funcionando correctamente y podemos volver a commitear nuestro trabajo.
+
+# 5. 2º user Story
+
+Las verdad que al realizar el primer user story, nos hemos dejado todo bastante bien organizado, para que sea mas sencillo continuar con los siguientes, 
+igualmente, todavía faltan piezas importantes del puzzle.
+
+Comenzaremos implementando el user story 2 `Como usuario sin autenticar puedo registrarme en el site`, este user story, a parte de lo que ya tenemos 
+creado necesita un formulario y validación. empecemos por los tests. primero crearemos el método post, justo después del método `createAuthenticatedClient` 
+que nos ayudará a realizar las peticiones en los diferentes tests.
+
+```php
+    <?php 
+    // src/AppBundle/Tests/Controller/UserControllerTest.php
+    
+    class UserControllerTest extends WebTestCase
+    {
+        ...
+        protected function post($uri, array $data, $auth = false)
+        {
+            $client = $this->getClient($auth);
+            $client->request('POST', $uri, $data);
+            return $client->getResponse();
+        }
+```
+
+Y añadimos nuestro primer test para el registro, testeara el envío del formulario vacío, nos tiene que devolver un error 400.
+
+```php
+    <?php 
+    // src/AppBundle/Tests/Controller/UserControllerTest.php
+    
+    class UserControllerTest extends WebTestCase
+    {
+        const REGISTER_ROUTE = '/api/users';
+        ...
+        public function testRegistrationFailedWithEmptyForm()
+        {
+            $client = static::createClient();
+            $client->request('POST', self::REGISTER_ROUTE);
+            $this->assertEquals(400, $client->getResponse()->getStatusCode());
+        }
+```
+
+Pasamos los test, y obtenemos un 404 en vez del 400 que esperamos, al igual que en nuestro primer user story, necesitaremos una 
+ruta a un controlador, y en este caso además necesitaremos un formulario, vamos con el controlador
+
+```php
+    <?php
+    // src/AppBundle/Controller/UserController.php
+
+    /**
+     * @ApiDoc(
+     *   description = "Register new user.",
+     *   statusCodes = {
+     *     200 = "User correctly added.",
+     *     401 = "Authentication failure, user doesn’t have permission or API token is invalid or outdated.",
+     *   }
+     * )
+     * 
+     * @param Request $request
+     *
+     * @return array
+     */
+    public function postUserAction(Request $request)
+    {
+        $user = $request->request->all();
+        
+        $view = $this->view($user);
+        return $this->handleView($view);
+    }
+```
+
+Lo bueno de Fos Rest es que se encarga de la pluralización de las URIs de nuestros recursos, también podemos ver que no estamos haciendo 
+uso de formularios, esto será lo siguiente que hagamos. Para crear formularios y validarlos crearemos dos nuevas clases. antes de ello le 
+diremos a nuestro API firewall, que la ruta que acabamos de crear será accesible sin necesidad de autenticación.
+
+```yaml
+    # app/config/security.yml
+    security:
+        ...
+        firewalls:
+            ...
+            register:
+                pattern:  ^/api/users
+                methods: [POST]
+                anonymous: true
+
+        ...
+        access_control:
+            ...
+            - { path: ^/api/users, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
+            - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+```
+
+Ahora si pasamos a crear nuestro formulario, para la validación crearemos un simple modelo de formulario, este a su vez nos ayudará a documentar el api,
+veamos como
+
+```php
+    <?php
+    namespace AppBundle\Form\Model;
+    use Symfony\Component\Validator\Constraints as Assert;
+    /**
+     * RegistrationFormModel.
+     */
+    class RegistrationFormModel
+    {
+        const NAME = 'username';
+        const MAIL = 'email';
+        const PLAIN = 'plainPassword';
+        const PASS = 'password';
+        /**
+         * @Assert\NotBlank()
+         * @Assert\Regex("/[a-zA-Z0-9]/")
+         *
+         * @var string
+         */
+        protected $username;
+        /**
+         * @Assert\NotBlank()
+         * @Assert\Email()
+         *
+         * @var string
+         */
+        protected $email;
+        /**
+         * @Assert\NotBlank()
+         *
+         * @var string
+         */
+        protected $plainPassword;
+        /**
+         * @Assert\NotBlank()
+         *
+         * @var string
+         */
+        protected $password;
+        public function __construct($username = null, $email = null, $plainPassword = null, $password = null)
+        {
+            $this->username = $username;
+            $this->email = $email;
+            $this->plainPassword = $plainPassword;
+            $this->password = $password;
+        }
+        /**
+         * @param array $user
+         *
+         * @return \self
+         */
+        public static function fromArray(array $user = array(
+            self::NAME => null, self::MAIL => null, self::PLAIN => null, self::PASS => null
+        ))
+        {
+            return new self(
+                array_key_exists(self::NAME, $user) ? $user[self::NAME] : null,
+                array_key_exists(self::MAIL, $user) ? $user[self::MAIL] : null,
+                array_key_exists(self::PLAIN, $user) ? $user[self::PLAIN] : null,
+                array_key_exists(self::PASS, $user) ? $user[self::PASS] : null
+            );
+        }
+        public function setUsername($username)
+        {
+            $this->username = $username;
+        }
+        public function getUsername()
+        {
+            return $this->username;
+        }
+        public function setEmail($email)
+        {
+            $this->email = $email;
+        }
+        public function getEmail()
+        {
+            return $this->email;
+        }
+        public function setPlainPassword($plainPassword)
+        {
+            $this->plainPassword = $plainPassword;
+        }
+        public function getPlainPassword()
+        {
+            return $this->plainPassword;
+        }
+        public function setPassword($password)
+        {
+            $this->password = $password;
+        }
+        public function getPassword()
+        {
+            return $this->password;
+        }
+    }
+```
+
+La parte más interesante de esta clase, son las anotaciones escritas sobre la declaración de las variables, de esta manerá añadimos la capa de 
+validación al formulario por ejemplo las anotaciones NotBlank y Regex
+
+```php
+        /**
+         * @Assert\NotBlank()
+         * @Assert\Regex("/[a-zA-Z0-9]/")
+         *
+```
+
+La primera obliga a que el campo no esté vacío en ningún caso, y la segunda, implementa una expresión regular que fuerza a que el texto tan solo 
+contenga caracteres alfanuméricos, sin ningún tipo de símbolo, creamos el formulario para el modelo
+
+```php
+    <?php
+    // src/AppBundle/Form/Type/RegistrationFormType.php
+
+    namespace AppBundle\Form\Type;
+    use Symfony\Component\Form\AbstractType;
+    use Symfony\Component\Form\FormBuilderInterface;
+    use Symfony\Component\Form\Extension\Core\Type;
+    use Symfony\Component\OptionsResolver\OptionsResolver;
+    /**
+     * RegistrationFormType.
+     */
+    class RegistrationFormType extends AbstractType
+    {
+        public function buildForm(FormBuilderInterface $builder, array $options)
+        {
+            $builder
+                ->add('username', Type\TextType::class)
+                ->add('email', Type\EmailType::class)
+                ->add('plainPassword', Type\PasswordType::class)
+                ->add('password', Type\PasswordType::class)
+            ;
+        }
+        public function configureOptions(OptionsResolver $resolver)
+        {
+            $resolver->setDefaults(array(
+              'data_class' => 'AppBundle\Form\Model\RegistrationFormModel',
+              'csrf_protection' => false,
+            ));
+        }
+        public function getBlockPrefix()
+        {
+            return 'app_user_registration';
+        }
+    }
+```
+
+Es un formulario muy simple de login, con los campos mínimos para crear un usuario. Ahora le tenemos que decir a nuestro controlador 
+que empiece a utilizarlo.
+
+Para ello utilizaremos las anotaciones de `nelmioApiDocs`, y forzaremos el envío del formulario.
+
+```php
+    <?php
+    // src/AppBundle/Controller/UserController.php
+    ...
+    use AppBundle\Form\Type\RegistrationFormType;
+    use AppBundle\Form\Model\RegistrationFormModel;
+    ...
+        /**
+         * @ApiDoc(
+         *   description = "Register new user.",
+         *   input = "AppBundle\Form\Model\RegistrationFormModel",
+         *   output = "AppBundle\Model\UserInterface",
+         *   statusCodes = {
+         *     200 = "User correctly added.",
+         *     401 = "Authentication failure, user doesn’t have permission or API token is invalid or outdated.",
+         *   }
+         * )
+         * 
+         * @param Request $request
+         *
+         * @return array
+         */
+        public function postUserAction(Request $request)
+        {
+            $user = null;
+            $form = $this->createForm(RegistrationFormType::class, new RegistrationFormModel(), array('method' => 'POST'));
+
+            $form->submit($request->request->all());
+
+            if ($form->isValid()) {
+                try {
+                    $rawUser = $this->insertFromForm($form->getData());
+                    $user = $this->repository->insert($rawUser);
+                    $view = $this->view($user);
+                    return $this->handleView($view);
+                } catch (\Exception $ex) {
+                    //  throw new $ex;
+                    $form->addError(new FormError('Duplicate entry for email or username.'));
+                    // log this somewhere.
+                }
+            }
+            $view = $this->view($form);
+            return $this->handleView($view);
+        }
+```
+
+Si pasamos los test estaríamos de nuevo en verde, pero como en el primer user story, esto no es más que un falso positivo, 
+crearemos otro test para comprobar los registros validos, para ello crearemos el método `getClient`, para seleccionar si 
+queremos un cliente autenticado o no
+
+```php
+    <?php 
+    // src/AppBundle/Tests/Controller/UserControllerTest.php
+    
+    class UserControllerTest extends WebTestCase
+    {
+        const MAIL = 'meco@mail.com';
+        ...
+        protected function getClient($auth = false)
+        {
+            if (true === $auth) {
+                $client = $this->createAuthenticatedClient(self::NAME, self::PASS);
+            } else {
+                $client = static::createClient();
+            }
+            return $client;
+        }
+        ...
+        public function testRegistration()
+        {
+            $response = $this->post(self::REGISTER_ROUTE, array(
+              'username' => self::NAME,
+              'email' => self::MAIL,
+              'plainPassword' => self::PASS,
+              'password' => self::PASS,
+                ), true);
+            $this->assertEquals(200, $response->getStatusCode());
+        }
+```
+
+Si volvemos a pasar los tests, vemos que tenemos un método que no existe, podríamos crearlo en el mismo controlador, pero 
+para tener todo mejor organizado, y dejar un fina capa de controladores crearemos un handler para recibir sus valores. Primero 
+definiremos su interface
+
+```php
+    <?php
+    // src/AppBundle/Handler/ApiUserHandlerInterface.php
+    namespace AppBundle\Handler;
+    /**
+     * ApiHandlerInterface.
+     */
+    interface ApiUserHandlerInterface
+    {
+        /**
+         * Get user from repository.
+         * 
+         * @param User $user
+         */
+        public function get($id);
+        /**
+         * Insert User to repository.
+         * 
+         * @param array $params
+         */
+        public function post(array $params);
+    }
+```
+
+Para después definimos su implementación
+
+```php
+    <?php
+    // src/AppBundle/Handler/ApiUserHandler.php
+    namespace AppBundle\Handler;
+    use AppBundle\Model\UserRepository;
+    use AppBundle\Model\UserInterface;
+    use AppBundle\Form\Type\RegistrationFormType;
+    use AppBundle\Form\Model\RegistrationFormModel;
+    use Symfony\Component\Form\FormFactoryInterface;
+    use Symfony\Component\Form\FormError;
+    /**
+     * ApiUserHandler.
+     */
+    class ApiUserHandler implements ApiUserHandlerInterface
+    {
+        /**
+         * @var UserRepository
+         */
+        protected $repository;
+        /**
+         * @var FormFactoryInterface
+         */
+        protected $formFactory;
+        /**
+         * Init Handler.
+         * 
+         * @param UserRepository       $repository
+         * @param FormFactoryInterface $formFactory
+         */
+        public function __construct(UserRepository $repository, FormFactoryInterface $formFactory)
+        {
+            $this->repository = $repository;
+            $this->formFactory = $formFactory;
+        }
+        /**
+         * Get user from repository.
+         * 
+         * @param $id
+         *
+         * @return User
+         */
+        public function get($id)
+        {
+            return $this->repository->parse($id);
+        }
+        /**
+         * Insert User to repository.
+         * 
+         * @param array $params
+         *
+         * @return User
+         */
+        public function post(array $params)
+        {
+            $userModel = RegistrationFormModel::fromArray($params);
+            $form = $this->formFactory->create(RegistrationFormType::class, $userModel, array('method' => 'POST'));
+            $form->submit($params);
+            if ($form->isValid()) {
+                try {
+                    $rawUser = $this->insertFromForm($form->getData());
+                    $user = $this->repository->insert($rawUser);
+                    return $this->repository->parse($user->getId());
+                } catch (\Exception $ex) {
+                    //  throw new $ex;
+                    $form->addError(new FormError('Duplicate entry for email or username.'));
+                    // log this somewhere.
+                }
+            }
+            return $form;
+        }
+        /**
+         * @param ProfileFormModel $userModel
+         *
+         * @return User
+         */
+        protected function insertFromForm(RegistrationFormModel $userModel)
+        {
+            $user = $this->repository->findNew();
+            $user
+                ->setUsername($userModel->getUsername())
+                ->setUsernameCanonical($userModel->getUsername())
+                ->setPlainPassword($userModel->getPlainPassword())
+            ;
+            return $this->fromForm($user, $userModel);
+        }
+        /**
+         * @param User             $user
+         * @param ProfileFormModel $userModel
+         *
+         * @return User
+         */
+        protected function fromForm(UserInterface $user, RegistrationFormModel $userModel)
+        {
+            $user
+                ->setEmailCanonical($userModel->getEmail())
+                ->setEmail($userModel->getEmail())
+            ;
+            return $user;
+        }
+    }
+```
+
+Lo damos de alta como servicio en el `services.yml`
+
+```yaml
+    # spp/config/services.yml
+        app.api_user_handler: 
+            class: AppBundle\Handler\ApiUserHandler
+            arguments: [ "@app.user_repository", "@form.factory" ]
+```
+
+Y actualizamos el controlador
+
+```php
+    // src/AppBundle/UserController.php
+    ...
+        public function postUserAction(Request $request)
+        {
+            $user = $this->container->get('app.api_user_handler')->post(
+                $request->request->all()
+            );
+            $view = $this->view($user);
+            return $this->handleView($view);
+        }
+```
+
+Ahora debemos añadir varios métodos a nuestro gateway y repository, empezaremos por actualizar `GatewayInterface`
+
+```php
+    <?php
+    // src/AppBundle/Model/GatewayInterface.php
+
+    namespace AppBundle\Model;
+    /**
+     * UserGateway.
+     */
+    interface UserGatewayInterface
+    {
+        /**
          * @param User $user
          *
          * @return User
          */
-        public function parse(UserInterface $user)
+        public function apiInsert(UserInterface $user);
+
+        /**
+         * @return type
+         */
+        public function findNew();
+
+        /**
+         * @param User $user
+         *
+         * @return User
+         */
+        public function insert(UserInterface $user);
+    }
+```
+
+Y añadimos los métodos al repository y al gateway respectivamente
+
+```php
+    <?php
+    // src/AppBundle/Entity/Gateway.php
+
+    namespace AppBundle\Entity;
+
+    use AppBundle\Model\UserInterface;
+    use AppBundle\Model\UserGatewayInterface;
+    use Doctrine\ORM\EntityRepository;
+
+    /**
+     * UserGateway.
+     */
+    class UserGateway extends EntityRepository implements UserGatewayInterface
+    {
+        /**
+         * @param User $user
+         *
+         * @return User
+         */
+        public function apiInsert(UserInterface $user)
         {
-            return $this->factory->makeOne($user);
+            $user
+                ->setEnabled(true)
+                ->setExpired(false)
+                ->setLocked(false)
+                ->addRole('read')
+                ->addRole('view')
+                ->addRole('edit')
+                ->addRole('ROLE_USER')
+            ;
+            return self::insert($user);
+        }
+
+        /**
+         * @return type
+         */
+        public function findNew()
+        {
+            return User::fromArray();
+        }
+        /**
+         * @param User $user
+         *
+         * @return User
+         */
+        public function insert(UserInterface $user)
+        {
+            $this->_em->persist($user);
+            $this->_em->flush();
+            return $user;
         }
     }
+```
 
-Pasamos los tests, y tenemos que ver que está todo correcto, ahora podemos comitear. El siguiente paso es unir el controlador 
-con el modelo, lo harremos de la siguiente manera
+Y por último actualizamos nuestro repository
 
+```php
+    // src/AppBundle/Model/UserRepository.php
+    ...
+        /**
+         * @return User
+         */
+        public function findNew()
+        {
+            return $this->gateway->findNew();
+        }
+        /**
+         * @param User $user
+         *
+         * @return User
+         */
+        public function insert(UserInterface $user)
+        {
+            $rawUser = $this->gateway->apiInsert($user);
+            return $this->factory->makeOne($rawUser);
+        }
+```
 
+Si pasamos ahora los test, fallarán, porque el usuario que estamos intentando crear existe ya en la bbdd, 
+así que vamos a crear la acción de borrar usuario para recuperar nuestros tests,
 
-Para terminar, comprobaremos la covertura que etamos dando a nuestro código con la herramienta code coverage de phpunit.
+```php
+    // src/AppBundle/tests/UserControllerTest.php
+        ...
+        public function testDeleteUser()
+        {
+            $client = $this->createAuthenticatedClient(self::NAME, self::PASS);
+
+            $id = $this->getLast($client);
+
+            $client->request('DELETE', sprintf(self::ROUTE, $id));
+
+            $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        }
+```
+
+creamos el método delete en el controlador
+
+```php
+    // src/AppBundle/Controller/UserController.php
+        ...
+        /**
+         * @Security("is_granted('edit', user)")
+         * @ApiDoc(
+         *   description = "Delete own user.",
+         *   statusCodes = {
+         *     204 = "Do no return nothing.",
+         *     401 = "Authentication failure, user doesn’t have permission or API token is invalid or outdated.",
+         *   }
+         * )
+         * 
+         * @return array
+         */
+        public function deleteUserAction($id)
+        {
+            $this->container->get('app.api_user_handler')->delete($id);
+
+            $view = $this->view(array());
+            return $this->handleView($view);
+        }
+```
+
+Después lo creamos en nuestro handler
+
+```php
+    // src/AppBundle/Handler/ApiUserHandler.php
+    ...
+        /**
+         * Delete User.
+         * 
+         * @param $id
+         */
+        public function delete($id)
+        {
+            $this->repository->remove($id);
+        }
+```
+
+Y añadimos los métodos a nuestro modelo, primero al interface
+
+```php
+    // src/AppBundle/Model/GatewayInterface.php
+    ...
+        /**
+         * @param $id
+         */
+        public function remove($id);
+```
+
+Luego en la clase
+
+```php
+    // src/AppBundle/Entity/Gateway.php
+    ...
+        /**
+         * @param $id
+         */
+        public function remove($id)
+        {
+            $user = $this->find($id);
+
+            $this->_em->remove($user);
+            $this->_em->flush();
+        }
+```
+
+y por último en el repository
+
+```php
+    // src/AppBundle/Model/UserRepository.php
+    ...
+        /**
+         * @param $id
+         */
+        public function remove($id)
+        {
+            $this->gateway->remove($id);
+        }
+```
+
+si pasamos los test tendremos un 403, porque el usuario aunque autenticado, no tiene un voter que le permita el acceso. Vamos a añadir 
+la entrada edit al voter que creamos antes.
+
+Además también quitaremos la dependencia con doctrine en el voter
+
+```php
+    <?php
+    // src/AppBundle/Security/UserVoter.php
+    namespace AppBundle\Security;
+    use Symfony\Component\Security\Core\Authorization\Voter\Voter;
+    use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+    use AppBundle\Model\UserInterface;
+    class UserVoter extends Voter
+    {
+        const EDIT = 'edit';
+        const VIEW = 'view';
+        public function supports($attribute, $subject)
+        {
+            return $subject instanceof UserInterface && in_array($attribute, array(
+                  self::VIEW, self::EDIT,
+            ));
+        }
+        protected function voteOnAttribute($attribute, $currentUser, TokenInterface $token)
+        {
+            $user = $token->getUser();
+            if (!$user instanceof UserInterface) {
+                return false;
+            }
+            $roles = $user->getRoles();
+            if (
+                in_array(strtoupper(self::EDIT), $roles) &&
+                $attribute == self::EDIT &&
+                $user->getEmail() == $currentUser->getEmail()
+            ) {
+                return true;
+            }
+            if (
+                in_array('ROLE_USER', $roles) &&
+                $attribute == self::VIEW &&
+                $user->getEmail() == $currentUser->getEmail()
+            ) {
+                return true;
+            }
+            return false;
+        }
+    }
+```
+
+Pasamos de nuevo los tests, debemos tener todo correcto, en este punto ya tenemos implementado el patrón repositorio, 
+haciendo uso del principio de inversión de dependencias.
+
+# 6. Método PUT
+
+Ahora vamos a por el user story 3 `Como usuario autenticado puedo editar mi perfil`, para esto utilizaremos el método PUT 
+que vimos antes.
+
+Como en los demás user storys empezamos con un test
+
+```php
+    <?php
+    // src/AppBundle/Tests/Controller/UserControllerTest.php
+
+    namespace AppBundle\Tests\Controller;
+
+    use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+
+    class UserControllerTest extends WebTestCase
+    {
+        ...
+        const DESCRIPTION = 'ha sido el texto de relleno estándar de las industrias desde el año 1500, '
+            . 'cuando un impresor (N. del T. persona que se dedica a la imprenta) desconocido';
+        ...
+        protected function put($uri, array $data, $auth = false)
+        {
+            $client = $this->getClient($auth);
+
+            $client->request('PUT', $uri, $data);
+
+            return $client->getResponse();
+        }
+```
+
+Agregamos el método put en nuestros tests, lo usaremos para no repetir las peticiones en los distintos tests.
+
+```php
+        // src/AppBundle/Tests/Controller/UserControllerTest.php
+    
+        public function testPutUserWithOutAuthentication()
+        {
+            $client = static::createClient();
+
+            $id = $this->getLast($client);
+
+            $client->request('PUT', sprintf(self::ROUTE, $id));
+
+            $this->assertEquals(401, $client->getResponse()->getStatusCode());
+        }
+
+        public function testPutUserWithOutRequiredParams()
+        {
+            $client = static::createClient();
+            $id = $this->getLast($client);
+
+            $response = $this->put(sprintf(self::ROUTE, $id), array(
+              'email' => null,
+              'description' => self::DESCRIPTION,
+                ), true);
+
+            $this->assertEquals(400, $response->getStatusCode());
+        }
+
+        public function testPutUser()
+        {
+            $client = static::createClient();
+            $id = $this->getLast($client);
+
+            $response = $this->put(sprintf(self::ROUTE, $id), array(
+              'email' => 'asd' . self::MAIL,
+              'description' => self::DESCRIPTION,
+                ), true);
+
+            $this->assertEquals(200, $response->getStatusCode());
+        }
+```
+
+El primer test comprueba el comportamiento cuando el usuario intenta acceder sin autenticar, el segundo valida que el comportamiento
+cuando los campos obligatorios no se han rellenado y el tercero, comprueba que la actualización se realiza correctamente.
+
+Pasamos los test para obtener información. Como siempre, necesitamos una ruta y un controlador, en este caso, al igual que en el post 
+necesitamos un formulario. Empezamos por el controlador.
+
+```php
+    <?php
+    // src/AppBundle/Controller/UserController.php
+        ...
+        /**
+         * @Security("is_granted('edit', user)")
+         * @ApiDoc(
+         *   description = "Update own user.",
+         *   input = "AppBundle\Form\Model\ProfileFormModel",
+         *   output = "AppBundle\Entity\User",
+         *   statusCodes = {
+         *     200 = "User data updated.",
+         *     401 = "Authentication failure, user doesn’t have permission or API token is invalid or outdated.",
+         *   }
+         * )
+         * 
+         * @param Request $request
+         *
+         * @return array
+         */
+        public function putUserAction(Request $request, $id)
+        {
+            $user = $this->container->get('app.api_user_handler')->put(
+                $id, $request->request->all()
+            );
+
+            $view = $this->view($user);
+            return $this->handleView($view);
+        }
+        ...
+```
+
+El método `put` de nuestro handler no existe, creemoslo... 
+
+Agregamos el método `put` al interface de nuestro handler
+
+```php
+    // src/AppBundle/Handler/UserHandlerInterface.php
+    ...
+        /**
+         * Update User from repository.
+         * 
+         * @param $id
+         * @param array $params
+         */
+        public function put($id, array $params);
+    }
+```
+
+Lo implementamos en el handler
+
+```php
+    // src/AppBundle/Handler/UserHandler.php
+        ...
+        /**
+         * Update User from repository.
+         * 
+         * @param array $params
+         *
+         * @return type
+         */
+        public function put($id, array $params)
+        {
+            $userModel = ProfileFormModel::fromArray($params);
+
+            $form = $this->formFactory->create(ProfileFormType::class, $userModel, array('method' => 'POST'));
+            $form->submit($params);
+
+            if ($form->isValid()) {
+                $user = $this->updateFromForm($id, $form->getData());
+
+                $this->repository->update();
+
+                return $this->repository->parse($user->getId());
+            }
+
+            return $form;
+        }
+        ...
+```
+
+Después actualizamos los métodos `insertFromForm` y `fromForm` para que utilicen el interface `UserFormModelInterface`, que crearemos a continuación.
+Además añadimos el método `updateFromForm`.
+
+```php
+        /**
+         * @param ProfileFormModel $userModel
+         *
+         * @return User
+         */
+        protected function insertFromForm(UserFormModelInterface $userModel)
+        ...
+        /**
+         * @param type             $id
+         * @param ProfileFormModel $userModel
+         *
+         * @return User
+         */
+        protected function updateFromForm($id, UserFormModelInterface $userModel)
+        {
+            $user = $this->repository->find($id);
+
+            $user->setDescription($userModel->getDescription());
+
+            return $this->fromForm($user, $userModel);
+        }
+        /**
+         * @param User             $user
+         * @param ProfileFormModel $userModel
+         *
+         * @return User
+         */
+        protected function fromForm(UserInterface $user, UserFormModelInterface $userModel)
+        ...
+```
+
+Por último nos falta el formulario `ProfileFormType`, su modelo. Creamos el interface para los modelos de formulario de usuario
+
+```php
+    <?php
+    // src/AppBundle/Form/Model/UserFormModelInterface.php
+    namespace AppBundle\Form\Model;
+    interface UserFormModelInterface
+    {
+        /**
+         * @param array $user
+         *
+         * @return \self
+         */
+        public static function fromArray(array $user = array());
+        /**
+         * @param string $email
+         */
+        public function setEmail($email);
+
+        public function getEmail();
+    }
+```
+
+Hacemos que el `RegisterFormModel` lo implemente, e implementamos el nuevo `ProfileFormModel`
+
+```php
+    <?php
+    // src/AppBundle/Form/Model/ProfileFormModel.php
+    namespace AppBundle\Form\Model;
+    use Symfony\Component\Validator\Constraints as Assert;
+    /**
+     * ProfileFormModel.
+     */
+    class ProfileFormModel implements UserFormModelInterface
+    {
+        const MAIL = 'email';
+        const DESC = 'description';
+        /**
+         * @Assert\NotBlank()
+         * @Assert\Email()
+         *
+         * @var string
+         */
+        protected $email;
+        /**
+         * @Assert\Regex("/[a-z\d\-_\s]+/")
+         *
+         * @var string
+         */
+        protected $description;
+        /**
+         * 
+         * @param type $username
+         * @param type $email
+         * @param type $description
+         */
+        public function __construct($username = null, $email = null, $description = null)
+        {
+            $this->username = $username;
+            $this->email = $email;
+            $this->description = $description;
+        }
+        /**
+         * @param array $user
+         *
+         * @return \self
+         */
+        public static function fromArray(array $user = array(self::MAIL => null, self::DESC => null))
+        {
+            return new self(
+                array_key_exists(self::MAIL, $user) ? $user[self::MAIL] : null,
+                array_key_exists(self::DESC, $user) ? $user[self::DESC] : null
+            );
+        }
+        public function setEmail($email)
+        {
+            $this->email = $email;
+        }
+        public function getEmail()
+        {
+            return $this->email;
+        }
+        public function setDescription($description)
+        {
+            $this->description = $description;
+        }
+        public function getDescription()
+        {
+            return $this->description;
+        }
+    }
+```
+
+Nos falta el formulario `ProfileFormType`
+
+```php
+    <?php
+    // src/AppBundle/Form/Type/ProfileFormType.php
+    namespace AppBundle\Form\Type;
+    use Symfony\Component\Form\AbstractType;
+    use Symfony\Component\Form\FormBuilderInterface;
+    use Symfony\Component\Form\Extension\Core\Type;
+    use Symfony\Component\OptionsResolver\OptionsResolver;
+    /**
+     * ProfileFormType.
+     */
+    class ProfileFormType extends AbstractType
+    {
+        public function buildForm(FormBuilderInterface $builder, array $options)
+        {
+            $builder
+                ->add('username', Type\TextType::class)
+                ->add('email', Type\EmailType::class)
+                ->add('description', Type\EmailType::class)
+            ;
+        }
+
+        public function configureOptions(OptionsResolver $resolver)
+        {
+            $resolver->setDefaults(array(
+              'data_class' => 'AppBundle\Form\Model\ProfileFormModel',
+              'csrf_protection' => false,
+            ));
+        }
+
+        public function getBlockPrefix()
+        {
+            return 'app_user_registration';
+        }
+    }
+```
+
+Si pasamos los tests, nos damos cuenta que nos falta por implementar el método `UserRepository::update()`, es más, 
+nos falta toda la parte de persistencia. Vamos a ello. Añadimos `Update` al `GatewayInterface`
+
+```php
+    // src/AppBundle/Model/GatewayInterface.php
+        ...
+        /**
+         * Update User
+         */
+        public function update();
+        ...
+```
+
+Lo implementamos en el `Gateway`
+
+```php
+    // src/AppBundle/Entity/UserGateway.php
+        ...
+        /**
+         * Update User.
+         */
+        public function update()
+        {
+            $this->_em->flush();
+        }
+        ...
+```
+
+Por último actualizamos nuestro `Repository`
+
+```php
+    // src/AppBundle/Model/UserRepository.php
+        ...
+        /**
+         * Update User.
+         */
+        public function update()
+        {
+            return $this->gateway->update();
+        }
+        ...
+```
+
+Pasamos los tests y todo debe seguir correcto. Como ejercicio podríamos implementar el verbo `PATCH`.
+
+Para terminar, comprobaremos la cobertura que estamos dando a nuestro código con la herramienta code coverage de phpunit.
 
     phpunit -c app/ --coverage-html ./web/coverage # Para verlo en la intefaz gráfico o
     phpunit -c app/ --coverage-text # para ver en informe en consola.
 
-## Site 2
+# 7. Demostrando la Inversión de dependencias
+
+Si todo lo anterior es realmente correcto, cambiar el motor de base de datos no debería ser una tarea complicado. En nuestro caso hemos 
+utilizado Doctrine ORM junto con Mysql, pero por requisitos de proyecto, podríamos necesitar cambiarlo por otro. por ejemplo MongoDB.
+
+Haremos un caso practico de sustitución de Doctrine ORM por Doctrine ODM.
+
+Tan solo necesitaremos instalar MongoDB he implementar las clases `User` y `UserGateway` específicas para `Doctrine ODM`.
+
+Para instalar MongoDB seguimos las intrucciones de la [página oficial](https://docs.mongodb.org/manual/installation/).
+
+Una vez instalada necesitaremos `DoctrineMongoDBBundle` para utilizar el `Document Manager` en vez del `Entity Manager` que utilizabamos hasta ahora.
+
+En el `composer.json`, añadimos las siguientes lineas
+
+```json
+            "doctrine/mongodb-odm": "~1.0",
+            "doctrine/mongodb-odm-bundle": "~3.0"
+```
+
+Y actualizamos composer
+
+    update doctrine/mongodb-odm doctrine/mongodb-odm-bundle
+
+Antes de darlo de alta en el kernel necesitamos añadir las siguientes lines al `autoload.php`
+
+```php
+    <?php
+    // app/autolad.php
+    use Doctrine\Common\Annotations\AnnotationRegistry;
+    use Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver;
+    use Composer\Autoload\ClassLoader;
+
+    /**
+     * @var ClassLoader $loader
+     */
+    $loader = require __DIR__.'/../vendor/autoload.php';
+    AnnotationDriver::registerAnnotationClasses();
+    AnnotationRegistry::registerLoader(array($loader, 'loadClass'));
+
+    return $loader;
+```
+
+Y ahora si, lo damos de alta en kernel
+
+```php
+    // app/AppKernel.php
+        ...
+            new Doctrine\Bundle\MongoDBBundle\DoctrineMongoDBBundle(),
+```
+
+También tenemos que añadir las configuraciones básicas al `config.yml`
+
+```yaml
+    # app/config/config.yml
+    ...
+    doctrine_mongodb:
+        connections:
+            default:
+                server: mongodb://localhost:27017
+                options: {}
+        default_database: test_database
+        document_managers:
+            default:
+                auto_mapping: true
+```
+
+Ahora pasamos a implementar las clases dependientes de la bbdd
+
+```php
+    <?php
+    // src/AppBundle/Document/User.php
+    namespace AppBundle\Document;
+    use AppBundle\Model\UserInterface;
+    use FOS\UserBundle\Document\User as BaseUser;
+    use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
+    use Doctrine\ODM\MongoDB\Mapping\Annotations\UniqueIndex;
+    use Symfony\Component\HttpFoundation\File\File;
+    use Vich\UploaderBundle\Mapping\Annotation as Vich;
+    use Hateoas\Configuration\Annotation as Hateoas;
+    /**
+     * User.
+     * 
+     * @MongoDB\Document(repositoryClass="AppBundle\Document\UserGateway")
+     */
+    class User extends BaseUser implements UserInterface
+    {
+        /**
+         * @MongoDB\Id(strategy="auto")
+         */
+        protected $id;
+        /**
+         * @var string
+         * 
+         * @MongoDB\String
+         */
+        protected $username;
+        /**
+         * @var string
+         * 
+         * @MongoDB\String
+         * @UniqueIndex
+         */
+        protected $usernameCanonical;
+        /**
+         * @var string
+         * 
+         * @MongoDB\String
+         */
+        protected $email;
+        /**
+         * @var string
+         * 
+         * @MongoDB\String
+         * @UniqueIndex
+         */
+        protected $emailCanonical;
+        /**
+         * @var bool
+         * 
+         * @MongoDB\Bool
+         */
+        protected $enabled;
+        /**
+         * The salt to use for hashing.
+         *
+         * @var string
+         * 
+         * @MongoDB\String
+         */
+        protected $salt;
+        /**
+         * Encrypted password. Must be persisted.
+         *
+         * @var string
+         * 
+         * @MongoDB\String
+         */
+        protected $password;
+        /**
+         * User description.
+         *
+         * @var string
+         *
+         * @MongoDB\String(nullable=true)
+         */
+        protected $description = null;
+        /**
+         * Plain password. Used for model validation. Must not be persisted.
+         *
+         * @var string
+         */
+        protected $plainPassword;
+        /**
+         * @var \DateTime
+         * 
+         * @MongoDB\Date(nullable=true)
+         */
+        protected $lastLogin;
+        /**
+         * Random string sent to the user email address in order to verify it.
+         *
+         * @var string
+         *
+         * @MongoDB\String(nullable=true)
+         */
+        protected $confirmationToken;
+        /**
+         * @var \DateTime
+         * 
+         * @MongoDB\Date(nullable=true)
+         */
+        protected $passwordRequestedAt;
+        /**
+         * @var bool
+         * 
+         * @MongoDB\Bool
+         */
+        protected $locked = false;
+        /**
+         * @var bool
+         * 
+         * @MongoDB\Bool
+         */
+        protected $expired = false;
+        /**
+         * @var \DateTime
+         * 
+         * @MongoDB\Date(nullable=true)
+         */
+        protected $expiresAt;
+        /**
+         * @var array
+         * 
+         * @MongoDB\Collection
+         */
+        protected $roles;
+        /**
+         * @var bool
+         * 
+         * @MongoDB\Bool
+         */
+        protected $credentialsExpired = false;
+        /**
+         * @var \DateTime
+         * 
+         * @MongoDB\Date(nullable=true)
+         */
+        protected $credentialsExpireAt;
+        /**
+         * @param type $username
+         * @param type $email
+         * @param type $pass
+         */
+        public function __construct($username = null, $email = null, $pass = null)
+        {
+            parent::__construct();
+
+            $this->username = $username;
+            $this->email = $email;
+            $this->password = $pass;
+        }
+        /**
+         * @param array $user
+         *
+         * @return \self
+         */
+        public static function fromArray(array $user = array('username' => null, 'email' => null))
+        {
+            $rawUser = new self($user['username'], $user['email']);
+            $rawUser->setExpired(array_key_exists('expired', $user) ? $user['expired'] : false);
+            $rawUser->setLocked(array_key_exists('locked', $user) ? $user['locked'] : false);
+
+            return $rawUser;
+        }
+        public function addRole($role)
+        {
+            return parent::addRole($role);
+        }
+        /**
+         * Removes sensitive data from the user.
+         */
+        public function eraseCredentials()
+        {
+            parent::eraseCredentials();
+        }
+        public function __toString()
+        {
+            return (string) $this->getUsername();
+        }
+        public function getDescription()
+        {
+            return $this->description;
+        }
+        public function setDescription($description)
+        {
+            $this->description = $description;
+        }
+        /**
+         * Get enabled
+         *
+         * @return bool $enabled
+         */
+        public function getEnabled()
+        {
+            return $this->enabled;
+        }
+        /**
+         * Set salt
+         *
+         * @param string $salt
+         * @return self
+         */
+        public function setSalt($salt)
+        {
+            $this->salt = $salt;
+            return $this;
+        }
+        /**
+         * Get locked
+         *
+         * @return bool $locked
+         */
+        public function getLocked()
+        {
+            return $this->locked;
+        }
+        /**
+         * Get expired
+         *
+         * @return bool $expired
+         */
+        public function getExpired()
+        {
+            return $this->expired;
+        }
+        /**
+         * Get expiresAt
+         *
+         * @return date $expiresAt
+         */
+        public function getExpiresAt()
+        {
+            return $this->expiresAt;
+        }
+        /**
+         * Get credentialsExpired
+         *
+         * @return bool $credentialsExpired
+         */
+        public function getCredentialsExpired()
+        {
+            return $this->credentialsExpired;
+        }
+        /**
+         * Get credentialsExpireAt
+         *
+         * @return date $credentialsExpireAt
+         */
+        public function getCredentialsExpireAt()
+        {
+            return $this->credentialsExpireAt;
+        }
+    }
+```
+
+Y la clase `UserGateway`
+
+```php
+    <?php
+    // src/AppBundle/Document/UserGateway.php
+    namespace AppBundle\Document;
+    use AppBundle\Model\UserInterface;
+    use AppBundle\Model\UserGatewayInterface;
+    use Doctrine\ODM\MongoDB\DocumentRepository;
+    /**
+     * UserGateway.
+     */
+    class UserGateway extends DocumentRepository implements UserGatewayInterface
+    {
+        /**
+         * @param User $user
+         *
+         * @return User
+         */
+        public function apiInsert(UserInterface $user)
+        {
+            $user
+                ->setEnabled(true)
+                ->setExpired(false)
+                ->setLocked(false)
+                ->addRole('read')
+                ->addRole('view')
+                ->addRole('edit')
+                ->addRole('ROLE_USER')
+            ;
+
+            return self::insert($user);
+        }
+        /**
+         * @return type
+         */
+        public function findNew()
+        {
+            return User::fromArray();
+        }
+        /**
+         * @param User $user
+         *
+         * @return User
+         */
+        public function insert(UserInterface $user)
+        {
+            $this->dm->persist($user);
+            $this->dm->flush();
+
+            return $user;
+        }
+        /**
+         * Update user.
+         */
+        public function update()
+        {   
+            $this->dm->flush();
+        }
+        /**
+         * @param $id
+         */
+        public function remove($id)
+        {
+            $user = $this->find($id);
+            $this->dm->remove($user);
+            $this->dm->flush();
+        }
+    }
+```
+
+Actualizamos nuestras dependencias en el archivo `services.yml`, modificamos la entrada `app_user_gateway` de la siguiente manera
+
+```yaml
+        app.user_gateway:
+            class: AppBundle\Document\UserGateway
+            factory: [ "@doctrine_mongodb", getRepository]
+            arguments: [ "AppBundle:User" ]
+```
+
+Generamos los documentaos necesarios para `MongoDB`
+
+    php app/console doctrine:mongodb:generate:documents AppBundle
+    php app/console doctrine:mongodb:generate:repositories AppBundle
+    php app/console doctrine:mongodb:schema:create --index
+
+Modificamos los tests para que utilicen el `Document Manager`
+
+```php
+    <?php
+    // src/AppBundle/Model/UserRepositoryTest.php
+    namespace AppBundle\Tests\Model;
+    use AppBundle\Document\User;
+    use AppBundle\Document\UserGateway;
+    ...
+        public function setUp()
+        {
+            parent::setUp();
+            $gatewayClassname = 'AppBundle\Document\UserGateway';
+    ...
+```
+
+Y 
+
+```php
+    // src/AppBundle/Controller/UserControllerTest.php
+        ...
+        protected function getLast($client)
+        {
+            $em = $client->getContainer()->get('doctrine_mongodb')->getManager();
+            $user = $em->getRepository('AppBundle:User')->findOneByUsername(self::NAME);
+
+            return $user->getId();
+        }
+```
+
+Ahora pasmos los test y comprobamos que todo sigue correcto. Hemos sustituido doctrine ORM por ODM tan solo añadiendo dos clases 
+prácticamente copiadas y pegadas.
+
+# 8. Cliente
 
 No tiene porque ser symfony, podría servir cualquier aplicación que consuma el API, AngularJS, Backbone, Ember, etc...
 De momento utilizaremos el sandbox que generamos con NelmioApiDocBundle.
+
+
+
+![Irontec](/home/kpicaza/server/educaedu/practica-final/app/Resources/doc/irontec.png)

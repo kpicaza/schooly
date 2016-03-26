@@ -1,11 +1,11 @@
 <?php
 
-namespace AppBundle\Tests\Entity;
+namespace AppBundle\Tests\Model;
 
-use AppBundle\Entity\User;
-use AppBundle\Entity\UserGateway;
-use AppBundle\Model\UserFactory;
-use AppBundle\Model\UserRepository;
+use AppBundle\Entity\User\User;
+use AppBundle\Entity\User\UserGateway;
+use AppBundle\Model\User\UserFactory;
+use AppBundle\Model\User\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class UserRepositoryTest extends WebTestCase
@@ -31,42 +31,17 @@ class UserRepositoryTest extends WebTestCase
     public function setUp()
     {
         parent::setUp();
-        $gatewayClassname = 'AppBundle\Entity\UserGateway';
+        $gatewayClassname = 'AppBundle\Entity\User\UserGateway';
         $this->gateway = $this->prophesize($gatewayClassname);
         $this->factory = new UserFactory();
         $this->repository = new UserRepository($this->gateway->reveal(), $this->factory);
     }
 
-    public function testFindAllUsersFromRepository()
+    public function testUser()
     {
-        $users = $this->repository->findAll();
-
-        $this->assertTrue(is_array($users));
+        $user = new User();
     }
-
-    public function testFindByUsersFromRepositoryWithEmptyParams()
-    {
-        $users = $this->repository->findBy();
-
-        $this->assertTrue(is_array($users));
-    }
-
-    public function testFindByUsersFromRepositoryWithValidParams()
-    {
-        $fakeUser = new User();
-        $fakeUsers = array($fakeUser->fromArray(array('username' => self::USER, 'email' => self::EMAIL, 'password' => self::PASS)));
-        $this->gateway->findBy(array('username' => self::USER), array('username' => 'ASC'), 10, null)->willReturn($fakeUsers);
-        $fakeUsers = $this->factory->makeAll($fakeUsers);
-
-        $users = $this->repository->findBy(array('username' => self::USER), array('username' => 'ASC'), 10, null);
-
-        $this->assertTrue(is_array($users));
-        //  var_dump($users);die();
-        foreach ($users as $user) {
-            $this->assertTrue($user instanceof User);
-        }
-    }
-
+    
     public function testFindOneByWithParams()
     {
         $fakeUser = new User();
@@ -82,10 +57,11 @@ class UserRepositoryTest extends WebTestCase
         $this->assertEquals($user->getEmail(), $fakeUser->getEmail());
         $this->assertEquals($user->getDescription(), $fakeUser->getDescription());
         $this->assertEquals($user->getUsername(), $user->__toString());
-    }
-
-    public function testFindOneByWithBadParams()
-    {
-        $this->repository->findOneBy(array('name' => 'jhkjgkjh'), array());
+        $this->assertEquals($user->getEnabled(), $fakeUser->getEnabled());
+        $this->assertEquals($user->getLocked(), $fakeUser->getLocked());
+        $this->assertEquals($user->getExpired(), $fakeUser->getExpired());
+        $this->assertEquals($user->getExpiresAt(), $fakeUser->getExpiresAt());
+        $this->assertEquals($user->getCredentialsExpired(), $fakeUser->getCredentialsExpired());
+        $this->assertEquals($user->getCredentialsExpireAt(), $fakeUser->getCredentialsExpireAt());
     }
 }

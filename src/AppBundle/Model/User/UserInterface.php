@@ -1,8 +1,8 @@
 <?php
 
-// src/AppBundle/Entity/User.php
+// src/AppBundle/Model/User/User.php
 
-namespace AppBundle\Model;
+namespace AppBundle\Model\User;
 
 use FOS\UserBundle\Model\GroupInterface;
 

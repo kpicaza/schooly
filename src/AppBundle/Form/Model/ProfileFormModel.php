@@ -25,17 +25,8 @@ class ProfileFormModel implements UserFormModelInterface
      *
      * @var string
      */
-    protected $description;
-    
-    /**
-     * @Assert\File(
-     *     maxSize = "1024k",
-     *     mimeTypes = {"image/png", "image/jpg", "image/jpeg", "image/gif"},
-     *     mimeTypesMessage = "Please upload a valid image"
-     * )
-     */
+    protected $description;    
     //protected $picture;
-    
     /**
      * 
      * @param type $username

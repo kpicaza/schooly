@@ -1,9 +1,6 @@
 <?php
-
 namespace AppBundle\Form\Model;
-
 use Symfony\Component\Validator\Constraints as Assert;
-
 /**
  * RegistrationFormModel.
  */
@@ -13,7 +10,6 @@ class RegistrationFormModel implements UserFormModelInterface
     const MAIL = 'email';
     const PLAIN = 'plainPassword';
     const PASS = 'password';
-
     /**
      * @Assert\NotBlank()
      * @Assert\Regex("/[a-zA-Z0-9]/")
@@ -21,7 +17,6 @@ class RegistrationFormModel implements UserFormModelInterface
      * @var string
      */
     protected $username;
-
     /**
      * @Assert\NotBlank()
      * @Assert\Email()
@@ -29,21 +24,24 @@ class RegistrationFormModel implements UserFormModelInterface
      * @var string
      */
     protected $email;
-
     /**
      * @Assert\NotBlank()
      *
      * @var string
      */
     protected $plainPassword;
-
     /**
      * @Assert\NotBlank()
      *
      * @var string
      */
     protected $password;
-
+    /**
+     * @param type $username
+     * @param type $email
+     * @param type $plainPassword
+     * @param type $password
+     */
     public function __construct($username = null, $email = null, $plainPassword = null, $password = null)
     {
         $this->username = $username;
@@ -51,7 +49,6 @@ class RegistrationFormModel implements UserFormModelInterface
         $this->plainPassword = $plainPassword;
         $this->password = $password;
     }
-
     /**
      * @param array $user
      *
@@ -66,42 +63,34 @@ class RegistrationFormModel implements UserFormModelInterface
             array_key_exists(self::PASS, $user) ? $user[self::PASS] : null
         );
     }
-
     public function setUsername($username)
     {
         $this->username = $username;
     }
-
     public function getUsername()
     {
         return $this->username;
     }
-
     public function setEmail($email)
     {
         $this->email = $email;
     }
-
     public function getEmail()
     {
         return $this->email;
     }
-
     public function setPlainPassword($plainPassword)
     {
         $this->plainPassword = $plainPassword;
     }
-
     public function getPlainPassword()
     {
         return $this->plainPassword;
     }
-
     public function setPassword($password)
     {
         $this->password = $password;
     }
-
     public function getPassword()
     {
         return $this->password;

@@ -1,21 +1,22 @@
 <?php
 
-// src/AppBundle/Document/User.php
+// src/AppBundle/Entity/User.php
 
-namespace AppBundle\Document;
+namespace AppBundle\Entity\User;
 
-use AppBundle\Model\UserInterface;
-use FOS\UserBundle\Document\User as BaseUser;
-use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
-use Doctrine\ODM\MongoDB\Mapping\Annotations\UniqueIndex;
+use AppBundle\Model\User\UserInterface;
+use FOS\UserBundle\Model\User as BaseUser;
+use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Hateoas\Configuration\Annotation as Hateoas;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * User.
- * 
- * @MongoDB\Document(repositoryClass="AppBundle\Document\UserGateway")
+ * @ORM\Entity
+ * @Vich\Uploadable
+ * @ORM\Table(name = "user")
+ * @ORM\Entity(repositoryClass="AppBundle\Entity\User\UserGateway")
  * @Hateoas\Relation(
  *      "get_user",
  *      href = @Hateoas\Route(
@@ -37,176 +38,165 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *          parameters = { "id" = "expr(object.getId())" }
  *      )
  * )
- * @Hateoas\Relation(
- *      "user_picture",
- *      href = @Hateoas\Route(
- *          "post_user_picture",
- *          parameters = { "id" = "expr(object.getId())" }
- *      )
- * )
  */
 class User extends BaseUser implements UserInterface
 {
 
     /**
-     * @MongoDB\Id(strategy="auto")
+     * @ORM\Id
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
 
     /**
      * @var string
-     * 
-     * @MongoDB\String
+     * @ORM\Column(type="string", length=255)
      */
     protected $username;
 
     /**
      * @var string
-     * 
-     * @MongoDB\String
-     * @UniqueIndex
+     * @ORM\Column(type="string", length=255, unique=true )
      */
     protected $usernameCanonical;
 
     /**
      * @var string
-     * 
-     * @MongoDB\String
+     * @ORM\Column(type="string", length=255)
      */
     protected $email;
 
     /**
      * @var string
-     * 
-     * @MongoDB\String
-     * @UniqueIndex
+     * @ORM\Column(type="string", length=255, unique=true )
      */
     protected $emailCanonical;
 
     /**
      * @var bool
-     * 
-     * @MongoDB\Bool
+     * @ORM\Column(type="boolean")
      */
     protected $enabled;
 
     /**
      * The salt to use for hashing.
      *
+     * @ORM\Column(type="string")
+     *
      * @var string
-     * 
-     * @MongoDB\String
      */
     protected $salt;
 
     /**
      * Encrypted password. Must be persisted.
      *
+     * @ORM\Column(type="string")
+     *
      * @var string
-     * 
-     * @MongoDB\String
      */
     protected $password;
 
     /**
      * User description.
      *
-     * @var string
+     * @ORM\Column(type="text", nullable=true)
      *
-     * @MongoDB\String(nullable=true)
+     * @var string
      */
     protected $description = null;
 
     /**
      * Plain password. Used for model validation. Must not be persisted.
      *
+     * @Assert\NotBlank(groups={"create"})
      * @var string
      */
     protected $plainPassword;
 
     /**
+     * @ORM\Column(type="datetime", nullable=true)
+     *
      * @var \DateTime
-     * 
-     * @MongoDB\Date(nullable=true)
      */
     protected $lastLogin;
 
     /**
      * Random string sent to the user email address in order to verify it.
      *
-     * @var string
+     * @ORM\Column(type="string", nullable=true)
      *
-     * @MongoDB\String(nullable=true)
+     * @var string
      */
     protected $confirmationToken;
 
     /**
+     * @ORM\Column(type="datetime", nullable=true)
+     *
      * @var \DateTime
-     * 
-     * @MongoDB\Date(nullable=true)
      */
     protected $passwordRequestedAt;
 
     /**
+     * @ORM\Column(type="boolean")
+     *
      * @var bool
-     * 
-     * @MongoDB\Bool
      */
     protected $locked = false;
 
     /**
+     * @ORM\Column(type="boolean")
+     *
      * @var bool
-     * 
-     * @MongoDB\Bool
      */
     protected $expired = false;
 
     /**
+     * @ORM\Column(type="datetime", nullable=true)
+     *
      * @var \DateTime
-     * 
-     * @MongoDB\Date(nullable=true)
      */
     protected $expiresAt;
 
     /**
+     * @ORM\Column(type="array")
+     *
      * @var array
-     * 
-     * @MongoDB\Collection
      */
     protected $roles;
 
     /**
+     * @ORM\Column(type="boolean")
+     *
      * @var bool
-     * 
-     * @MongoDB\Bool
      */
     protected $credentialsExpired = false;
 
     /**
+     * @ORM\Column(type="datetime", nullable=true)
+     *
      * @var \DateTime
-     * 
-     * @MongoDB\Date(nullable=true)
      */
     protected $credentialsExpireAt;
 
     /**
      * NOTE: This is not a mapped field of entity metadata, just a simple property.
      * 
-     * @Vich\UploadableField(mapping="product_image", fileNameProperty="imageName")
+     * @Vich\UploadableField(mapping="user_image", fileNameProperty="imageName")
      * 
      * @var File
      */
     private $imageFile;
 
     /**
-     * @MongoDB\String
+     * @ORM\Column(type="string", nullable=true)
      *
      * @var string
      */
     private $imageName;
 
     /**
-     * @MongoDB\Date(nullable=true)
+     * @ORM\Column(type="datetime", nullable=true)
      *
      * @var \DateTime
      */
@@ -220,7 +210,6 @@ class User extends BaseUser implements UserInterface
     public function __construct($username = null, $email = null, $pass = null)
     {
         parent::__construct();
-
         $this->username = $username;
         $this->email = $email;
         $this->password = $pass;
@@ -269,78 +258,6 @@ class User extends BaseUser implements UserInterface
     }
 
     /**
-     * Get enabled
-     *
-     * @return bool $enabled
-     */
-    public function getEnabled()
-    {
-        return $this->enabled;
-    }
-
-    /**
-     * Set salt
-     *
-     * @param string $salt
-     * @return self
-     */
-    public function setSalt($salt)
-    {
-        $this->salt = $salt;
-        return $this;
-    }
-
-    /**
-     * Get locked
-     *
-     * @return bool $locked
-     */
-    public function getLocked()
-    {
-        return $this->locked;
-    }
-
-    /**
-     * Get expired
-     *
-     * @return bool $expired
-     */
-    public function getExpired()
-    {
-        return $this->expired;
-    }
-
-    /**
-     * Get expiresAt
-     *
-     * @return date $expiresAt
-     */
-    public function getExpiresAt()
-    {
-        return $this->expiresAt;
-    }
-
-    /**
-     * Get credentialsExpired
-     *
-     * @return bool $credentialsExpired
-     */
-    public function getCredentialsExpired()
-    {
-        return $this->credentialsExpired;
-    }
-
-    /**
-     * Get credentialsExpireAt
-     *
-     * @return date $credentialsExpireAt
-     */
-    public function getCredentialsExpireAt()
-    {
-        return $this->credentialsExpireAt;
-    }
-
-    /**
      * If manually uploading a file (i.e. not using Symfony Form) ensure an instance
      * of 'UploadedFile' is injected into this setter to trigger the  update. If this
      * bundle's configuration parameter 'inject_on_load' is set to 'true' this setter
@@ -360,6 +277,30 @@ class User extends BaseUser implements UserInterface
             // otherwise the event listeners won't be called and the file is lost
             $this->updatedAt = new \DateTime('now');
         }
+
+        return $this;
+    }
+
+    /**
+     * Get enabled
+     *
+     * @return boolean
+     */
+    public function getEnabled()
+    {
+        return $this->enabled;
+    }
+
+    /**
+     * Set salt
+     *
+     * @param string $salt
+     *
+     * @return User
+     */
+    public function setSalt($salt)
+    {
+        $this->salt = $salt;
 
         return $this;
     }
@@ -392,7 +333,6 @@ class User extends BaseUser implements UserInterface
         return $this->imageName;
     }
 
-
     /**
      * Set updatedAt
      *
@@ -414,4 +354,68 @@ class User extends BaseUser implements UserInterface
     {
         return $this->updatedAt;
     }
+
+    public function setPlainPassword($password)
+    {
+        $this->plainPassword = $password;
+        
+        if ($password) {
+            // It is required that at least one field changes if you are using doctrine
+            // otherwise the event listeners won't be called and the new password is lost
+            $this->updatedAt = new \DateTime('now');
+        }
+        
+        return $this;
+    }
+
+    /**
+     * Get locked
+     *
+     * @return boolean
+     */
+    public function getLocked()
+    {
+        return $this->locked;
+    }
+
+    /**
+     * Get expired
+     *
+     * @return boolean
+     */
+    public function getExpired()
+    {
+        return $this->expired;
+    }
+
+    /**
+     * Get expiresAt
+     *
+     * @return \DateTime
+     */
+    public function getExpiresAt()
+    {
+        return $this->expiresAt;
+    }
+
+    /**
+     * Get credentialsExpired
+     *
+     * @return boolean
+     */
+    public function getCredentialsExpired()
+    {
+        return $this->credentialsExpired;
+    }
+
+    /**
+     * Get credentialsExpireAt
+     *
+     * @return \DateTime
+     */
+    public function getCredentialsExpireAt()
+    {
+        return $this->credentialsExpireAt;
+    }
+
 }

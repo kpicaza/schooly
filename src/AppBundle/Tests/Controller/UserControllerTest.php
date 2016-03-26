@@ -7,22 +7,21 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 class UserControllerTest extends WebTestCase
 {
 
-    const NAME = 'meco';
-    const MAIL = 'meco@mail.com';
+    const NAME = 'mico';
+    const MAIL = 'mico@mail.com';
     const PASS = 'Demo1234';
     const DESCRIPTION = 'ha sido el texto de relleno estándar de las industrias desde el año 1500, '
         . 'cuando un impresor (N. del T. persona que se dedica a la imprenta) desconocido';
     const ROUTE = '/api/users/%s';
     const REGISTER_ROUTE = '/api/users';
 
-    protected $id;
-
     /**
-     * Create a client with a default Authorization header.
+     * Create a client with a default Authorization header. 
      *
      * @param string $username
      * @param string $password
-     *
+     * @see https://github.com/lexik/LexikJWTAuthenticationBundle/blob/master/Resources/doc/3-functional-testing.md
+     * 
      * @return \Symfony\Bundle\FrameworkBundle\Client
      */
     protected function createAuthenticatedClient($username = 'user', $password = 'password')
@@ -45,7 +44,47 @@ class UserControllerTest extends WebTestCase
         return $client;
     }
 
-    protected function post($uri, array $data, $auth = false)
+    public function setRoles($client, array $roles)
+    {
+        $em = $client->getContainer()->get('doctrine')->getManager();
+        $user = $em->getRepository('AppBundle:User\User')->findOneByUsername(self::NAME);
+        foreach ($roles as $role) {
+            $user->addRole($role);
+        }
+        $em->flush();
+    }
+
+    public function unSetRoles(array $roles)
+    {
+        $client = $this->getClient(true);
+        $em = $client->getContainer()->get('doctrine')->getManager();
+        $user = $em->getRepository('AppBundle:User\User')->findOneByUsername(self::NAME);
+        foreach ($roles as $role) {
+            $user->removeRole($role);
+        }
+        $em->flush();
+    }
+
+    public function getLast($client)
+    {
+        $em = $client->getContainer()->get('doctrine')->getManager();
+        $user = $em->getRepository('AppBundle:User\User')->findOneByUsername(self::NAME);
+
+        return $user->getId();
+    }
+
+    public function getClient($auth = false)
+    {
+        if (true === $auth) {
+            $client = $this->createAuthenticatedClient(self::NAME, self::PASS);
+        }
+        else {
+            $client = static::createClient();
+        }
+        return $client;
+    }
+
+    public function post($uri, array $data, $auth = false)
     {
         $client = $this->getClient($auth);
 
@@ -54,33 +93,13 @@ class UserControllerTest extends WebTestCase
         return $client->getResponse();
     }
 
-    protected function put($uri, array $data, $auth = false)
+    public function put($uri, array $data, $auth = false)
     {
         $client = $this->getClient($auth);
 
         $client->request('PUT', $uri, $data);
 
         return $client->getResponse();
-    }
-
-    protected function getLast($client)
-    {
-        $em = $client->getContainer()->get('doctrine')->getManager();
-        $user = $em->getRepository('AppBundle:User')->findOneByUsername('meco');
-        
-        return $user->getId();
-    }
-
-    protected function getClient($auth = false)
-    {
-        if (true === $auth) {
-            $client = $this->createAuthenticatedClient(self::NAME, self::PASS);
-        }
-        else {
-            $client = static::createClient();
-        }
-
-        return $client;
     }
 
     public function testRegistrationFailedWithEmptyForm()
@@ -92,18 +111,6 @@ class UserControllerTest extends WebTestCase
         $this->assertEquals(400, $client->getResponse()->getStatusCode());
     }
 
-    public function testRegistrationFailedWithOutAllParams()
-    {
-        $response = $this->post(self::REGISTER_ROUTE, array(
-          'username' => self::NAME,
-          'email' => self::MAIL,
-          'plainPassword' => null,
-          'password' => self::PASS,
-            ), true);
-
-        $this->assertEquals(400, $response->getStatusCode());
-    }
-
     public function testRegistration()
     {
         $response = $this->post(self::REGISTER_ROUTE, array(
@@ -111,21 +118,39 @@ class UserControllerTest extends WebTestCase
           'email' => self::MAIL,
           'plainPassword' => self::PASS,
           'password' => self::PASS,
-            ), true);
-
-        $this->assertEquals(201, $response->getStatusCode());
+        ));
+        $this->assertEquals(200, $response->getStatusCode());
     }
 
-    public function testRegistrationTwiceMustFail()
+    public function testRepeatedUserRegistration()
     {
         $response = $this->post(self::REGISTER_ROUTE, array(
           'username' => self::NAME,
           'email' => self::MAIL,
           'plainPassword' => self::PASS,
           'password' => self::PASS,
-            ), true);
-
+        ));
         $this->assertEquals(400, $response->getStatusCode());
+    }
+
+    public function testValidGetUser()
+    {
+        $client = $this->createAuthenticatedClient(self::NAME, self::PASS);
+
+        $id = $this->getLast($client);
+
+        $client->request('GET', sprintf(self::ROUTE, $id));
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+    }
+
+    public function testNotFoundGetUser()
+    {
+        $client = $this->createAuthenticatedClient(self::NAME, self::PASS);
+
+        $client->request('GET', sprintf(self::ROUTE, 'kjhkhk'));
+
+        $this->assertEquals(404, $client->getResponse()->getStatusCode());
     }
 
     public function testPutUserWithOutAuthentication()
@@ -133,7 +158,6 @@ class UserControllerTest extends WebTestCase
         $client = static::createClient();
 
         $id = $this->getLast($client);
-        
         $client->request('PUT', sprintf(self::ROUTE, $id));
 
         $this->assertEquals(401, $client->getResponse()->getStatusCode());
@@ -165,45 +189,24 @@ class UserControllerTest extends WebTestCase
         $this->assertEquals(200, $response->getStatusCode());
     }
 
-    public function testPutUserDeleteDescription()
-    {
-        $client = static::createClient();
-        $id = $this->getLast($client);
-
-        $response = $this->put(sprintf(self::ROUTE, $id), array(
-          'email' => 'asd' . self::MAIL,
-          'description' => '',
-            ), true);
-
-        $this->assertEquals(200, $response->getStatusCode());
-    }
-
-    public function testUnauthorizedGetUser()
-    {
-        $client = static::createClient();
-        $id = $this->getLast($client);
-
-        $client->request('GET', sprintf(self::ROUTE, $id));
-
-        $this->assertEquals(401, $client->getResponse()->getStatusCode());
-    }
-
-    public function testInvalidCredentialsGetUser()
-    {
-        $client = $this->createAuthenticatedClient('bad', 'pass');
-        $id = $this->getLast($client);
-
-        $client->request('GET', sprintf(self::ROUTE, $id));
-
-        $this->assertEquals(401, $client->getResponse()->getStatusCode());
-    }
-
-    public function testValidGetUser()
+    public function testGetUsersWithoutPermission()
     {
         $client = $this->createAuthenticatedClient(self::NAME, self::PASS);
-        $id = $this->getLast($client);
 
-        $client->request('GET', sprintf(self::ROUTE, $id));
+        $client->request('GET', self::REGISTER_ROUTE);
+
+        $this->assertEquals(403, $client->getResponse()->getStatusCode());
+    }
+
+    public function testGetUsersWithPermission()
+    {
+        $client = $this->createAuthenticatedClient(self::NAME, self::PASS);
+
+        $this->setRoles($client, array(
+          'ROLE_TEACHER'
+        ));
+
+        $client->request('GET', self::REGISTER_ROUTE);
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
     }
@@ -215,7 +218,7 @@ class UserControllerTest extends WebTestCase
 
         $client->request('DELETE', sprintf(self::ROUTE, $id));
 
-        $this->assertEquals(204, $client->getResponse()->getStatusCode());
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
     }
 
 }

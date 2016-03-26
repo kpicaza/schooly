@@ -9,7 +9,7 @@
 easy_admin:
     entities:
         User:
-            class: AppBundle\Entity\User
+            class: AppBundle\Entity\User\User
             label: 'Users'
             list:
                 fields: 

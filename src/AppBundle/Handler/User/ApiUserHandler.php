@@ -1,17 +1,15 @@
 <?php
-
-namespace AppBundle\Handler;
-
-use AppBundle\Model\UserRepository;
-use AppBundle\Model\UserInterface;
+namespace AppBundle\Handler\User;
+use AppBundle\Model\User\UserRepository;
+use AppBundle\Model\User\UserInterface;
 use AppBundle\Form\Type\RegistrationFormType;
 use AppBundle\Form\Model\RegistrationFormModel;
 use AppBundle\Form\Type\ProfileFormType;
 use AppBundle\Form\Model\ProfileFormModel;
 use AppBundle\Form\Model\UserFormModelInterface;
+use AppBundle\Handler\ApiHandlerInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormError;
-
 /**
  * ApiUserHandler.
  */
@@ -21,12 +19,10 @@ class ApiUserHandler implements ApiHandlerInterface
      * @var UserRepository
      */
     protected $repository;
-
     /**
      * @var FormFactoryInterface
      */
     protected $formFactory;
-
     /**
      * Init Handler.
      * 
@@ -38,11 +34,22 @@ class ApiUserHandler implements ApiHandlerInterface
         $this->repository = $repository;
         $this->formFactory = $formFactory;
     }
-
+    /**
+     * Get object list from repository.
+     * 
+     * @param array $criteria
+     * @param array $sort
+     * @param integer $limit
+     * @param integer $skip
+     */
+    public function getList(array $criteria, array $sort = null, $limit = null, $skip = null)
+    {
+        return $this->repository->findBy($criteria, $sort , $limit , $skip );
+    }
     /**
      * Get user from repository.
      * 
-     * @param uuid $id
+     * @param integer $id
      *
      * @return User
      */
@@ -50,7 +57,6 @@ class ApiUserHandler implements ApiHandlerInterface
     {
         return $this->repository->parse($id);
     }
-
     /**
      * Insert User to repository.
      * 
@@ -63,25 +69,19 @@ class ApiUserHandler implements ApiHandlerInterface
         $userModel = RegistrationFormModel::fromArray($params);
         $form = $this->formFactory->create(RegistrationFormType::class, $userModel, array('method' => 'POST'));
         $form->submit($params);
-
         if ($form->isValid()) {
             try {
                 $rawUser = $this->insertFromForm($form->getData());
-
                 $user = $this->repository->insert($rawUser);
-
                 return $this->repository->parse($user->getId());
             } catch (\Exception $ex) {
-                //  throw new $ex;
+                // throw new $ex;
                 $form->addError(new FormError('Duplicate entry for email or username.'));
-                //throw new \Exception($ex);
                 // log this somewhere.
             }
         }
-
         return $form;
     }
-
     /**
      * Update User to repository.
      * 
@@ -106,17 +106,15 @@ class ApiUserHandler implements ApiHandlerInterface
 
         return $form;
     }
-
     /**
      * Delete User.
      * 
-     * @param User $id
+     * @param $id
      */
     public function delete($id)
     {
         $this->repository->remove($id);
     }
-
     /**
      * @param ProfileFormModel $userModel
      *
@@ -125,16 +123,13 @@ class ApiUserHandler implements ApiHandlerInterface
     protected function insertFromForm(UserFormModelInterface $userModel)
     {
         $user = $this->repository->findNew();
-
         $user
             ->setUsername($userModel->getUsername())
             ->setUsernameCanonical($userModel->getUsername())
             ->setPlainPassword($userModel->getPlainPassword())
         ;
-
         return $this->fromForm($user, $userModel);
     }
-
     /**
      * @param type             $id
      * @param ProfileFormModel $userModel
@@ -149,7 +144,6 @@ class ApiUserHandler implements ApiHandlerInterface
 
         return $this->fromForm($user, $userModel);
     }
-
     /**
      * @param User             $user
      * @param ProfileFormModel $userModel
@@ -162,7 +156,6 @@ class ApiUserHandler implements ApiHandlerInterface
             ->setEmailCanonical($userModel->getEmail())
             ->setEmail($userModel->getEmail())
         ;
-
         return $user;
     }
 }

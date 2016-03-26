@@ -4,14 +4,20 @@
 
 namespace AppBundle\Entity;
 
+use AppBundle\Model\UserInterface;
 use FOS\UserBundle\Model\User as BaseUser;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
  * @ORM\Table(name = "user")
+ * @ORM\Entity(repositoryClass="AppBundle\Entity\UserGateway")
  */
+<<<<<<< HEAD:src/AppBundle/Entity/User.php~
 class User extends BaseUser
+=======
+class User extends BaseUser implements UserInterface
+>>>>>>> feature/school:src/AppBundle/Entity/User.php~
 {
 
     /**
@@ -130,17 +136,49 @@ class User extends BaseUser
      */
     protected $credentialsExpireAt;
 
+<<<<<<< HEAD:src/AppBundle/Entity/User.php~
     public function __construct()
     {
         parent::__construct();
         // your own logic
     }
 
+=======
+    /**
+     * @param type $username
+     * @param type $email
+     * @param type $pass
+     */
+    public function __construct($username = null, $email = null, $pass = null)
+    {
+        parent::__construct();
+        $this->username = $username;
+        $this->email = $email;
+        $this->password = $pass;
+    }
+
+    /**
+     * @param array $user
+     *
+     * @return \self
+     */
+    public static function fromArray(array $user = array('username' => null, 'email' => null))
+    {
+        $rawUser = new self($user['username'], $user['email']);
+        $rawUser->setExpired(array_key_exists('expired', $user) ? $user['expired'] : false);
+        $rawUser->setLocked(array_key_exists('locked', $user) ? $user['locked'] : false);
+        return $rawUser;
+    }
+>>>>>>> feature/school:src/AppBundle/Entity/User.php~
 
     /**
      * Get enabled
      *
+<<<<<<< HEAD:src/AppBundle/Entity/User.php~
      * @return boolean 
+=======
+     * @return boolean
+>>>>>>> feature/school:src/AppBundle/Entity/User.php~
      */
     public function getEnabled()
     {
@@ -151,6 +189,10 @@ class User extends BaseUser
      * Set salt
      *
      * @param string $salt
+<<<<<<< HEAD:src/AppBundle/Entity/User.php~
+=======
+     *
+>>>>>>> feature/school:src/AppBundle/Entity/User.php~
      * @return User
      */
     public function setSalt($salt)
@@ -161,9 +203,39 @@ class User extends BaseUser
     }
 
     /**
+<<<<<<< HEAD:src/AppBundle/Entity/User.php~
      * Get locked
      *
      * @return boolean 
+=======
+     * Set description
+     *
+     * @param string $description
+     *
+     * @return User
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get description
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * Get locked
+     *
+     * @return boolean
+>>>>>>> feature/school:src/AppBundle/Entity/User.php~
      */
     public function getLocked()
     {
@@ -173,7 +245,11 @@ class User extends BaseUser
     /**
      * Get expired
      *
+<<<<<<< HEAD:src/AppBundle/Entity/User.php~
      * @return boolean 
+=======
+     * @return boolean
+>>>>>>> feature/school:src/AppBundle/Entity/User.php~
      */
     public function getExpired()
     {
@@ -183,7 +259,11 @@ class User extends BaseUser
     /**
      * Get expiresAt
      *
+<<<<<<< HEAD:src/AppBundle/Entity/User.php~
      * @return \DateTime 
+=======
+     * @return \DateTime
+>>>>>>> feature/school:src/AppBundle/Entity/User.php~
      */
     public function getExpiresAt()
     {
@@ -193,7 +273,11 @@ class User extends BaseUser
     /**
      * Get credentialsExpired
      *
+<<<<<<< HEAD:src/AppBundle/Entity/User.php~
      * @return boolean 
+=======
+     * @return boolean
+>>>>>>> feature/school:src/AppBundle/Entity/User.php~
      */
     public function getCredentialsExpired()
     {
@@ -203,10 +287,18 @@ class User extends BaseUser
     /**
      * Get credentialsExpireAt
      *
+<<<<<<< HEAD:src/AppBundle/Entity/User.php~
      * @return \DateTime 
+=======
+     * @return \DateTime
+>>>>>>> feature/school:src/AppBundle/Entity/User.php~
      */
     public function getCredentialsExpireAt()
     {
         return $this->credentialsExpireAt;
     }
+<<<<<<< HEAD:src/AppBundle/Entity/User.php~
+=======
+
+>>>>>>> feature/school:src/AppBundle/Entity/User.php~
 }

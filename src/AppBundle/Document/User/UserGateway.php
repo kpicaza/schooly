@@ -1,16 +1,37 @@
 <?php
-
-namespace AppBundle\Document;
-
-use AppBundle\Model\UserInterface;
-use AppBundle\Model\UserGatewayInterface;
+namespace AppBundle\Document\User;
+use AppBundle\Model\User\UserInterface;
+use AppBundle\Model\User\UserGatewayInterface;
 use Doctrine\ODM\MongoDB\DocumentRepository;
-
 /**
  * UserGateway.
  */
 class UserGateway extends DocumentRepository implements UserGatewayInterface
 {
+    /**
+     * @param type $id
+     */
+    public function find($id)
+    {
+        return parent::find($id);
+    }
+    /**
+     * @param array $criteria
+     * @param array $sort
+     * @param integer $limit
+     * @param integer $skip
+     */
+    public function findBy(array $criteria, array $sort = null, $limit = null, $skip = null)
+    {
+        return parent::findBy($criteria, $sort, $limit, $skip);
+    }
+    /**
+     * @param array $criteria
+     */
+    public function findOneBy(array $criteria)
+    {
+        return parent::findOneBy($criteria);
+    }
     /**
      * @param User $user
      *
@@ -30,7 +51,6 @@ class UserGateway extends DocumentRepository implements UserGatewayInterface
 
         return self::insert($user);
     }
-
     /**
      * @return type
      */
@@ -38,7 +58,6 @@ class UserGateway extends DocumentRepository implements UserGatewayInterface
     {
         return User::fromArray();
     }
-
     /**
      * @param User $user
      *
@@ -51,7 +70,6 @@ class UserGateway extends DocumentRepository implements UserGatewayInterface
 
         return $user;
     }
-
     /**
      * Update user.
      */
@@ -59,9 +77,8 @@ class UserGateway extends DocumentRepository implements UserGatewayInterface
     {   
         $this->dm->flush();
     }
-
     /**
-     * @param User $user
+     * @param $id
      */
     public function remove($id)
     {
