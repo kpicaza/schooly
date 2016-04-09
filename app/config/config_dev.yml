@@ -31,4 +31,4 @@ monolog:
         #    level:  info
 
 swiftmailer:
-    delivery_address: 'kpicaza.sound@gmail.com'
+    delivery_address: '%dev_delivery_mail%'
