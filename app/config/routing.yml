@@ -23,6 +23,11 @@ app_course:
     prefix: /api
     resource: AppBundle\Controller\CourseController
 
+app_grade:
+    type: rest
+    prefix: /api
+    resource: AppBundle\Controller\GradeController
+
 # app/config/routing.yml
 fos_user_security:
     resource: "@FOSUserBundle/Resources/config/routing/security.xml"

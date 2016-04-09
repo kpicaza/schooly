@@ -14,6 +14,7 @@ class CourseController extends FOSRestController
 {
     /**
      * @ApiDoc(
+     *   section = "Courses",
      *   description = "Get course list.",
      *   statusCodes = {
      *     200 = "Show user info.",
@@ -34,6 +35,7 @@ class CourseController extends FOSRestController
 
     /**
      * @ApiDoc(
+     *   section = "Courses",
      *   description = "Get course by ID.",
      *   statusCodes = {
      *     200 = "Show user info.",
@@ -60,6 +62,7 @@ class CourseController extends FOSRestController
     /**
      * @Security("has_role('ROLE_TEACHER')")
      * @ApiDoc(
+     *   section = "Courses",
      *   description = "Create new Course.",
      *   input = "AppBundle\Form\Model\CourseFormModel",
      *   output = "AppBundle\Model\Course\CourseInterface",
@@ -84,6 +87,7 @@ class CourseController extends FOSRestController
     /**
      * @Security("has_role('ROLE_TEACHER')")
      * @ApiDoc(
+     *   section = "Courses",
      *   description = "Add or update picture to a Course.",
      *   input = "AppBundle\Form\Model\FileFormModel",
      *   output = "AppBundle\Model\Course\CourseInterface",
@@ -111,6 +115,7 @@ class CourseController extends FOSRestController
     /**
      * @Security("has_role('ROLE_TEACHER')")
      * @ApiDoc(
+     *   section = "Courses",
      *   description = "Update course by ID.",
      *   input = "AppBundle\Form\Model\CourseFormModel",
      *   output = "AppBundle\Model\Course\CourseInterface",
@@ -137,6 +142,7 @@ class CourseController extends FOSRestController
     /**
      * @Security("has_role('ROLE_ADMIN')")
      * @ApiDoc(
+     *   section = "Courses",
      *   description = "Delete course.",
      *   statusCodes = {
      *     204 = "Do no return nothing.",

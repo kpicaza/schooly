@@ -46,9 +46,9 @@ class CourseRepository
      *
      * @return CourseInterface
      */
-    public function findOneBy(array $criteria, array $orderBy = array())
+    public function findOneBy(array $criteria)
     {
-        $course = $this->gateway->findOneBy($criteria, $orderBy);
+        $course = $this->gateway->findOneBy($criteria);
 
         return null === $course ? null : $this->factory->makeOne($course);
     }

@@ -4,6 +4,7 @@ namespace AppBundle\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use AppBundle\Tests\Controller\UserControllerTest;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class CourseControllerTest extends WebTestCase
 {
@@ -14,6 +15,8 @@ class CourseControllerTest extends WebTestCase
     const RESOURCE_PICTURE = 'pictures';
     const DESCRIPTION = 'ha sido el texto de relleno estándar de las industrias desde el año 1500, '
     . 'cuando un impresor (N. del T. persona que se dedica a la imprenta) desconocido';
+    const FILE_PATH = __DIR__ . '/../Resources/';
+    const FILE_NAME = 'open-weather.jpg';
 
     protected $userTest;
 
@@ -30,6 +33,30 @@ class CourseControllerTest extends WebTestCase
         $course = $em->getRepository('AppBundle:Course\Course')->findOneByName(self::NAME);
 
         return $course->getId();
+    }
+
+    public function getUploadedFile()
+    {
+        exec('cp ' . self::FILE_PATH . self::FILE_NAME . ' ' . self::FILE_PATH . self::FILE_NAME . '-1');
+
+        return new UploadedFile(
+            self::FILE_PATH . self::FILE_NAME . '-1',
+            self::FILE_NAME,
+            'image/jpeg',
+            123
+        );
+    }
+
+    public function postPicture($client, $url, $file)
+    {
+        $client->request(
+            'POST',
+            $url,
+            array(),
+            array('imageFile' => $file)
+        );
+
+        return $client->getResponse();
     }
 
     public function testCreateCourse()
@@ -84,9 +111,7 @@ class CourseControllerTest extends WebTestCase
 
         $id = $this->getLast($client);
 
-        $response = $this->userTest->post(sprintf(self::ROUTE_ID, $id) . '/' . self::RESOURCE_PICTURE, array(
-            'name' => self::NAME,
-        ), true);
+        $response = $this->postPicture($client, sprintf(self::ROUTE_ID . '/' . self::RESOURCE_PICTURE, $id), array());
 
         $this->assertEquals(403, $response->getStatusCode());
     }
@@ -106,6 +131,23 @@ class CourseControllerTest extends WebTestCase
         $this->userTest->unSetRoles(array('ROLE_TEACHER'));
 
         $this->assertEquals(400, $response->getStatusCode());
+    }
+
+    public function testPostPicture()
+    {
+        $client = $this->userTest->getClient(true);
+
+        $this->userTest->setRoles($client, array('ROLE_TEACHER'));
+
+        $id = $this->getLast($client);
+
+        $file = $this->getUploadedFile();
+
+        $response = $this->postPicture($client, sprintf(self::ROUTE_ID . '/' . self::RESOURCE_PICTURE, $id), $file);
+
+        $this->userTest->unSetRoles(array('ROLE_TEACHER'));
+
+        $this->assertEquals(200, $response->getStatusCode());
     }
 
     public function testValidGetCourses()

@@ -16,7 +16,7 @@ class FileFormModel
      *
      * @Assert\NotNull()
      * @Assert\Image(
-     *     allowLandscape = false,
+     *     allowLandscape = true,
      *     allowPortrait = true
      * )
      * 

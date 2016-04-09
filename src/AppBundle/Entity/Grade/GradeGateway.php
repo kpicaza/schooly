@@ -1,12 +1,20 @@
 <?php
-namespace AppBundle\Entity\Course;
-use AppBundle\Model\Course\CourseGatewayInterface;
-use AppBundle\Model\Course\CourseInterface;
+
+namespace AppBundle\Entity\Grade;
+
+use AppBundle\Model\Grade\GradeGatewayInterface;
+use AppBundle\Model\Grade\GradeInterface;
 use Doctrine\ORM\EntityRepository;
-class CourseGateway extends EntityRepository implements CourseGatewayInterface
+
+/**
+ * Class GradeGateway
+ * @package AppBundle\Entity\Grade
+ */
+class GradeGateway extends EntityRepository implements GradeGatewayInterface
 {
+
     /**
-     * @param type $id
+     * @param string|integer|Grade $id
      */
     public function find($id)
     {
@@ -30,25 +38,26 @@ class CourseGateway extends EntityRepository implements CourseGatewayInterface
         return parent::findOneBy($criteria);
     }
     /**
-     * @return Course
+     * @return Grade
      */
-    public function findNew()
+    public function findNew($subject = null, $description = null)
     {
-        return new Course();
+        return new Grade($subject, $description);
     }
+
     /**
-     * @param CourseInterface $course
-     * @return CourseInterface
+     * @param GradeInterface $grade
+     * @return GradeInterface
      */
-    public function insert($course)
+    public function insert(GradeInterface $grade)
     {
-        $this->_em->persist($course);
+        $this->_em->persist($grade);
         $this->_em->flush();
 
-        return $course;
+        return $grade;
     }
     /**
-     * Update course.
+     * Update Grade.
      */
     public function update()
     {
@@ -59,8 +68,8 @@ class CourseGateway extends EntityRepository implements CourseGatewayInterface
      */
     public function remove($id)
     {
-        $course = $this->find($id);
-        $this->_em->remove($course);
+        $grade = $this->find($id);
+        $this->_em->remove($grade);
         $this->_em->flush();
     }
 }

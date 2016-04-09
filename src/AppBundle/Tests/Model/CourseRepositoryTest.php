@@ -56,7 +56,7 @@ class CourseRepositoryTest extends WebTestCase
         $fakeCourse = new Course();
         $fakeCourse = $fakeCourse->setName(self::NAME);
 
-        $this->gateway->findOneBy(array('name' => self::NAME), array())->willReturn($fakeCourse);
+        $this->gateway->findOneBy(array('name' => self::NAME))->willReturn($fakeCourse);
         $fakeCourse = $this->factory->makeOne($fakeCourse);
 
         $course = $this->repository->findOneBy(array('name' => self::NAME));

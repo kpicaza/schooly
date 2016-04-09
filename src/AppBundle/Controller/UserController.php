@@ -18,6 +18,7 @@ class UserController extends FOSRestController
     /**
      * @Security("has_role('ROLE_TEACHER')")
      * @ApiDoc(
+     *   section = "Users",
      *   description = "Get user list.",
      *   statusCodes = {
      *     200 = "Show user info.",
@@ -38,6 +39,7 @@ class UserController extends FOSRestController
     /**
      * @Security("is_granted('view', user) or has_role('ROLE_TEACHER')")
      * @ApiDoc(
+     *   section = "Users",
      *   description = "Get your own user.",
      *   statusCodes = {
      *     200 = "Show user info.",
@@ -62,6 +64,7 @@ class UserController extends FOSRestController
     }
     /**
      * @ApiDoc(
+     *   section = "Users",
      *   description = "Register new user.",
      *   input = "AppBundle\Form\Model\RegistrationFormModel",
      *   output = "AppBundle\Model\User\UserInterface",
@@ -85,6 +88,7 @@ class UserController extends FOSRestController
     /**
      * @Security("is_granted('edit', user)")
      * @ApiDoc(
+     *   section = "Users",
      *   description = "Update own user.",
      *   input = "AppBundle\Form\Model\ProfileFormModel",
      *   output = "AppBundle\Model\User\UserInterface",
@@ -110,6 +114,7 @@ class UserController extends FOSRestController
     /**
      * @Security("is_granted('edit', user)")
      * @ApiDoc(
+     *   section = "Users",
      *   description = "Delete own user.",
      *   statusCodes = {
      *     204 = "Do no return nothing.",

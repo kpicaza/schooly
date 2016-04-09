@@ -1,11 +1,13 @@
 <?php
 
 namespace AppBundle\Model\User;
+use AppBundle\Model\GatewayInterface;
 
 /**
- * UserGateway.
+ * Interface UserGatewayInterface
+ * @package AppBundle\Model\User
  */
-interface UserGatewayInterface
+interface UserGatewayInterface extends GatewayInterface
 {
     /**
      * @param integer|string|UserInterface $id

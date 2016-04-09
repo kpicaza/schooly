@@ -3,11 +3,37 @@ namespace AppBundle\Entity\User;
 use AppBundle\Model\User\UserInterface;
 use AppBundle\Model\User\UserGatewayInterface;
 use Doctrine\ORM\EntityRepository;
+
 /**
- * UserGateway.
+ * Class UserGateway
+ * @package AppBundle\Entity\User
  */
 class UserGateway extends EntityRepository implements UserGatewayInterface
 {
+    /**
+     * @param string|integer|Grade $id
+     */
+    public function find($id)
+    {
+        return parent::find($id);
+    }
+    /**
+     * @param array $criteria
+     * @param array $sort
+     * @param integer $limit
+     * @param integer $skip
+     */
+    public function findBy(array $criteria, array $sort = null, $limit = null, $skip = null)
+    {
+        return parent::findBy($criteria, $sort, $limit, $skip);
+    }
+    /**
+     * @param array $criteria
+     */
+    public function findOneBy(array $criteria)
+    {
+        return parent::findOneBy($criteria);
+    }
     /**
      * @param User $user
      *

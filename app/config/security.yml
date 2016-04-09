@@ -30,7 +30,13 @@ security:
             methods: [GET]
             stateless: true
             anonymous: true
-            
+
+        grades:
+            pattern:  ^/api/grades
+            methods: [GET]
+            stateless: true
+            anonymous: true
+
         login:
             pattern:  ^/api/login
             stateless: true
@@ -80,5 +86,6 @@ security:
         - { path: ^/api/users, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
         - { path: ^/api/users, roles: ROLE_TEACHER, methods: [GET] }
         - { path: ^/api/courses, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [GET] }
+        - { path: ^/api/grades, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [GET] }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/admin/, role: ROLE_ADMIN }        
