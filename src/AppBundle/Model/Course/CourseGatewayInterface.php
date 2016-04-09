@@ -6,7 +6,7 @@ namespace AppBundle\Model\Course;
 interface CourseGatewayInterface
 {
     /**
-     * @param type $id
+     * @param integer|string|CourseInterface $id
      */
     public function find($id);
     /**
@@ -19,6 +19,9 @@ interface CourseGatewayInterface
     /**
      * @param array $criteria
      */
-    public function findOneBy(array $criteria);
+    public function findOneBy(array $criteria, array $order = null);
+    /**
+     * @return mixed
+     */
     public function findNew();
 }

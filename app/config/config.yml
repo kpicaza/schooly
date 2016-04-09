@@ -80,21 +80,19 @@ vich_uploader:
     db_driver: orm # mongodb, orm or propel or phpcr
     mappings:
         user_image:
-            uri_prefix:         %app.path.user_image%
-            upload_destination: %kernel.root_dir%/../web/uploads/images/users
+            uri_prefix:         "%app.path.user_image%"
+            upload_destination: "%kernel.root_dir%/../web/uploads/images/users"
+
+        course_image:
+            uri_prefix:         "%app.path.course_image%"
+            upload_destination: "%kernel.root_dir%/../web/uploads/images/courses"
 
 bazinga_hateoas:
     metadata:
         cache:                file
         file_cache:
-            dir:              %kernel.cache_dir%/hateoas
-            
-lexik_jwt_authentication:
-    private_key_path: %jwt_private_key_path%
-    public_key_path:  %jwt_public_key_path%
-    pass_phrase:      %jwt_key_pass_phrase%
-    token_ttl:        %jwt_token_ttl%
-    
+            dir:              "%kernel.cache_dir%/hateoas"
+
 #gesdinet_jwt_refresh_token:
 #    ttl: 2592000
 #    ttl_update: true
@@ -146,8 +144,8 @@ nelmio_cors:
             max_age: 3600
 
 lexik_jwt_authentication:
-    private_key_path: %jwt_private_key_path%
-    public_key_path:  %jwt_public_key_path%
-    pass_phrase:      %jwt_key_pass_phrase%
-    token_ttl:        %jwt_token_ttl%
+    private_key_path: "%jwt_private_key_path%"
+    public_key_path:  "%jwt_public_key_path%"
+    pass_phrase:      "%jwt_key_pass_phrase%"
+    token_ttl:        "%jwt_token_ttl%"
     

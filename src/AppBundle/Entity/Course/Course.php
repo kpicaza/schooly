@@ -3,6 +3,8 @@
 namespace AppBundle\Entity\Course;
 
 use AppBundle\Model\Course\CourseInterface;
+use Symfony\Component\HttpFoundation\File\File;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -10,6 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * 
  * @ORM\Entity
  * @ORM\Table(name = "course")
+ * @Vich\Uploadable
  * @ORM\Entity(repositoryClass="AppBundle\Entity\Course\CourseGateway")
  */
 class Course implements CourseInterface
@@ -23,14 +26,50 @@ class Course implements CourseInterface
     protected $id;
 
     /**
+     * Course name.
+     * 
      * @var string
      * 
      * @ORM\Column(type="string", length=255)
      */
     protected $name;
+    /**
+     * Course description.
+     *
+     * @ORM\Column(type="text", nullable=true)
+     *
+     * @var string
+     */
+    protected $description = null;
+    /**
+     * @var bool
+     * @ORM\Column(type="boolean")
+     */
+    protected $enabled = false;
+    /**
+     * NOTE: This is not a mapped field of entity metadata, just a simple property.
+     * 
+     * @Vich\UploadableField(mapping="course_image", fileNameProperty="imageName")
+     * 
+     * @var File
+     */
+    protected $imageFile;
 
     /**
-     * @return type
+     * @ORM\Column(type="string", nullable=true)
+     *
+     * @var string
+     */
+    protected $imageName;
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     *
+     * @var \DateTime
+     */
+    protected $updatedAt;
+    /**
+     * @return integer|string
      */
     public function getId()
     {
@@ -46,7 +85,7 @@ class Course implements CourseInterface
     }
 
     /**
-     * @param type $name
+     * @param string $name
      * @return \AppBundle\Entity\Course\Course
      */
     public function setName($name)
@@ -55,5 +94,122 @@ class Course implements CourseInterface
 
         return $this;
     }
+    /**
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+    /**
+     * @param string $description
+     * @return \AppBundle\Entity\Course\Course
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
 
+        return $this;
+    }
+    /**
+     * Get enabled
+     *
+     * @return boolean
+     */
+    public function isEnabled()
+    {
+        return (bool) $this->enabled;
+    }
+    /**
+     * Get enabled
+     *
+     * @return boolean
+     */
+    public function getEnabled()
+    {
+        return $this->enabled;
+    }
+    /**
+     * Get enabled
+     *
+     * @return boolean
+     */
+    public function setEnabled($enabled)
+    {
+        $this->enabled = $enabled;
+        
+        return $this;
+    }
+    /**
+     * If manually uploading a file (i.e. not using Symfony Form) ensure an instance
+     * of 'UploadedFile' is injected into this setter to trigger the  update. If this
+     * bundle's configuration parameter 'inject_on_load' is set to 'true' this setter
+     * must be able to accept an instance of 'File' as the bundle will inject one here
+     * during Doctrine hydration.
+     *
+     * @param File|\Symfony\Component\HttpFoundation\File\UploadedFile $image
+     *
+     * @return Course
+     */
+    public function setImageFile(File $image = null)
+    {
+        $this->imageFile = $image;
+
+        if ($image) {
+            // It is required that at least one field changes if you are using doctrine
+            // otherwise the event listeners won't be called and the file is lost
+            $this->updatedAt = new \DateTime('now');
+        }
+
+        return $this;
+    }
+    /**
+     * @return File
+     */
+    public function getImageFile()
+    {
+        return $this->imageFile;
+    }
+
+    /**
+     * @param string $imageName
+     *
+     * @return Product
+     */
+    public function setImageName($imageName)
+    {
+        $this->imageName = $imageName;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getImageName()
+    {
+        return $this->imageName;
+    }
+
+    /**
+     * Set updatedAt
+     *
+     * @param date $updatedAt
+     * @return self
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+        return $this;
+    }
+
+    /**
+     * Get updatedAt
+     *
+     * @return date $updatedAt
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
 }

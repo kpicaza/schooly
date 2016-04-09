@@ -1,10 +1,12 @@
 <?php
 namespace AppBundle\Controller;
+
 use FOS\RestBundle\Controller\FOSRestController;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
 /**
  * CourseController.
  */
@@ -15,8 +17,8 @@ class CourseController extends FOSRestController
      *   description = "Get course list.",
      *   statusCodes = {
      *     200 = "Show user info.",
-     *     401 = "Authentication failure, user doesn’t have permission or API token is invalid or outdated.",
-     *     403 = "Authorizationi failure, user doesn’t have permission to access this area.",
+     *     401 = "Authentication failure, user does not have permission or API token is invalid or outdated.",
+     *     403 = "Authorization failure, user does not have permission to access this area.",
      *   }
      * )
      * Get list of users
@@ -29,16 +31,17 @@ class CourseController extends FOSRestController
 
         return $this->handleView($view);
     }
+
     /**
      * @ApiDoc(
      *   description = "Get course by ID.",
      *   statusCodes = {
      *     200 = "Show user info.",
-     *     401 = "Authentication failure, user doesn’t have permission or API token is invalid or outdated.",
-     *     403 = "Authorizationi failure, user doesn’t have permission to access this area.",
+     *     401 = "Authentication failure, user does not have permission or API token is invalid or outdated.",
+     *     403 = "Authorization failure, user does not have permission to access this area.",
      *   }
      * )
-     * 
+     *
      * @return array
      */
     public function getCourseAction($id)
@@ -50,21 +53,22 @@ class CourseController extends FOSRestController
         }
 
         $view = $this->view($course);
-        
+
         return $this->handleView($view);
     }
+
     /**
-     * @Security("has_role('ROLE_USER')")
+     * @Security("has_role('ROLE_TEACHER')")
      * @ApiDoc(
      *   description = "Create new Course.",
      *   input = "AppBundle\Form\Model\CourseFormModel",
-     *   output = "AppBundle\Model\CourseInterface",
+     *   output = "AppBundle\Model\Course\CourseInterface",
      *   statusCodes = {
      *     200 = "User data updated.",
-     *     401 = "Authentication failure, user doesn’t have permission or API token is invalid or outdated.",
+     *     401 = "Authentication failure, user does not have permission or API token is invalid or outdated.",
      *   }
      * )
-     * 
+     *
      * @param Request $request
      */
     public function postCourseAction(Request $request)
@@ -76,45 +80,77 @@ class CourseController extends FOSRestController
 
         return $this->handleView($view);
     }
+
+    /**
+     * @Security("has_role('ROLE_TEACHER')")
+     * @ApiDoc(
+     *   description = "Add or update picture to a Course.",
+     *   input = "AppBundle\Form\Model\FileFormModel",
+     *   output = "AppBundle\Model\Course\CourseInterface",
+     *   statusCodes = {
+     *     200 = "User data updated.",
+     *     401 = "Authentication failure, user does not have permission or API token is invalid or outdated.",
+     *   }
+     * )
+     *
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function postCoursePictureAction(Request $request, $id)
+    {
+        $course = $this->container->get('app.api_course_handler')->postPicture(
+            $id,
+            $request->files->get('imageFile')
+        );
+
+        $view = $this->view($course);
+
+        return $this->handleView($view);
+    }
+
     /**
      * @Security("has_role('ROLE_TEACHER')")
      * @ApiDoc(
      *   description = "Update course by ID.",
+     *   input = "AppBundle\Form\Model\CourseFormModel",
+     *   output = "AppBundle\Model\Course\CourseInterface",
      *   statusCodes = {
      *     200 = "Show user info.",
-     *     401 = "Authentication failure, user doesn’t have permission or API token is invalid or outdated.",
-     *     403 = "Authorizationi failure, user doesn’t have permission to access this area.",
+     *     401 = "Authentication failure, user does not have permission or API token is invalid or outdated.",
+     *     403 = "Authorization failure, user does not have permission to access this area.",
      *   }
      * )
-     * 
+     *
      * @return array
      */
     public function putCourseAction(Request $request, $id)
     {
         $course = $this->container->get('app.api_course_handler')->put(
-            $id, $request->request->all()
+            $id,
+            $request->request->all()
         );
         $view = $this->view($course);
 
         return $this->handleView($view);
     }
+
     /**
      * @Security("has_role('ROLE_ADMIN')")
      * @ApiDoc(
      *   description = "Delete course.",
      *   statusCodes = {
      *     204 = "Do no return nothing.",
-     *     401 = "Authentication failure, user doesn’t have permission or API token is invalid or outdated.",
+     *     401 = "Authentication failure, user does not have permission or API token is invalid or outdated.",
      *   }
      * )
-     * 
+     *
      * @return array
      */
     public function deleteCourseAction($id)
     {
         $this->container->get('app.api_course_handler')->delete($id);
         $view = $this->view(array());
-        
+
         return $this->handleView($view);
     }
 }

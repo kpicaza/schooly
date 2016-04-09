@@ -55,7 +55,7 @@ class UserController extends FOSRestController
         if (null === $user) {
             throw new NotFoundHttpException('User not found');
         }
-        
+
         $view = $this->view($user);
 
         return $this->handleView($view);
@@ -123,7 +123,7 @@ class UserController extends FOSRestController
     {
         $this->container->get('app.api_user_handler')->delete($id);
         $view = $this->view(array());
-        
+
         return $this->handleView($view);
     }
 

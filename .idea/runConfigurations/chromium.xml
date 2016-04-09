@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="chromium" type="PhpWebAppRunConfigurationType" factoryName="PHP Web Application" editBeforeRun="true" singleton="true" browser="4501dcd8-2816-43f1-b52d-cabb707e9912" server_name="local" start_url="/app_dev.php/">
+    <method />
+  </configuration>
+</component>

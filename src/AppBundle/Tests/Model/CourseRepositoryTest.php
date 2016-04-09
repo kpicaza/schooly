@@ -7,11 +7,16 @@ use AppBundle\Entity\Course\CourseGateway;
 use AppBundle\Model\Course\CourseFactory;
 use AppBundle\Model\Course\CourseRepository;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\File\File;
 
 class CourseRepositoryTest extends WebTestCase
 {
 
     const NAME = 'Test course';
+    const DESCRIPTION = 'ha sido el texto de relleno estándar de las industrias desde el año 1500, ';
+    const ENABLED = true;
+    const IMAGE_FILE = __DIR__ . '/../Resources/open-weather.jpg';
+    const IMAGE_NAME = 'open-weather.jpg';
 
     /**
      * @var UserGateway
@@ -38,6 +43,12 @@ class CourseRepositoryTest extends WebTestCase
     public function testCourse()
     {
         $course = new Course();
+        $course
+            ->setName(self::NAME)
+            ->setDescription(self::DESCRIPTION)
+            ->setEnabled(self::ENABLED)
+            ->setUpdatedAt(new \DateTime())
+        ;
     }
 
     public function testFindOneByWithParams()
@@ -67,7 +78,24 @@ class CourseRepositoryTest extends WebTestCase
 
             $this->assertTrue($course instanceof Course);
             $this->assertEquals($course->getName(), $fakeCourses[$key]->getName());
+            $this->assertEquals($course->getDescription(), $fakeCourses[$key]->getDescription());
+            $this->assertEquals($course->getEnabled(), $fakeCourses[$key]->getEnabled());
+            $this->assertEquals($course->isEnabled(), $fakeCourses[$key]->isEnabled());
+            $this->assertEquals($course->getUpdatedAt(), $fakeCourses[$key]->getUpdatedAt());
         }
+    }
+
+    public function testAddFileWithParams()
+    {
+        $fakeCourse = new Course();
+        $fakeCourse = $fakeCourse->setName(self::NAME);
+
+        $file = new File(self::IMAGE_FILE);
+
+        $course = $this->repository->addFile($fakeCourse, $file, self::IMAGE_NAME);
+        $this->assertTrue($course instanceof Course);
+        $this->assertEquals($course->getImageFile(), self::IMAGE_FILE);
+        $this->assertEquals($course->getImageName(), self::IMAGE_NAME);
     }
 
 }

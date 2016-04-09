@@ -8,7 +8,7 @@ namespace AppBundle\Model\User;
 interface UserGatewayInterface
 {
     /**
-     * @param type $id
+     * @param integer|string|UserInterface $id
      */
     public function find($id);
     /**
@@ -23,20 +23,20 @@ interface UserGatewayInterface
      */
     public function findOneBy(array $criteria);
     /**
-     * @param User $user
+     * @param UserInterface $user
      *
-     * @return User
+     * @return UserInterface
      */
     public function apiInsert(UserInterface $user);
 
     /**
-     * @return type
+     * @return UserInterface
      */
     public function findNew();
     /**
-     * @param User $user
+     * @param UserInterface $user
      *
-     * @return User
+     * @return UserInterface
      */
     public function insert(UserInterface $user);
     /**

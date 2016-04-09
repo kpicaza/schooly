@@ -4,27 +4,13 @@ parameters:
 #    parameter_name: value
 
 services:
-#    service_name:
-#        class: AppBundle\Directory\ClassName
-#        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]
-
-#   fos_user.doctrine_registry:
-#       alias: doctrine
-
     app.user_factory:
         class: AppBundle\Model\User\UserFactory
 
     app.user_gateway:
         class: AppBundle\Entity\User\UserGateway
-        factory: [ "@doctrine", getRepository]
+        factory: [ "@doctrine", getRepository] #  "@doctrine" or "@doctrine_mongodb"
         arguments: [ "AppBundle:User\\User" ]
-
-#    app.user_gateway:
-#        class: AppBundle\Document\UserGateway
-#        factory: [ "@doctrine_mongodb", getRepository]
-##        factory_service: doctrine_mongodb
-##        factory_method:  getRepository
-#        arguments: [ "AppBundle:User" ]
 
     app.user_repository:
         class: AppBundle\Model\User\UserRepository

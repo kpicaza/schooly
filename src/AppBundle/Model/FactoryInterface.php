@@ -1,5 +1,6 @@
 <?php
 namespace AppBundle\Model;
+
 /**
  * FactoryInterface.
  */
@@ -10,11 +11,11 @@ interface FactoryInterface
      */
     public function makeAll(array $array);
     /**
-     * @param type $raw
+     * @param mixed $raw
      */
     public function makeOne($raw);
     /**
-     * @param type $raw
+     * @param mixed $raw
      */
     public function make($raw);
 }

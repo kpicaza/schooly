@@ -35,55 +35,50 @@ class UserRepository
     public function findBy(array $criteria = array(), $sort = null, $limit = null, $skip = null)
     {
         $rawUsers = $this->gateway->findBy($criteria, $sort, $limit, $skip);
-        
+
         return $this->factory->makeAll($rawUsers);
     }
     /**
-     * @param User|int $id
+     * @param UserInterface|int $id
      *
-     * @return User
+     * @return UserInterface
      */
     public function find($id)
     {
         $rawUser = $this->gateway->find($id);
-        
+
         return $this->factory->makeOne($rawUser);
     }
     /**
      * @param array $criteria
      * @param array $orderBy
      *
-     * @return User
-     *
-     * @throws NotFoundHttpException
+     * @return UserInterface
      */
     public function findOneBy(array $criteria, array $orderBy = array())
     {
         $user = $this->gateway->findOneBy($criteria, $orderBy);
-        if (null === $user) {
-            return null;
-        }
-        
-        return $this->factory->makeOne($user);
+
+        return null === $user ? null : $this->factory->makeOne($user);
     }
     /**
-     * @return User
+     * @return UserInterface
      */
     public function findNew()
     {
         $rawUser = $this->gateway->findNew();
-        
+
         return $this->factory->makeOne($rawUser);
     }
     /**
-     * @param User $user
+     * @param UserInterface $user
      *
-     * @return User
+     * @return UserInterface
      */
     public function insert(UserInterface $user)
     {
         $rawUser = $this->gateway->apiInsert($user);
-        
+
         return $this->factory->makeOne($rawUser);
     }
     /**
@@ -103,12 +98,12 @@ class UserRepository
     /**
      * @param $id
      *
-     * @return User
+     * @return UserInterface
      */
     public function parse($id)
     {
         $rawUser = $this->gateway->find($id);
-        
+
         return $this->factory->makeOne($rawUser);
     }
 }

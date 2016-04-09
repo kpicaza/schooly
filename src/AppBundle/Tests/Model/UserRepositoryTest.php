@@ -7,6 +7,7 @@ use AppBundle\Entity\User\UserGateway;
 use AppBundle\Model\User\UserFactory;
 use AppBundle\Model\User\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\File\File;
 
 class UserRepositoryTest extends WebTestCase
 {
@@ -14,6 +15,7 @@ class UserRepositoryTest extends WebTestCase
     const EMAIL = 'koldo@koldo.mail';
     const PASS = 'Demo1234';
     const DESC = 'Hola mondo';
+    const IMAGE_FILE = __DIR__ . '/../Resources/open-weather.jpg';
 
     /**
      * @var UserGateway
@@ -40,8 +42,16 @@ class UserRepositoryTest extends WebTestCase
     public function testUser()
     {
         $user = new User();
+
+        $file = new File(self::IMAGE_FILE);
+
+        $user
+            ->setSalt('adsjhgdjhsfgkjasf')
+            ->setImageFile($file)
+            ->setUpdatedAt(new \DateTime())
+        ;
     }
-    
+
     public function testFindOneByWithParams()
     {
         $fakeUser = new User();
@@ -63,5 +73,6 @@ class UserRepositoryTest extends WebTestCase
         $this->assertEquals($user->getExpiresAt(), $fakeUser->getExpiresAt());
         $this->assertEquals($user->getCredentialsExpired(), $fakeUser->getCredentialsExpired());
         $this->assertEquals($user->getCredentialsExpireAt(), $fakeUser->getCredentialsExpireAt());
+        $this->assertEquals($user->getUpdatedAt(), $fakeUser->getUpdatedAt());
     }
 }

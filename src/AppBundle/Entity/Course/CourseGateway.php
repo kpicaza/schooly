@@ -1,6 +1,7 @@
 <?php
 namespace AppBundle\Entity\Course;
 use AppBundle\Model\Course\CourseGatewayInterface;
+use AppBundle\Model\Course\CourseInterface;
 use Doctrine\ORM\EntityRepository;
 class CourseGateway extends EntityRepository implements CourseGatewayInterface
 {
@@ -24,7 +25,7 @@ class CourseGateway extends EntityRepository implements CourseGatewayInterface
     /**
      * @param array $criteria
      */
-    public function findOneBy(array $criteria)
+    public function findOneBy(array $criteria, array $orderBy = null)
     {
         return parent::findOneBy($criteria);
     }
@@ -36,21 +37,21 @@ class CourseGateway extends EntityRepository implements CourseGatewayInterface
         return new Course();
     }
     /**
-     * @param type $course
-     * @return type
+     * @param CourseInterface $course
+     * @return CourseInterface
      */
     public function insert($course)
     {
         $this->_em->persist($course);
         $this->_em->flush();
-        
+
         return $course;
     }
     /**
      * Update course.
      */
     public function update()
-    {   
+    {
         $this->_em->flush();
     }
     /**
