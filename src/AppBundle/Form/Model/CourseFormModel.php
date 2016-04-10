@@ -11,7 +11,7 @@ class CourseFormModel
 {
     /**
      * @Assert\NotBlank()
-     * @Assert\Regex("/[A-Za-z\d\-_\s]+/")
+     * @Assert\Regex("/^[A-Za-z0-9 _]*[A-Za-z]+[A-Za-z0-9 _]*$/")
      *
      * @var string
      */

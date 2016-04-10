@@ -19,17 +19,17 @@ class CourseRepositoryTest extends WebTestCase
     const IMAGE_NAME = 'open-weather.jpg';
 
     /**
-     * @var UserGateway
+     * @var CourseGateway
      */
     private $gateway;
 
     /**
-     * @var UserRepository
+     * @var CourseRepository
      */
     private $repository;
 
     /**
-     * Set up UserRepository.
+     * Set up CourseRepository.
      */
     public function setUp()
     {

@@ -7,13 +7,13 @@ easy_admin:
             list:
                 fields:
                     - 'id'
-                    - { property: 'imageName', type: 'image', base_path: %app.path.grade_image% }
+                    - { property: 'imageName', type: 'image', base_path: "%app.path.grade_image%" }
                     - 'enabled'
                     - 'subject'
             show:
                 fields:
                     - 'id'
-                    - { property: 'imageName', type: 'image', base_path: %app.path.grade_image% }
+                    - { property: 'imageName', type: 'image', base_path: "%app.path.grade_image%" }
                     - 'enabled'
                     - 'subject'
                     - 'description'

@@ -14,7 +14,7 @@ easy_admin:
             list:
                 fields: 
                     - 'id' 
-                    - { property: 'imageName', type: 'image', base_path: %app.path.user_image% }
+                    - { property: 'imageName', type: 'image', base_path: "%app.path.user_image%" }
                     - 'enabled'
                     - 'username'
                     - 'email'
@@ -23,7 +23,7 @@ easy_admin:
             show:
                 fields: 
                     - 'id'
-                    - { property: 'imageName', type: 'image', base_path: %app.path.user_image% }
+                    - { property: 'imageName', type: 'image', base_path: "%app.path.user_image%" }
                     - 'enabled'
                     - 'username'
                     - 'email'
