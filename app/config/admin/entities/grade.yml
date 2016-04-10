@@ -1,0 +1,31 @@
+## YAML Template.
+easy_admin:
+    entities:
+        Course:
+            class: AppBundle\Entity\Grade\Grade
+            label: 'Grades'
+            list:
+                fields:
+                    - 'id'
+                    - { property: 'imageName', type: 'image', base_path: %app.path.grade_image% }
+                    - 'enabled'
+                    - 'subject'
+            show:
+                fields:
+                    - 'id'
+                    - { property: 'imageName', type: 'image', base_path: %app.path.grade_image% }
+                    - 'enabled'
+                    - 'subject'
+                    - 'description'
+            form:
+                fields:
+                    - 'enabled'
+                    - 'subject'
+                    - 'description'
+                    - { property: 'imageFile', type: 'vich_image' }
+            edit:
+                fields:
+                    - 'enabled'
+                    - 'subject'
+                    - 'description'
+                    - { property: 'imageFile', type: 'vich_image' }

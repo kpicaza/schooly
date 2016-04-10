@@ -12,11 +12,11 @@ use AppBundle\Model\FactoryInterface;
 class GradeFactory implements FactoryInterface
 {
     /**
-     * @param array $rawCourses
+     * @param array $rawGrades
      * @param array $params
      * @return array
      */
-    public function makeAll(array $rawCourses, array $params = array())
+    public function makeAll(array $rawGrades, array $params = array())
     {
         $grades = array();
 

@@ -16,6 +16,18 @@ services:
         class: AppBundle\Model\User\UserRepository
         arguments: [ "@app.user_gateway", "@app.user_factory" ]
 
+    app.grade_factory:
+        class: AppBundle\Model\Grade\GradeFactory
+
+    app.grade_gateway:
+        class: AppBundle\Entity\Grade\GradeGateway
+        factory: [ "@doctrine", getRepository]
+        arguments: [ "AppBundle:Grade\\Grade" ]
+
+    app.grade_repository:
+        class: AppBundle\Model\Grade\GradeRepository
+        arguments: [ "@app.grade_gateway", "@app.grade_factory" ]
+
     app.course_factory:
         class: AppBundle\Model\Course\CourseFactory
 
@@ -38,7 +50,11 @@ services:
         class: AppBundle\Handler\User\ApiUserHandler
         arguments: [ "@app.user_repository", "@form.factory" ]
 
-    app.api_course_handler: 
+    app.api_grade_handler:
+        class: AppBundle\Handler\Grade\ApiGradeHandler
+        arguments: [ "@app.grade_repository", "@form.factory" ]
+
+    app.api_course_handler:
         class: AppBundle\Handler\Course\ApiCourseHandler
         arguments: [ "@app.course_repository", "@form.factory" ]
         

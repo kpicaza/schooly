@@ -11,19 +11,17 @@ use AppBundle\Model\User\UserInterface as User;
 class AdminController extends EasyAdminController
 {
 
-    public function createNewEntity()
+    public function createNewUserEntity()
     {
-        return $this->container->get('fos_user.user_manager')->createUser();
+        return $this->get('fos_user.user_manager')->createUser();
     }
 
-    public function prePersistEntity($entity)
+    public function prePersistUserEntity($user)
     {
-        if ($entity instanceof User) {
-            $this->container->get('fos_user.user_manager')->updateUser($entity, false);
-        }
+        $this->get('fos_user.user_manager')->updateUser($user, false);
     }
 
-    public function preUpdateEntity($entity)
+    public function preUpdateUserEntity($entity)
     {
         if ($entity instanceof User) {
             $this->container->get('fos_user.user_manager')->updateUser($entity, false);

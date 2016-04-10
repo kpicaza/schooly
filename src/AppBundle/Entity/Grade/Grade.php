@@ -122,6 +122,15 @@ class Grade implements GradeInterface
      *
      * @return boolean
      */
+    public function isEnabled()
+    {
+        return (bool) $this->enabled;
+    }
+    /**
+     * Get enabled
+     *
+     * @return boolean
+     */
     public function getEnabled()
     {
         return $this->enabled;

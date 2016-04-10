@@ -1,24 +1,31 @@
 <?php
-namespace AppBundle\Handler\Course;
+/**
+ * Created by PhpStorm.
+ * User: kpicaza
+ * Date: 9/04/16
+ * Time: 23:48
+ */
+
+namespace AppBundle\Handler\Grade;
 
 use AppBundle\Form\Model\FileFormModel;
 use AppBundle\Form\Type\FileFormType;
-use AppBundle\Model\Course\CourseRepository;
-use AppBundle\Model\Course\CourseInterface;
 use AppBundle\Handler\ApiHandlerInterface;
-use AppBundle\Form\Model\CourseFormModel;
-use AppBundle\Form\Type\CourseFormType;
+use AppBundle\Model\Grade\GradeInterface;
+use AppBundle\Model\Grade\GradeRepository;
+use AppBundle\Form\Model\GradeFormModel;
+use AppBundle\Form\Type\GradeFormType;
 use Symfony\Component\Form\FormFactoryInterface;
-use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\File;
 
 /**
- * ApiCourseHandler.
+ * Class ApiGradeHandler
+ * @package AppBundle\Handler\Grade
  */
-class ApiCourseHandler implements ApiHandlerInterface
+class ApiGradeHandler implements ApiHandlerInterface
 {
     /**
-     * @var CourseRepository
+     * @var GradeRepository
      */
     protected $repository;
     /**
@@ -29,10 +36,10 @@ class ApiCourseHandler implements ApiHandlerInterface
     /**
      * Init Handler.
      *
-     * @param CourseRepository $repository
+     * @param GradeRepository $repository
      * @param FormFactoryInterface $formFactory
      */
-    public function __construct(CourseRepository $repository, FormFactoryInterface $formFactory)
+    public function __construct(GradeRepository $repository, FormFactoryInterface $formFactory)
     {
         $this->repository = $repository;
         $this->formFactory = $formFactory;
@@ -54,7 +61,7 @@ class ApiCourseHandler implements ApiHandlerInterface
     /**
      * Get object from repository.
      *
-     * @param integer|string $id
+     * @param integer $id
      */
     public function get($id)
     {
@@ -68,14 +75,17 @@ class ApiCourseHandler implements ApiHandlerInterface
      */
     public function post(array $params)
     {
-        $courseModel = new CourseFormModel();
-        $form = $this->formFactory->create(CourseFormType::class, $courseModel, array('method' => 'POST'));
+        $gradeModel = new GradeFormModel();
+        $form = $this->formFactory->create(GradeFormType::class, $gradeModel, array('method' => 'POST'));
         $form->submit($params);
 
         if ($form->isValid()) {
-            $rawCourse = $this->insertFromForm($form->getData());
-            $course = $this->repository->insert($rawCourse);
-            return $course;
+            $data = $form->getData();
+
+            $rawGrade = $this->repository->findNew($data->getSubject(), $data->getDescription());
+            $grade = $this->repository->insert($rawGrade);
+
+            return $grade;
         }
 
         return $form;
@@ -84,7 +94,7 @@ class ApiCourseHandler implements ApiHandlerInterface
     /**
      * @param integer|string $course
      * @param File $file
-     * @return CourseInterface|\Symfony\Component\Form\FormInterface
+     * @return GradeInterface|\Symfony\Component\Form\FormInterface
      */
     public function postPicture($id, File $file = null)
     {
@@ -93,10 +103,10 @@ class ApiCourseHandler implements ApiHandlerInterface
         $form->submit(array('imageFile' => $file));
 
         if ($form->isValid()) {
-            $course = $this->repository->find($id);
+            $grade = $this->repository->find($id);
 
             return $this->repository->addFile(
-                $course,
+                $grade,
                 $fileModel->getImageFile(),
                 $fileModel->getImageName()
             );
@@ -108,19 +118,25 @@ class ApiCourseHandler implements ApiHandlerInterface
     /**
      * Update object from repository.
      *
-     * @param integer|string $id
+     * @param $id
      * @param array $params
      */
     public function put($id, array $params)
     {
-        $courseModel = new CourseFormModel();
-        $form = $this->formFactory->create(CourseFormType::class, $courseModel, array('method' => 'PUT'));
+        $gradeModel = new GradeFormModel();
+        $form = $this->formFactory->create(GradeFormType::class, $gradeModel, array('method' => 'PUT'));
         $form->submit($params);
 
         if ($form->isValid()) {
-            $rawCourse = $this->updateFromForm($id, $form->getData());
+            $data = $form->getData();
+
+            $rawCourse = $this->repository->find($id);
+            $rawCourse
+                ->setSubject($data->getSubject())
+                ->setDescription($data->getDescription());
             $this->repository->update();
-            return $this->repository->find($rawCourse);
+
+            return $rawCourse;
         }
 
         return $form;
@@ -132,42 +148,5 @@ class ApiCourseHandler implements ApiHandlerInterface
     public function delete($id)
     {
         $this->repository->remove($id);
-    }
-
-    /**
-     * @param CourseFormModel $courseModel
-     *
-     * @return CourseInterface
-     */
-    protected function insertFromForm(CourseFormModel $courseModel)
-    {
-        $course = $this->repository->findNew();
-
-        return $this->fromForm($course, $courseModel);
-    }
-
-    /**
-     * @param integer|string $id
-     * @param CourseFormModel $courseModel
-     *
-     * @return CourseInterface
-     */
-    protected function updateFromForm($id, CourseFormModel $courseModel)
-    {
-        $course = $this->repository->find($id);
-
-        return $this->fromForm($course, $courseModel);
-    }
-
-    /**
-     * @param CourseFormModel $courseModel
-     * @return CourseInterface
-     */
-    protected function fromForm(CourseInterface $course, CourseFormModel $courseModel)
-    {
-        $course
-            ->setName($courseModel->getName());
-
-        return $course;
     }
 }

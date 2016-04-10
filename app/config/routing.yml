@@ -49,7 +49,7 @@ fos_user_change_password:
     prefix: /profile
 
 easy_admin_bundle:
-    resource: "@EasyAdminBundle/Controller/"
+    resource: "@AppBundle/Controller/AdminController.php" # <-- ADD this line
     type:     annotation
     prefix:   /admin
     

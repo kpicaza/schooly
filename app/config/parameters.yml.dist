@@ -25,5 +25,6 @@ parameters:
 
     app.path.user_image: /uploads/images/users
     app.path.course_image: /uploads/images/courses
+    app.path.grade_image: /uploads/images/grades
 
     dev_delivery_mail: ~
