@@ -28,6 +28,11 @@ app_grade:
     prefix: /api
     resource: AppBundle\Controller\GradeController
 
+app_grade session:
+    type: rest
+    prefix: /api
+    resource: AppBundle\Controller\GradeSessionController
+
 # app/config/routing.yml
 fos_user_security:
     resource: "@FOSUserBundle/Resources/config/routing/security.xml"

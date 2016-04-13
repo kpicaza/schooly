@@ -28,6 +28,18 @@ services:
         class: AppBundle\Model\Grade\GradeRepository
         arguments: [ "@app.grade_gateway", "@app.grade_factory" ]
 
+    app.grade_session_factory:
+        class: AppBundle\Model\Grade\GradeSessionFactory
+
+    app.grade_session_gateway:
+        class: AppBundle\Entity\Grade\GradeSessionGateway
+        factory: [ "@doctrine", getRepository]
+        arguments: [ "AppBundle:Grade\\GradeSession" ]
+
+    app.grade_session_repository:
+        class: AppBundle\Model\Grade\GradeSessionRepository
+        arguments: [ "@app.grade_session_gateway", "@app.grade_session_factory", "@app.grade_repository" ]
+
     app.course_factory:
         class: AppBundle\Model\Course\CourseFactory
 
@@ -53,6 +65,10 @@ services:
     app.api_grade_handler:
         class: AppBundle\Handler\Grade\ApiGradeHandler
         arguments: [ "@app.grade_repository", "@form.factory" ]
+
+    app.api_grade_session_handler:
+        class: AppBundle\Handler\Grade\ApiGradeSessionHandler
+        arguments: [ "@app.grade_session_repository", "@form.factory" ]
 
     app.api_course_handler:
         class: AppBundle\Handler\Course\ApiCourseHandler
