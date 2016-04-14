@@ -4,6 +4,7 @@ namespace AppBundle\Tests\Model;
 
 use AppBundle\Entity\Grade\GradeSession;
 use AppBundle\Entity\Grade\GradeSessionGateway;
+use AppBundle\Entity\Grade\GradeGateway;
 use AppBundle\Entity\Grade\Grade;
 use AppBundle\Model\Grade\GradeSessionFactory;
 use AppBundle\Model\Grade\GradeSessionRepository;
@@ -28,6 +29,11 @@ class GradeSessionRepositoryTest extends WebTestCase
     private $repository;
 
     /**
+     * @var GradeGateway
+     */
+    private $gradeGateway;
+
+    /**
      * Set up GradeSessionRepository.
      */
     public function setUp()
@@ -35,8 +41,10 @@ class GradeSessionRepositoryTest extends WebTestCase
         parent::setUp();
         $gatewayClassname = 'AppBundle\Entity\Grade\GradeSessionGateway';
         $this->gateway = $this->prophesize($gatewayClassname);
+        $gradeGatewayClassName = 'AppBundle\Entity\Grade\GradeGateway';
+        $this->gradeGateway = $this->prophesize($gradeGatewayClassName);
         $this->factory = new GradeSessionFactory();
-        $this->repository = new GradeSessionRepository($this->gateway->reveal(), $this->factory);
+        $this->repository = new GradeSessionRepository($this->gateway->reveal(), $this->factory, $this->gradeGateway->reveal());
     }
 
     public function testGradeSession()

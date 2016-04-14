@@ -26,6 +26,7 @@ class GradeSessionFactory implements FactoryInterface
 
         return $GradeSessions;
     }
+
     /**
      * @param GradeSessionInterface $rawGradeSession
      * @return GradeSessionInterface
@@ -34,6 +35,7 @@ class GradeSessionFactory implements FactoryInterface
     {
         return $this->make($rawGradeSession, $params);
     }
+
     /**
      * @param GradeSessionInterface $rawUser
      * @return GradeSessionInterface
@@ -43,6 +45,8 @@ class GradeSessionFactory implements FactoryInterface
         if (!$rawGradeSession instanceof GradeSessionInterface) {
             return null;
         }
+
+        $rawGradeSession->setGrade(null);
 
         // You can format object, in this case we left it to return as raw object, feedback is welcome!
         return $rawGradeSession;

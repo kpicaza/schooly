@@ -6,6 +6,7 @@ use FOS\RestBundle\Controller\FOSRestController;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -58,5 +59,105 @@ class GradeSessionController extends FOSRestController
         $view = $this->view($gradeSession);
 
         return $this->handleView($view);
+    }
+
+    /**
+     * @ApiDoc(
+     *   section = "Grades",
+     *   description = "Grade session options.",
+     *   statusCodes = {
+     *     200 = "User data updated.",
+     *     401 = "Authentication failure, user does not have permission or API token is invalid or outdated.",
+     *   }
+     * )
+
+     * @return Response
+     */
+    public function optionsGradeSessionAction($id) {
+        $options = array(
+            'GET' => array(
+                'description' => 'Get  list.',
+                'parameters' => array(
+                    'id' => array(
+                        'type' => 'integer|string',
+                        'description' => 'Grade Id.',
+                        'required' => 'true'
+                    ),
+                    'grade_id' => array(
+                        'type' => 'integer|string',
+                        'description' => 'Grade session Id.',
+                        'required' => 'false'
+                    )
+                )
+            ),
+            'POST' => array(
+                'description' => 'Create new Grade session.',
+                'parameters' => array(
+                    'id' => array(
+                        'type' => 'integer|string',
+                        'description' => 'Grade Id.',
+                        'required' => 'true'
+                    ),
+                    'start_date' => array(
+                        'type' => 'string',
+                        'description' => 'Grade session start date.',
+                        'required' => 'true'
+                    ),
+                    'end_date' => array(
+                        'type' => 'string',
+                        'description' => 'Grade session end date.',
+                        'required' => 'false'
+                    ),
+                )
+            ),
+            'PUT' => array(
+                'description' => 'Edit existing Grade session.',
+                'parameters' => array(
+                    'id' => array(
+                        'type' => 'integer|string',
+                        'description' => 'Grade Id.',
+                        'required' => 'true'
+                    ),
+                    'grade_id' => array(
+                        'type' => 'integer|string',
+                        'description' => 'Grade session Id.',
+                        'required' => 'true'
+                    ),
+                    'start_date' => array(
+                        'type' => 'string',
+                        'description' => 'Grade session start date.',
+                        'required' => 'true'
+                    ),
+                    'end_date' => array(
+                        'type' => 'string',
+                        'description' => 'Grade session end date.',
+                        'required' => 'false'
+                    ),
+                )
+            ),
+            'DELETE' => array(
+                'description' => 'Delete Grade session.',
+                'parameters' => array(
+                    'id' => array(
+                        'type' => 'integer|string',
+                        'description' => 'Grade Id.',
+                        'required' => 'true'
+                    ),
+                    'grade_id' => array(
+                        'type' => 'integer|string',
+                        'description' => 'Grade session Id.',
+                        'required' => 'true'
+                    ),
+                )
+            )
+        );
+
+        $view = $this->view($options);
+
+        $response = $this->handleView($view);
+
+        $response->headers->set('Allow', 'OPTIONS, GET, PUT, POST');
+
+        return $response;
     }
 }

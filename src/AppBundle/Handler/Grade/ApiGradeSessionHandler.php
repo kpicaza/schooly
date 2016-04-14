@@ -37,6 +37,29 @@ class ApiGradeSessionHandler implements ApiRelationHandlerInterface
     }
 
     /**
+     * @param $id
+     * @param array $criteria
+     * @param array|null $sort
+     * @param null $limit
+     * @param null $skip
+     * @return array
+     */
+    public function getList($id, array $criteria, array $sort = null, $limit = null, $skip = null)
+    {
+        return $this->repository->findBy($criteria, $sort, $limit, $skip);
+    }
+
+    /**
+     * @param $id
+     * @param $session_id
+     * @return GradeSessionInterface
+     */
+    public function get($id, $session_id)
+    {
+        return $this->repository->find($id);
+    }
+
+    /**
      * Insert object to repository.
      *
      * @param array $params
@@ -51,23 +74,13 @@ class ApiGradeSessionHandler implements ApiRelationHandlerInterface
         if ($form->isValid()) {
             $data = $form->getData();
 
-            $rawGradeSession = $this->repository->findNew($id, $data->getStartDate(), $data->getEndDate());
+            $rawGradeSession = $this->repository->findNew($id, $data->getStartDate(), $data->getEndDate(), true);
             $grade = $this->repository->insert($rawGradeSession);
 
             return $grade;
         }
 
         return $form;
-    }
-
-    public function getList($id, array $criteria, array $sort = null, $limit = null, $skip = null)
-    {
-        // TODO: Implement getList() method.
-    }
-
-    public function get($id, $session_id)
-    {
-        // TODO: Implement get() method.
     }
 
     public function put($id, $session_id, array $params)

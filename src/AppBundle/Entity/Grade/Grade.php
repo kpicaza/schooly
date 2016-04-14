@@ -1,19 +1,12 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: kpicaza
- * Date: 9/04/16
- * Time: 22:41
- */
 
 namespace AppBundle\Entity\Grade;
-
 
 use AppBundle\Model\Grade\GradeInterface;
 use Symfony\Component\HttpFoundation\File\File;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Doctrine\ORM\Mapping as ORM;
-
+use Hateoas\Configuration\Annotation as Hateoas;
 /**
  * Class Grade
  *
@@ -21,6 +14,67 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name = "grade")
  * @Vich\Uploadable
  * @ORM\Entity(repositoryClass="AppBundle\Entity\Grade\GradeGateway")
+ * @Hateoas\Relation(
+ *      "get_grades",
+ *      href = @Hateoas\Route(
+ *          "get_grades"
+ *      )
+ * )
+ * @Hateoas\Relation(
+ *      "post_grade",
+ *      href = @Hateoas\Route(
+ *          "post_grade"
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(
+ *          excludeIf = "expr(not is_granted(['ROLE_ADMIN']))"
+ *      )
+ * )
+ * @Hateoas\Relation(
+ *      "get_grade",
+ *      href = @Hateoas\Route(
+ *          "get_grade",
+ *          parameters = { "id" = "expr(object.getId())" }
+ *      )
+ * )
+ * @Hateoas\Relation(
+ *      "post_grade_picture",
+ *      href = @Hateoas\Route(
+ *          "post_grade_picture",
+ *          parameters = { "id" = "expr(object.getId())" }
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(
+ *          excludeIf = "expr(not is_granted(['ROLE_ADMIN']))"
+ *      )
+ * )
+ * @Hateoas\Relation(
+ *      "put_grade",
+ *      href = @Hateoas\Route(
+ *          "put_grade",
+ *          parameters = { "id" = "expr(object.getId())" }
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(
+ *          excludeIf = "expr(not is_granted(['ROLE_ADMIN']))"
+ *      )
+ * )
+ * @Hateoas\Relation(
+ *      "delete_grade",
+ *      href = @Hateoas\Route(
+ *          "delete_grade",
+ *          parameters = { "id" = "expr(object.getId())" }
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(
+ *          excludeIf = "expr(not is_granted(['ROLE_ADMIN']))"
+ *      )
+ * )
+ * @Hateoas\Relation(
+ *      "post_user",
+ *      href = @Hateoas\Route(
+ *          "post_user"
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(
+ *          excludeIf = "expr(is_granted(['ROLE_ADMIN']))"
+ *      )
+ * )
  *
  * @package AppBundle\Entity\Grade
  */

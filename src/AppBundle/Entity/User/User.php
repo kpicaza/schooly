@@ -18,6 +18,18 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Table(name = "user")
  * @ORM\Entity(repositoryClass="AppBundle\Entity\User\UserGateway")
  * @Hateoas\Relation(
+ *      "get_users",
+ *      href = @Hateoas\Route(
+ *          "get_users"
+ *      )
+ * )
+ * @Hateoas\Relation(
+ *      "post_user",
+ *      href = @Hateoas\Route(
+ *          "post_user"
+ *      ),
+ * )
+ * @Hateoas\Relation(
  *      "get_user",
  *      href = @Hateoas\Route(
  *          "get_user",

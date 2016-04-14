@@ -6,6 +6,7 @@ use AppBundle\Model\Course\CourseInterface;
 use Symfony\Component\HttpFoundation\File\File;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Doctrine\ORM\Mapping as ORM;
+use Hateoas\Configuration\Annotation as Hateoas;
 
 /**
  * Course.
@@ -14,7 +15,58 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name = "course")
  * @Vich\Uploadable
  * @ORM\Entity(repositoryClass="AppBundle\Entity\Course\CourseGateway")
- */
+ * @Hateoas\Relation(
+ *      "get_courses",
+ *      href = @Hateoas\Route(
+ *          "get_courses"
+ *      )
+ * )
+ * @Hateoas\Relation(
+ *      "post_course",
+ *      href = @Hateoas\Route(
+ *          "post_course"
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(
+ *          excludeIf = "expr(not is_granted(['ROLE_TEACHER']))"
+ *      )
+ * )
+ * @Hateoas\Relation(
+ *      "post_course_picture",
+ *      href = @Hateoas\Route(
+ *          "post_course_picture",
+ *          parameters = { "id" = "expr(object.getId())" }
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(
+ *          excludeIf = "expr(not is_granted(['ROLE_TEACHER']))"
+ *      )
+ * )
+ * @Hateoas\Relation(
+ *      "get_course",
+ *      href = @Hateoas\Route(
+ *          "get_course",
+ *          parameters = { "id" = "expr(object.getId())" }
+ *      )
+ * )
+ * @Hateoas\Relation(
+ *      "put_course",
+ *      href = @Hateoas\Route(
+ *          "put_course",
+ *          parameters = { "id" = "expr(object.getId())" }
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(
+ *          excludeIf = "expr(not is_granted(['ROLE_TEACHER']))"
+ *      )
+ * )
+ * @Hateoas\Relation(
+ *      "delete_course",
+ *      href = @Hateoas\Route(
+ *          "delete_course",
+ *          parameters = { "id" = "expr(object.getId())" }
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(
+ *          excludeIf = "expr(not is_granted(['ROLE_ADMIN']))"
+ *      )
+ * ) */
 class Course implements CourseInterface
 {
 

@@ -38,7 +38,7 @@ services:
 
     app.grade_session_repository:
         class: AppBundle\Model\Grade\GradeSessionRepository
-        arguments: [ "@app.grade_session_gateway", "@app.grade_session_factory", "@app.grade_repository" ]
+        arguments: [ "@app.grade_session_gateway", "@app.grade_session_factory", "@app.grade_gateway" ]
 
     app.course_factory:
         class: AppBundle\Model\Course\CourseFactory

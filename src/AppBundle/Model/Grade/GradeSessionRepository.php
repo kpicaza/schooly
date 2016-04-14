@@ -1,6 +1,7 @@
 <?php
 namespace AppBundle\Model\Grade;
 
+use AppBundle\Entity\Grade\GradeGateway;
 use AppBundle\Model\Grade\GradeSessionGatewayInterface;
 use AppBundle\Model\FactoryInterface;
 
@@ -19,25 +20,25 @@ class GradeSessionRepository
      */
     private $factory;
     /**
-     * @var GradeRepository;
+     * @var GradeGateway;
      */
-    private $gradeRepository;
+    private $gradeGateway;
 
     /**
      * @param GradeSessionGatewayInterface $gateway
      * @param FactoryInterface $factory
      */
-    public function __construct(GradeSessionGatewayInterface $gateway, FactoryInterface $factory, GradeRepository $gradeRepository)
+    public function __construct(GradeSessionGatewayInterface $gateway, FactoryInterface $factory, GradeGateway $gradeGateway)
     {
         $this->gateway = $gateway;
         $this->factory = $factory;
-        $this->gradeRepository = $gradeRepository;
+        $this->gradeGateway = $gradeGateway;
     }
 
     /**
      * @param GradeSessionInterface|int $id
      *
-     * @return GradeSessionInterface
+     * @return array
      */
     public function find($id)
     {
@@ -79,13 +80,13 @@ class GradeSessionRepository
      * @param \DateTime|null $end_date
      * @return mixed
      */
-    public function findNew($id, \DateTime $start_date = null, \DateTime $end_date = null)
+    public function findNew($id, \DateTime $start_date = null, \DateTime $end_date = null, $formatted = false)
     {
-        $grade = $this->gradeRepository->find($id);
+        $grade = $this->gradeGateway->find($id);
 
         $rawGradeSession = $this->gateway->findNew($grade, $start_date, $end_date);
 
-        return $this->factory->makeOne($rawGradeSession);
+        return false === $formatted ? $this->factory->makeOne($rawGradeSession) : $rawGradeSession;
     }
 
     /**

@@ -14,11 +14,25 @@ use Doctrine\ORM\EntityRepository;
  */
 class GradeSessionGateway extends EntityRepository implements GradeSessionGatewayInterface
 {
+    /**
+     * Get non-persisted object.
+     *
+     * @param GradeInterface $grade
+     * @param \DateTime|null $start_date
+     * @param \DateTime|null $end_date
+     * @return GradeSession
+     */
     public function findNew(GradeInterface $grade, \DateTime $start_date = null, \DateTime $end_date = null)
     {
         return new GradeSession($grade, $start_date, $end_date);
     }
 
+    /**
+     * Insert.
+     *
+     * @param GradeSessionInterface $gradeSession
+     * @return GradeSessionInterface
+     */
     public function insert(GradeSessionInterface $gradeSession)
     {
         $this->_em->persist($gradeSession);
@@ -28,13 +42,23 @@ class GradeSessionGateway extends EntityRepository implements GradeSessionGatewa
 
     }
 
+    /**
+     * Update.
+     */
     public function update()
     {
-        // TODO: Implement update() method.
+        $this->_em->flush();
     }
 
+    /**
+     * Remove.
+     *
+     * @param $id
+     */
     public function remove($id)
     {
-        // TODO: Implement remove() method.
+        $grade = $this->find($id);
+        $this->_em->remove($grade);
+        $this->_em->flush();
     }
 }
