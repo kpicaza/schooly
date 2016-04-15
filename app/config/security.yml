@@ -22,18 +22,18 @@ security:
 
         register:
             pattern:  ^/api/users
-            methods: [POST]
+            methods: [POST, OPTIONS]
             anonymous: true
 
         courses:
             pattern:  ^/api/courses
-            methods: [GET]
+            methods: [GET, OPTIONS]
             stateless: true
             anonymous: true
 
         grades:
             pattern:  ^/api/grades
-            methods: [GET]
+            methods: [GET, OPTIONS]
             stateless: true
             anonymous: true
 
@@ -83,9 +83,9 @@ security:
         - { path: ^/api/doc, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api/users/*, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/api/users, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
+        - { path: ^/api/users, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST, OPTIONS] }
         - { path: ^/api/users, roles: ROLE_TEACHER, methods: [GET] }
-        - { path: ^/api/courses, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [GET] }
-        - { path: ^/api/grades, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [GET] }
+        - { path: ^/api/courses, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [GET, OPTIONS] }
+        - { path: ^/api/grades, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [GET, OPTIONS] }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/admin/, role: ROLE_ADMIN }        

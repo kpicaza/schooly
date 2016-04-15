@@ -1,0 +1,24 @@
+language: php
+php:
+  - '5.6'
+  - '7.0'
+  - nightly
+
+before_script:
+  - mysql -e 'create database app;'  
+  - mysql -e 'create database app_test;'
+  - mkdir -p app/var/jwt
+  - openssl genrsa -out app/var/jwt/private.pem -aes256 4096
+  - openssl rsa -pubout -in app/var/jwt/private.pem -out app/var/jwt/public.pem
+  - openssl genrsa -out app/var/jwt/private-test.pem -aes256 4096
+  - openssl rsa -pubout -in app/var/jwt/private-test.pem -out app/var/jwt/public-test.pem
+  - cp app/config/parameters.yml.travis app/config/parameters.yml
+  - composer install -n --no-interaction
+  - php bin/console doctrine:schema:update --force --env=test
+
+script:
+  - mkdir -p build/logs
+  - phpunit --coverage-clover build/logs/clover.xml
+
+after_success:
+  - php vendor/bin/coveralls -v

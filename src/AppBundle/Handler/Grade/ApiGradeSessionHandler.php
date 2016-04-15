@@ -87,4 +87,86 @@ class ApiGradeSessionHandler implements ApiRelationHandlerInterface
     {
         // TODO: Implement put() method.
     }
+
+    public function options()
+    {
+        return array(
+            'GET' => array(
+                'description' => 'Get  list.',
+                'parameters' => array(
+                    'id' => array(
+                        'type' => 'integer|string',
+                        'description' => 'Grade Id.',
+                        'required' => 'true'
+                    ),
+                    'grade_id' => array(
+                        'type' => 'integer|string',
+                        'description' => 'Grade session Id.',
+                        'required' => 'false'
+                    )
+                )
+            ),
+            'POST' => array(
+                'description' => 'Create new Grade session.',
+                'parameters' => array(
+                    'id' => array(
+                        'type' => 'integer|string',
+                        'description' => 'Grade Id.',
+                        'required' => 'true'
+                    ),
+                    'start_date' => array(
+                        'type' => 'string',
+                        'description' => 'Grade session start date.',
+                        'required' => 'true'
+                    ),
+                    'end_date' => array(
+                        'type' => 'string',
+                        'description' => 'Grade session end date.',
+                        'required' => 'false'
+                    ),
+                )
+            ),
+            'PUT' => array(
+                'description' => 'Edit existing Grade session.',
+                'parameters' => array(
+                    'id' => array(
+                        'type' => 'integer|string',
+                        'description' => 'Grade Id.',
+                        'required' => 'true'
+                    ),
+                    'grade_id' => array(
+                        'type' => 'integer|string',
+                        'description' => 'Grade session Id.',
+                        'required' => 'true'
+                    ),
+                    'start_date' => array(
+                        'type' => 'string',
+                        'description' => 'Grade session start date.',
+                        'required' => 'true'
+                    ),
+                    'end_date' => array(
+                        'type' => 'string',
+                        'description' => 'Grade session end date.',
+                        'required' => 'false'
+                    ),
+                )
+            ),
+            'DELETE' => array(
+                'description' => 'Delete Grade session.',
+                'parameters' => array(
+                    'id' => array(
+                        'type' => 'integer|string',
+                        'description' => 'Grade Id.',
+                        'required' => 'true'
+                    ),
+                    'grade_id' => array(
+                        'type' => 'integer|string',
+                        'description' => 'Grade session Id.',
+                        'required' => 'true'
+                    ),
+                )
+            )
+        );
+
+    }
 }
