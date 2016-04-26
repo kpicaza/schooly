@@ -39,6 +39,33 @@ class GradeSessionController extends FOSRestController
     }
 
     /**
+     * @ApiDoc(
+     *   section = "Grades",
+     *   description = "Get one GradeSession.",
+     *   statusCodes = {
+     *     200 = "Show grade session info.",
+     *     401 = "Authentication failure, user does not have permission or API token is invalid or outdated.",
+     *     403 = "Authorization failure, user does not have permission to access this area.",
+     *   }
+     * )
+     * Get list of courses
+     */
+    public function getGradeSessionAction($id, $session_id)
+    {
+        $grade = $this->gradeExistOr404($id);
+
+        $gradeSession = $this->container->get('app.api_grade_session_handler')->get($id, $session_id);
+
+        if (null === $gradeSession) {
+            throw new NotFoundHttpException('Grade session not found');
+        }
+
+        $view = $this->view($gradeSession);
+
+        return $this->handleView($view);
+    }
+
+    /**
      * @Security("has_role('ROLE_TEACHER')")
      * @ApiDoc(
      *   section = "Grades",
@@ -105,6 +132,29 @@ class GradeSessionController extends FOSRestController
     }
 
     /**
+     * @Security("has_role('ROLE_ADMIN')")
+     * @ApiDoc(
+     *   section = "Grades",
+     *   description = "Delete a grade session.",
+     *   statusCodes = {
+     *     204 = "Do no return nothing.",
+     *     401 = "Authentication failure, user does not have permission or API token is invalid or outdated.",
+     *   }
+     * )
+     *
+     * @return array
+     */
+    public function deleteGradesSessionsAction($id, $session_id)
+    {
+        $grade = $this->gradeExistOr404($id);
+
+        $this->container->get('app.api_grade_session_handler')->delete($session_id);
+        $view = $this->view(array(), 204);
+
+        return $this->handleView($view);
+    }
+
+    /**
      * @ApiDoc(
      *   section = "Grades",
      *   description = "Grade session options.",
@@ -116,7 +166,7 @@ class GradeSessionController extends FOSRestController
      *
      * @return Response
      */
-    public function optionsGradeSessionAction($id)
+    public function optionsGradeSessionsAction($id)
     {
         $options = $this->get('app.api_grade_session_handler')->options();
 

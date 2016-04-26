@@ -32,6 +32,11 @@ class GradeSessionRepositoryTest extends WebTestCase
     private $gradeGateway;
 
     /**
+     * @var GradeSessionFactory
+     */
+    private $factory;
+
+    /**
      * Set up GradeSessionRepository.
      */
     public function setUp()
@@ -53,5 +58,26 @@ class GradeSessionRepositoryTest extends WebTestCase
             ->setStartDate(new \DateTime())
             ->setGrade(new Grade())
         ;
+    }
+
+    public function testFindOneByWithParams()
+    {
+        $grade = new Grade();
+        $grade->setSubject(self::NAME);
+
+        $fakeGradeSession = new GradeSession();
+        $fakeGradeSession
+            ->setEndDate(new \DateTime())
+            ->setStartDate(new \DateTime())
+            ->setGrade($grade)
+        ;
+
+        $this->gateway->findOneBy(array('grade' => $grade))->willReturn($fakeGradeSession);
+        $fakeGradeSession = $this->factory->makeOne($fakeGradeSession);
+
+        $gradeSession = $this->repository->findOneBy(array('grade' => $grade));
+
+        $this->assertTrue($gradeSession instanceof GradeSession);
+        $this->assertEquals($gradeSession->getStartDate(), $fakeGradeSession->getStartDate());
     }
 }

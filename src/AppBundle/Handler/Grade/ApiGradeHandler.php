@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: kpicaza
- * Date: 9/04/16
- * Time: 23:48.
- */
 
 namespace AppBundle\Handler\Grade;
 

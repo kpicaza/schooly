@@ -42,11 +42,22 @@ class GradeSessionControllerTest extends WebTestCase
         return $grade->getId();
     }
 
+    public function testOptionsMethod()
+    {
+        $client = $this->userTest->getClient(true);
+
+        $this->getDoctrine($client);
+
+        $client->request('OPTIONS', sprintf(self::ROUTE, $this->getLastGrade()));
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+    }
+
     public function testCreateWithoutRequiredParams()
     {
         $client = $this->userTest->getClient(true);
         $this->getDoctrine($client);
-        $this->userTest->setRoles($client, array('ROLE_ADMIN'));
+        $this->userTest->setRoles($client, array('ROLE_TEACHER'));
 
         $response = $this->userTest->post(
             sprintf(self::ROUTE, $this->getLastGrade()),
@@ -57,7 +68,7 @@ class GradeSessionControllerTest extends WebTestCase
             true
         );
 
-        $this->userTest->unSetRoles(array('ROLE_ADMIN'));
+        $this->userTest->unSetRoles(array('ROLE_TEACHER'));
 
         $this->assertEquals(400, $response->getStatusCode());
     }
@@ -66,7 +77,7 @@ class GradeSessionControllerTest extends WebTestCase
     {
         $client = $this->userTest->getClient(true);
         $this->getDoctrine($client);
-        $this->userTest->setRoles($client, array('ROLE_ADMIN'));
+        $this->userTest->setRoles($client, array('ROLE_TEACHER'));
 
         $date = new \DateTime();
 
@@ -79,7 +90,7 @@ class GradeSessionControllerTest extends WebTestCase
             true
         );
 
-        $this->userTest->unSetRoles(array('ROLE_ADMIN'));
+        $this->userTest->unSetRoles(array('ROLE_TEACHER'));
 
         $this->assertEquals(200, $response->getStatusCode());
     }
@@ -102,6 +113,32 @@ class GradeSessionControllerTest extends WebTestCase
         $client->request('GET', sprintf(self::ROUTE, 'abc'));
 
         $this->assertEquals(404, $client->getResponse()->getStatusCode());
+    }
+
+    public function testNotFoundGetGradeSession()
+    {
+        $client = $this->userTest->getClient(true);
+
+        $this->getDoctrine($client);
+
+        $grade_id = $this->getLastGrade();
+
+        $client->request('GET', sprintf(self::ROUTE_ID, $grade_id, 'fasdfsf'));
+
+        $this->assertEquals(404, $client->getResponse()->getStatusCode());
+    }
+
+    public function testValidGetGradeSession()
+    {
+        $client = $this->userTest->getClient(true);
+
+        $this->getDoctrine($client);
+
+        $grade_id = $this->getLastGrade();
+
+        $client->request('GET', sprintf(self::ROUTE_ID, $grade_id, $this->getLast($grade_id)));
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
     }
 
     public function testPutWithOutValidCredentials()
@@ -149,7 +186,7 @@ class GradeSessionControllerTest extends WebTestCase
     {
         $client = $this->userTest->getClient(true);
         $this->getDoctrine($client);
-        $this->userTest->setRoles($client, array('ROLE_ADMIN'));
+        $this->userTest->setRoles($client, array('ROLE_TEACHER'));
 
         $date = new \DateTime();
 
@@ -164,9 +201,49 @@ class GradeSessionControllerTest extends WebTestCase
             true
         );
 
-        $this->userTest->unSetRoles(array('ROLE_ADMIN'));
+        $this->userTest->unSetRoles(array('ROLE_TEACHER'));
 
         $this->assertEquals(204, $response->getStatusCode());
+    }
+
+    public function testPutWithInvalidParams()
+    {
+        $client = $this->userTest->getClient(true);
+        $this->getDoctrine($client);
+        $this->userTest->setRoles($client, array('ROLE_TEACHER'));
+
+        $date = new \DateTime();
+
+        $grade_id = $this->getLastGrade();
+
+        $response = $this->userTest->put(
+            sprintf(self::ROUTE_ID, $grade_id, $this->getLast($grade_id)),
+            array(
+                'start_date' => 'fdsfdkhjds',
+                'end_date' => 'dsdasdasdas',
+            ),
+            true
+        );
+
+        $this->userTest->unSetRoles(array('ROLE_TEACHER'));
+
+        $this->assertEquals(400, $response->getStatusCode());
+    }
+
+    public function testDelete()
+    {
+        $client = $this->userTest->getClient(true);
+        $this->getDoctrine($client);
+
+        $this->userTest->setRoles($client, array(
+            'ROLE_ADMIN',
+        ));
+
+        $grade_id = $this->getLastGrade();
+
+        $client->request('DELETE', sprintf(self::ROUTE_ID, $grade_id, $this->getLast($grade_id)));
+
+        $this->assertEquals(204, $client->getResponse()->getStatusCode());
     }
 
     public function tearDown()

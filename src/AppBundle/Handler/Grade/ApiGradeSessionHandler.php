@@ -58,7 +58,7 @@ class ApiGradeSessionHandler implements ApiRelationHandlerInterface
      */
     public function get($id, $session_id)
     {
-        return $this->repository->find($id);
+        return $this->repository->find($session_id);
     }
 
     /**
@@ -113,6 +113,14 @@ class ApiGradeSessionHandler implements ApiRelationHandlerInterface
         }
 
         throw new InvalidFormException('Invalid form params', $form);
+    }
+
+    /**
+     * @param int|string $id
+     */
+    public function delete($id)
+    {
+        $this->repository->remove($id);
     }
 
     public function options()

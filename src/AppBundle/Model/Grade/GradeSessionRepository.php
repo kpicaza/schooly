@@ -55,7 +55,7 @@ class GradeSessionRepository
     {
         $gradeSession = $this->gateway->findOneBy($criteria);
 
-        return null === $gradeSession ? null : $this->factory->makeOne($call);
+        return null === $gradeSession ? null : $this->factory->makeOne($gradeSession);
     }
 
     /**
