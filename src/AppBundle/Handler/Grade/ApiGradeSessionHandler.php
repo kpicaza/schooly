@@ -2,6 +2,7 @@
 
 namespace AppBundle\Handler\Grade;
 
+use AppBundle\Exception\InvalidFormException;
 use AppBundle\Handler\ApiRelationHandlerInterface;
 use AppBundle\Model\Grade\GradeSessionInterface;
 use AppBundle\Model\Grade\GradeSessionRepository;
@@ -75,17 +76,41 @@ class ApiGradeSessionHandler implements ApiRelationHandlerInterface
             $data = $form->getData();
 
             $rawGradeSession = $this->repository->findNew($id, $data->getStartDate(), $data->getEndDate(), true);
-            $grade = $this->repository->insert($rawGradeSession);
+            $gradeSession = $this->repository->insert($rawGradeSession);
 
-            return $grade;
+            return $gradeSession;
         }
 
-        return $form;
+        throw new InvalidFormException('Invalid form params', $form);
     }
 
+    /**
+     * @param $id
+     * @param $session_id
+     * @param array $params
+     * @return array|\Symfony\Component\Form\FormInterface
+     */
     public function put($id, $session_id, array $params)
     {
-        // TODO: Implement put() method.
+        $gradeSessionModel = new GradeSessionFormModel();
+        $form = $this->formFactory->create(GradeSessionFormType::class, $gradeSessionModel, array('method' => 'PUT'));
+
+        $form->submit($params);
+
+        if ($form->isValid()) {
+            $data = $form->getData();
+
+            $gradeSession = $this->repository->find($session_id);
+            $gradeSession
+                ->setStartDate($data->getStartDate())
+                ->setEndDate($data->getEndDate())
+            ;
+            $this->repository->update();
+
+            return $gradeSession;
+        }
+
+        throw new InvalidFormException('Invalid form params', $form);
     }
 
     public function options()

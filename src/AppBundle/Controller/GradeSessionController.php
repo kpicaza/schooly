@@ -2,6 +2,7 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Exception\InvalidFormException;
 use FOS\RestBundle\Controller\FOSRestController;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -29,14 +30,17 @@ class GradeSessionController extends FOSRestController
      */
     public function getGradeSessionsAction($id)
     {
-        $gradeSessions = $this->container->get('app.grade_session_repository')->findBy(array('grade' => $id));
+        $grade = $this->gradeExistOr404($id);
+
+        $gradeSessions = $this->container->get('app.api_grade_session_handler')->getList($id, array('grade' => $grade));
 
         $view = $this->view($gradeSessions);
 
         return $this->handleView($view);
     }
+
     /**
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_TEACHER')")
      * @ApiDoc(
      *   section = "Grades",
      *   description = "Create new Grade session.",
@@ -52,11 +56,50 @@ class GradeSessionController extends FOSRestController
      */
     public function postGradeSessionAction(Request $request, $id)
     {
-        $gradeSession = $this->container->get('app.api_grade_session_handler')->post(
-            $id, $request->request->all()
-        );
+        $grade = $this->gradeExistOr404($id);
 
-        $view = $this->view($gradeSession);
+        try {
+            $gradeSession = $this->container->get('app.api_grade_session_handler')->post(
+                $id, $request->request->all()
+            );
+
+            $view = $this->view($gradeSession);
+        } catch (InvalidFormException $exception) {
+            $view = $this->view($exception->getForm(), Response::HTTP_BAD_REQUEST);
+        }
+        return $this->handleView($view);
+    }
+
+    /**
+     * @Security("has_role('ROLE_TEACHER')")
+     * @ApiDoc(
+     *   section = "Grades",
+     *   description = "Existing Grade sessions.",
+     *   input = "AppBundle\Form\Model\GradeSessionFormModel",
+     *   output = "AppBundle\Model\Grade\GradeSessionInterface",
+     *   statusCodes = {
+     *     200 = "User data updated.",
+     *     401 = "Authentication failure, user does not have permission or API token is invalid or outdated.",
+     *   }
+     * )
+     *
+     * @param Request $request
+     */
+    public function putGradeSessionAction(Request $request, $id, $session_id)
+    {
+        $grade = $this->gradeExistOr404($id);
+
+        try {
+            $gradeSession = $this->container->get('app.api_grade_session_handler')->put(
+                $id,
+                $session_id,
+                $request->request->all()
+            );
+
+            $view = $this->view(array(), Response::HTTP_NO_CONTENT);
+        } catch (InvalidFormException $exception) {
+            $view = $this->view($exception->getForm(), Response::HTTP_BAD_REQUEST);
+        }
 
         return $this->handleView($view);
     }
@@ -70,12 +113,12 @@ class GradeSessionController extends FOSRestController
      *     401 = "Authentication failure, user does not have permission or API token is invalid or outdated.",
      *   }
      * )
-
      * @return Response
      */
-    public function optionsGradeSessionAction($id) {
+    public function optionsGradeSessionAction($id)
+    {
         $options = $this->get('app.api_grade_session_handler')->options();
-            
+
         $view = $this->view($options);
 
         $response = $this->handleView($view);
@@ -83,5 +126,14 @@ class GradeSessionController extends FOSRestController
         $response->headers->set('Allow', 'OPTIONS, GET, PUT, POST');
 
         return $response;
+    }
+
+    protected function gradeExistOr404 ($id) {
+        $grade = $this->get('app.api_grade_handler')->get($id);
+        if (null === $grade) {
+            throw new NotFoundHttpException();
+        }
+
+        return $grade;
     }
 }

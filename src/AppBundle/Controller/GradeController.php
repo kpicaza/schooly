@@ -61,7 +61,7 @@ class GradeController extends FOSRestController
     }
 
     /**
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_TEACHER')")
      * @ApiDoc(
      *   section = "Grades",
      *   description = "Create new Grade.",
@@ -87,7 +87,7 @@ class GradeController extends FOSRestController
     }
 
     /**
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_TEACHER')")
      * @ApiDoc(
      *   section = "Grades",
      *   description = "Add or update picture to a Grade.",
@@ -115,7 +115,7 @@ class GradeController extends FOSRestController
     }
 
     /**
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_TEACHER')")
      * @ApiDoc(
      *   section = "Grades",
      *   description = "Update grade by ID.",

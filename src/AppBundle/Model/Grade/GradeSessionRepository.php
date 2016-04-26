@@ -1,7 +1,6 @@
 <?php
 namespace AppBundle\Model\Grade;
 
-use AppBundle\Entity\Grade\GradeGateway;
 use AppBundle\Model\Grade\GradeSessionGatewayInterface;
 use AppBundle\Model\FactoryInterface;
 
@@ -28,7 +27,7 @@ class GradeSessionRepository
      * @param GradeSessionGatewayInterface $gateway
      * @param FactoryInterface $factory
      */
-    public function __construct(GradeSessionGatewayInterface $gateway, FactoryInterface $factory, GradeGateway $gradeGateway)
+    public function __construct(GradeSessionGatewayInterface $gateway, FactoryInterface $factory, GradeGatewayInterface $gradeGateway)
     {
         $this->gateway = $gateway;
         $this->factory = $factory;
@@ -70,9 +69,9 @@ class GradeSessionRepository
      */
     public function findBy(array $criteria = array(), $sort = null, $limit = null, $skip = null)
     {
-        $rawGradeSession = $this->gateway->findBy($criteria, $sort, $limit, $skip);
+        $rawGradeSessions = $this->gateway->findBy($criteria, $sort, $limit, $skip);
 
-        return $this->factory->makeAll($rawGradeSession);
+        return $this->factory->makeAll($rawGradeSessions);
     }
 
     /**

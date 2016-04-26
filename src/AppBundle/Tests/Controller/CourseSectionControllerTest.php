@@ -28,6 +28,12 @@ class CourseSectionControllerTest extends WebTestCase
 
     public function testPassTest()
     {
-        $this->assertTrue(true, true);
+        $this->assertTrue(true);
+    }
+
+    public function tearDown()
+    {
+        parent::tearDown();
+        $this->userTest->testDeleteUser();
     }
 }
