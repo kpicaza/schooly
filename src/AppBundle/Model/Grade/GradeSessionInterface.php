@@ -2,7 +2,6 @@
 
 namespace AppBundle\Model\Grade;
 
-
 interface GradeSessionInterface
 {
     public function getStartDate();

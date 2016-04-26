@@ -7,12 +7,9 @@ use AppBundle\Entity\Grade\GradeGateway;
 use AppBundle\Model\Grade\GradeFactory;
 use AppBundle\Model\Grade\GradeRepository;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\HttpFoundation\File\File;
-
 
 class GradeRepositoryTest extends WebTestCase
 {
-
     const SUBJECT = 'Test Grade subject';
     const DESCRIPTION = 'ha sido el texto de relleno estándar de las industrias desde el año 1500, ';
     const ENABLED = true;
@@ -57,7 +54,7 @@ class GradeRepositoryTest extends WebTestCase
         $fakeGrade = $fakeGrade->setSubject(self::SUBJECT);
 
         $this->gateway->findOneBy(array('subject' => self::SUBJECT))->willReturn($fakeGrade);
-        $fakeGrade= $this->factory->makeOne($fakeGrade);
+        $fakeGrade = $this->factory->makeOne($fakeGrade);
 
         $grade = $this->repository->findOneBy(array('subject' => self::SUBJECT));
 
@@ -75,7 +72,6 @@ class GradeRepositoryTest extends WebTestCase
 
         $grades = $this->repository->findBy(array('subject' => self::SUBJECT), null, null, null);
         foreach ($grades as $key => $grade) {
-
             $this->assertTrue($grade instanceof Grade);
             $this->assertEquals($grade->getDescription(), $fakeGrades[$key]->getDescription());
             $this->assertEquals($grade->getEnabled(), $fakeGrades[$key]->getEnabled());
@@ -83,5 +79,4 @@ class GradeRepositoryTest extends WebTestCase
             $this->assertEquals($grade->getUpdatedAt(), $fakeGrades[$key]->getUpdatedAt());
         }
     }
-
 }

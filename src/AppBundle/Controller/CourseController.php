@@ -1,4 +1,5 @@
 <?php
+
 namespace AppBundle\Controller;
 
 use FOS\RestBundle\Controller\FOSRestController;
@@ -98,6 +99,7 @@ class CourseController extends FOSRestController
      * )
      *
      * @param Request $request
+     *
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function postCoursePictureAction(Request $request, $id)

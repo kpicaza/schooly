@@ -7,14 +7,12 @@ use AppBundle\Model\Grade\GradeInterface;
 use Doctrine\ORM\EntityRepository;
 
 /**
- * Class GradeGateway
- * @package AppBundle\Entity\Grade
+ * Class GradeGateway.
  */
 class GradeGateway extends EntityRepository implements GradeGatewayInterface
 {
-
     /**
-     * @param string|integer|Grade $id
+     * @param string|int|Grade $id
      */
     public function find($id)
     {
@@ -23,8 +21,8 @@ class GradeGateway extends EntityRepository implements GradeGatewayInterface
     /**
      * @param array $criteria
      * @param array $sort
-     * @param integer $limit
-     * @param integer $skip
+     * @param int   $limit
+     * @param int   $skip
      */
     public function findBy(array $criteria, array $sort = null, $limit = null, $skip = null)
     {
@@ -47,6 +45,7 @@ class GradeGateway extends EntityRepository implements GradeGatewayInterface
 
     /**
      * @param GradeInterface $grade
+     *
      * @return GradeInterface
      */
     public function insert(GradeInterface $grade)

@@ -8,11 +8,9 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
- * Class CreateGradeCommandTest
- * @package AppBundle\Tests\Command
+ * Class CreateGradeCommandTest.
  */
 class CreateGradeCommandTest extends KernelTestCase
-
 {
     const SUBJECT = 'Testing create grade command';
     const ERROR = 'Error occurred creating a Grade.';
@@ -50,7 +48,7 @@ class CreateGradeCommandTest extends KernelTestCase
             'subject' => self::SUBJECT,
         ));
 
-        $this->assertRegExp('/' . self::SUBJECT . '/', $commandTester->getDisplay());
+        $this->assertRegExp('/'.self::SUBJECT.'/', $commandTester->getDisplay());
     }
 
     public function testExecuteFail()
@@ -68,7 +66,7 @@ class CreateGradeCommandTest extends KernelTestCase
             // 'subject' => self::SUBJECT,
         ));
 
-        $this->assertRegExp('/' . self::ERROR . '/', $commandTester->getDisplay());
+        $this->assertRegExp('/'.self::ERROR.'/', $commandTester->getDisplay());
     }
 
     public function testExecutePrompt()
@@ -86,6 +84,6 @@ class CreateGradeCommandTest extends KernelTestCase
             // 'subject' => self::SUBJECT,
         ));
 
-        $this->assertRegExp('/' . self::SUBJECT . '/', $commandTester->getDisplay());
+        $this->assertRegExp('/'.self::SUBJECT.'/', $commandTester->getDisplay());
     }
 }

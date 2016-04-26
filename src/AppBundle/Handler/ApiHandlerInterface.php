@@ -1,5 +1,7 @@
 <?php
+
 namespace AppBundle\Handler;
+
 /**
  * ApiHandlerInterface.
  */
@@ -10,14 +12,14 @@ interface ApiHandlerInterface
      * 
      * @param array $criteria
      * @param array $sort
-     * @param integer $limit
-     * @param integer $skip
+     * @param int   $limit
+     * @param int   $skip
      */
     public function getList(array $criteria, array $sort = null, $limit = null, $skip = null);
     /**
      * Get object from repository.
      * 
-     * @param integer $id
+     * @param int $id
      */
     public function get($id);
     /**

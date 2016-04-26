@@ -5,11 +5,9 @@ namespace AppBundle\Entity\Grade;
 use AppBundle\Model\Grade\GradeSessionInterface;
 use AppBundle\Model\Grade\GradeInterface;
 use Doctrine\ORM\Mapping as ORM;
-use Hateoas\Configuration\Annotation as Hateoas;
 
 /**
- * Class GradeSession
- * @package AppBundle\Entity\Grade
+ * Class GradeSession.
  *
  * @ORM\Entity
  * @ORM\Table(name = "grade_session")
@@ -44,10 +42,9 @@ class GradeSession implements GradeSessionInterface
     protected $grade;
 
     /**
-     * @var integer|string
+     * @var int|string
      */
     protected $grade_id;
-
 
     public function __construct(GradeInterface $grade = null, \DateTime $start_date = null, \DateTime $end_date = null)
     {
@@ -58,9 +55,9 @@ class GradeSession implements GradeSessionInterface
     }
 
     /**
-     * Get id
+     * Get id.
      *
-     * @return integer
+     * @return int
      */
     public function getId()
     {
@@ -68,7 +65,7 @@ class GradeSession implements GradeSessionInterface
     }
 
     /**
-     * Set startDate
+     * Set startDate.
      *
      * @param \DateTime $startDate
      *
@@ -82,7 +79,7 @@ class GradeSession implements GradeSessionInterface
     }
 
     /**
-     * Get startDate
+     * Get startDate.
      *
      * @return \DateTime
      */
@@ -92,7 +89,7 @@ class GradeSession implements GradeSessionInterface
     }
 
     /**
-     * Set endDate
+     * Set endDate.
      *
      * @param \DateTime $endDate
      *
@@ -106,7 +103,7 @@ class GradeSession implements GradeSessionInterface
     }
 
     /**
-     * Get endDate
+     * Get endDate.
      *
      * @return \DateTime
      */
@@ -116,7 +113,7 @@ class GradeSession implements GradeSessionInterface
     }
 
     /**
-     * Set grade
+     * Set grade.
      *
      * @param GradeInterface $grade
      *
@@ -130,7 +127,7 @@ class GradeSession implements GradeSessionInterface
     }
 
     /**
-     * Get grade
+     * Get grade.
      *
      * @return GradeInterface
      */
@@ -140,7 +137,7 @@ class GradeSession implements GradeSessionInterface
     }
 
     /**
-     * Set grade id
+     * Set grade id.
      *
      * @param GradeInterface $grade
      *
@@ -158,9 +155,9 @@ class GradeSession implements GradeSessionInterface
     }
 
     /**
-     * Get grade id
+     * Get grade id.
      *
-     * @return integer|string
+     * @return int|string
      */
     public function getGradeId()
     {

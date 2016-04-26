@@ -9,7 +9,6 @@ use FOS\UserBundle\Document\User as BaseUser;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use Doctrine\ODM\MongoDB\Mapping\Annotations\UniqueIndex;
 
-
 /**
  * User.
  * 
@@ -17,7 +16,6 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations\UniqueIndex;
  */
 class User extends BaseUser implements UserInterface
 {
-
     /**
      * @MongoDB\Id(strategy="auto")
      */
@@ -216,7 +214,7 @@ class User extends BaseUser implements UserInterface
     }
 
     /**
-     * Get enabled
+     * Get enabled.
      *
      * @return bool $enabled
      */
@@ -226,7 +224,7 @@ class User extends BaseUser implements UserInterface
     }
 
     /**
-     * Get locked
+     * Get locked.
      *
      * @return bool $locked
      */
@@ -236,7 +234,7 @@ class User extends BaseUser implements UserInterface
     }
 
     /**
-     * Get expired
+     * Get expired.
      *
      * @return bool $expired
      */
@@ -246,7 +244,7 @@ class User extends BaseUser implements UserInterface
     }
 
     /**
-     * Get expiresAt
+     * Get expiresAt.
      *
      * @return date $expiresAt
      */
@@ -256,7 +254,7 @@ class User extends BaseUser implements UserInterface
     }
 
     /**
-     * Get credentialsExpired
+     * Get credentialsExpired.
      *
      * @return bool $credentialsExpired
      */
@@ -266,7 +264,7 @@ class User extends BaseUser implements UserInterface
     }
 
     /**
-     * Get credentialsExpireAt
+     * Get credentialsExpireAt.
      *
      * @return date $credentialsExpireAt
      */

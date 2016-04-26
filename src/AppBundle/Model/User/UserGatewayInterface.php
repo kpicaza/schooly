@@ -1,23 +1,23 @@
 <?php
 
 namespace AppBundle\Model\User;
+
 use AppBundle\Model\GatewayInterface;
 
 /**
- * Interface UserGatewayInterface
- * @package AppBundle\Model\User
+ * Interface UserGatewayInterface.
  */
 interface UserGatewayInterface extends GatewayInterface
 {
     /**
-     * @param integer|string|UserInterface $id
+     * @param int|string|UserInterface $id
      */
     public function find($id);
     /**
      * @param array $criteria
      * @param array $sort
-     * @param integer $limit
-     * @param integer $skip
+     * @param int   $limit
+     * @param int   $skip
      */
     public function findBy(array $criteria, array $sort = null, $limit = null, $skip = null);
     /**
@@ -42,7 +42,7 @@ interface UserGatewayInterface extends GatewayInterface
      */
     public function insert(UserInterface $user);
     /**
-     * Update User
+     * Update User.
      */
     public function update();
     /**

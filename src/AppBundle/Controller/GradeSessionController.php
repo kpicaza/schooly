@@ -11,8 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Class GradeSessionController
- * @package AppBundle\Controller
+ * Class GradeSessionController.
  */
 class GradeSessionController extends FOSRestController
 {
@@ -67,6 +66,7 @@ class GradeSessionController extends FOSRestController
         } catch (InvalidFormException $exception) {
             $view = $this->view($exception->getForm(), Response::HTTP_BAD_REQUEST);
         }
+
         return $this->handleView($view);
     }
 
@@ -113,6 +113,7 @@ class GradeSessionController extends FOSRestController
      *     401 = "Authentication failure, user does not have permission or API token is invalid or outdated.",
      *   }
      * )
+     *
      * @return Response
      */
     public function optionsGradeSessionAction($id)
@@ -128,7 +129,8 @@ class GradeSessionController extends FOSRestController
         return $response;
     }
 
-    protected function gradeExistOr404 ($id) {
+    protected function gradeExistOr404($id)
+    {
         $grade = $this->get('app.api_grade_handler')->get($id);
         if (null === $grade) {
             throw new NotFoundHttpException();

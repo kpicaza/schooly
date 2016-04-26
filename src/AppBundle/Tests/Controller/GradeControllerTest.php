@@ -12,7 +12,7 @@ class GradeControllerTest extends WebTestCase
     const ROUTE = '/api/grades';
     const ROUTE_ID = '/api/grades/%s';
     const RESOURCE_PICTURE = 'pictures';
-    const FILE_PATH = __DIR__ . '/../Resources/';
+    const FILE_PATH = __DIR__.'/../Resources/';
     const FILE_NAME = 'open-weather.jpg';
 
     protected $userTest;
@@ -34,10 +34,10 @@ class GradeControllerTest extends WebTestCase
 
     public function getUploadedFile()
     {
-        exec('cp ' . self::FILE_PATH . self::FILE_NAME . ' ' . self::FILE_PATH . self::FILE_NAME . '-1');
+        exec('cp '.self::FILE_PATH.self::FILE_NAME.' '.self::FILE_PATH.self::FILE_NAME.'-1');
 
         return new UploadedFile(
-            self::FILE_PATH . self::FILE_NAME . '-1',
+            self::FILE_PATH.self::FILE_NAME.'-1',
             self::FILE_NAME,
             'image/jpeg',
             123
@@ -119,7 +119,7 @@ class GradeControllerTest extends WebTestCase
 
         $id = $this->getLast($client);
 
-        $response = $this->postPicture($client, sprintf(self::ROUTE_ID . '/' . self::RESOURCE_PICTURE, $id), array());
+        $response = $this->postPicture($client, sprintf(self::ROUTE_ID.'/'.self::RESOURCE_PICTURE, $id), array());
 
         $this->assertEquals(403, $response->getStatusCode());
     }
@@ -132,7 +132,7 @@ class GradeControllerTest extends WebTestCase
 
         $id = $this->getLast($client);
 
-        $response = $this->userTest->post(sprintf(self::ROUTE_ID, $id) . '/' . self::RESOURCE_PICTURE, array(
+        $response = $this->userTest->post(sprintf(self::ROUTE_ID, $id).'/'.self::RESOURCE_PICTURE, array(
             'subject' => self::SUBJECT,
         ), true);
 
@@ -151,7 +151,7 @@ class GradeControllerTest extends WebTestCase
 
         $file = $this->getUploadedFile();
 
-        $response = $this->postPicture($client, sprintf(self::ROUTE_ID . '/' . self::RESOURCE_PICTURE, $id), $file);
+        $response = $this->postPicture($client, sprintf(self::ROUTE_ID.'/'.self::RESOURCE_PICTURE, $id), $file);
 
         $this->userTest->unSetRoles(array('ROLE_ADMIN'));
 
@@ -189,9 +189,8 @@ class GradeControllerTest extends WebTestCase
         $client = $this->userTest->getClient(true);
         $id = $this->getLast($client);
         $this->userTest->setRoles($client, array(
-            'ROLE_ADMIN'
+            'ROLE_ADMIN',
         ));
-
 
         $response = $this->userTest->put(sprintf(self::ROUTE_ID, $id), array(
             'subject' => self::SUBJECT,
@@ -218,7 +217,7 @@ class GradeControllerTest extends WebTestCase
         $client = $this->userTest->getClient(true);
 
         $this->userTest->setRoles($client, array(
-            'ROLE_ADMIN'
+            'ROLE_ADMIN',
         ));
 
         $id = $this->getLast($client);
@@ -233,5 +232,4 @@ class GradeControllerTest extends WebTestCase
         parent::tearDown();
         $this->userTest->testDeleteUser();
     }
-
 }

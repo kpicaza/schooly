@@ -9,11 +9,9 @@ use AppBundle\Entity\Grade\Grade;
 use AppBundle\Model\Grade\GradeSessionFactory;
 use AppBundle\Model\Grade\GradeSessionRepository;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\HttpFoundation\File\File;
 
 class GradeSessionRepositoryTest extends WebTestCase
 {
-
     const NAME = 'Test GradeSession';
     const DESCRIPTION = 'ha sido el texto de relleno estándar de las industrias desde el año 1500, ';
     const ENABLED = true;

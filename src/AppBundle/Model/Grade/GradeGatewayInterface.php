@@ -5,8 +5,7 @@ namespace AppBundle\Model\Grade;
 use AppBundle\Model\GatewayInterface;
 
 /**
- * Interface GradeGatewayInterface
- * @package AppBundle\Model\Grade
+ * Interface GradeGatewayInterface.
  */
 interface GradeGatewayInterface extends GatewayInterface
 {
@@ -14,5 +13,4 @@ interface GradeGatewayInterface extends GatewayInterface
     public function insert(GradeInterface $grade);
     public function update();
     public function remove($id);
-
 }

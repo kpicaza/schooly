@@ -1,8 +1,11 @@
 <?php
+
 namespace AppBundle\Document\User;
+
 use AppBundle\Model\User\UserInterface;
 use AppBundle\Model\User\UserGatewayInterface;
 use Doctrine\ODM\MongoDB\DocumentRepository;
+
 /**
  * UserGateway.
  */
@@ -18,8 +21,8 @@ class UserGateway extends DocumentRepository implements UserGatewayInterface
     /**
      * @param array $criteria
      * @param array $sort
-     * @param integer $limit
-     * @param integer $skip
+     * @param int   $limit
+     * @param int   $skip
      */
     public function findBy(array $criteria, array $sort = null, $limit = null, $skip = null)
     {
@@ -74,7 +77,7 @@ class UserGateway extends DocumentRepository implements UserGatewayInterface
      * Update user.
      */
     public function update()
-    {   
+    {
         $this->dm->flush();
     }
     /**

@@ -1,17 +1,18 @@
 <?php
+
 namespace AppBundle\Entity\User;
+
 use AppBundle\Model\User\UserInterface;
 use AppBundle\Model\User\UserGatewayInterface;
 use Doctrine\ORM\EntityRepository;
 
 /**
- * Class UserGateway
- * @package AppBundle\Entity\User
+ * Class UserGateway.
  */
 class UserGateway extends EntityRepository implements UserGatewayInterface
 {
     /**
-     * @param string|integer|Grade $id
+     * @param string|int|Grade $id
      */
     public function find($id)
     {
@@ -20,8 +21,8 @@ class UserGateway extends EntityRepository implements UserGatewayInterface
     /**
      * @param array $criteria
      * @param array $sort
-     * @param integer $limit
-     * @param integer $skip
+     * @param int   $limit
+     * @param int   $skip
      */
     public function findBy(array $criteria, array $sort = null, $limit = null, $skip = null)
     {
@@ -51,6 +52,7 @@ class UserGateway extends EntityRepository implements UserGatewayInterface
             ->addRole('ROLE_USER')
             ->addRole('ROLE_API_USER')
         ;
+
         return self::insert($user);
     }
     /**
@@ -69,6 +71,7 @@ class UserGateway extends EntityRepository implements UserGatewayInterface
     {
         $this->_em->persist($user);
         $this->_em->flush();
+
         return $user;
     }
     /**
@@ -86,7 +89,7 @@ class UserGateway extends EntityRepository implements UserGatewayInterface
     public function remove($id)
     {
         $user = $this->find($id);
-        
+
         $this->_em->remove($user);
         $this->_em->flush();
     }

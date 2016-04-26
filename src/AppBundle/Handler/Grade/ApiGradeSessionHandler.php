@@ -11,8 +11,7 @@ use AppBundle\Form\Type\GradeSessionFormType;
 use Symfony\Component\Form\FormFactoryInterface;
 
 /**
- * Class ApiGradeSessionHandler
- * @package AppBundle\Handler\Grade
+ * Class ApiGradeSessionHandler.
  */
 class ApiGradeSessionHandler implements ApiRelationHandlerInterface
 {
@@ -29,7 +28,7 @@ class ApiGradeSessionHandler implements ApiRelationHandlerInterface
      * Init Handler.
      *
      * @param GradeSessionRepository $repository
-     * @param FormFactoryInterface $formFactory
+     * @param FormFactoryInterface   $formFactory
      */
     public function __construct(GradeSessionRepository $repository, FormFactoryInterface $formFactory)
     {
@@ -39,10 +38,11 @@ class ApiGradeSessionHandler implements ApiRelationHandlerInterface
 
     /**
      * @param $id
-     * @param array $criteria
+     * @param array      $criteria
      * @param array|null $sort
-     * @param null $limit
-     * @param null $skip
+     * @param null       $limit
+     * @param null       $skip
+     *
      * @return array
      */
     public function getList($id, array $criteria, array $sort = null, $limit = null, $skip = null)
@@ -53,6 +53,7 @@ class ApiGradeSessionHandler implements ApiRelationHandlerInterface
     /**
      * @param $id
      * @param $session_id
+     *
      * @return GradeSessionInterface
      */
     public function get($id, $session_id)
@@ -88,6 +89,7 @@ class ApiGradeSessionHandler implements ApiRelationHandlerInterface
      * @param $id
      * @param $session_id
      * @param array $params
+     *
      * @return array|\Symfony\Component\Form\FormInterface
      */
     public function put($id, $session_id, array $params)
@@ -122,14 +124,14 @@ class ApiGradeSessionHandler implements ApiRelationHandlerInterface
                     'id' => array(
                         'type' => 'integer|string',
                         'description' => 'Grade Id.',
-                        'required' => 'true'
+                        'required' => 'true',
                     ),
                     'grade_id' => array(
                         'type' => 'integer|string',
                         'description' => 'Grade session Id.',
-                        'required' => 'false'
-                    )
-                )
+                        'required' => 'false',
+                    ),
+                ),
             ),
             'POST' => array(
                 'description' => 'Create new Grade session.',
@@ -137,19 +139,19 @@ class ApiGradeSessionHandler implements ApiRelationHandlerInterface
                     'id' => array(
                         'type' => 'integer|string',
                         'description' => 'Grade Id.',
-                        'required' => 'true'
+                        'required' => 'true',
                     ),
                     'start_date' => array(
                         'type' => 'string',
                         'description' => 'Grade session start date.',
-                        'required' => 'true'
+                        'required' => 'true',
                     ),
                     'end_date' => array(
                         'type' => 'string',
                         'description' => 'Grade session end date.',
-                        'required' => 'false'
+                        'required' => 'false',
                     ),
-                )
+                ),
             ),
             'PUT' => array(
                 'description' => 'Edit existing Grade session.',
@@ -157,24 +159,24 @@ class ApiGradeSessionHandler implements ApiRelationHandlerInterface
                     'id' => array(
                         'type' => 'integer|string',
                         'description' => 'Grade Id.',
-                        'required' => 'true'
+                        'required' => 'true',
                     ),
                     'grade_id' => array(
                         'type' => 'integer|string',
                         'description' => 'Grade session Id.',
-                        'required' => 'true'
+                        'required' => 'true',
                     ),
                     'start_date' => array(
                         'type' => 'string',
                         'description' => 'Grade session start date.',
-                        'required' => 'true'
+                        'required' => 'true',
                     ),
                     'end_date' => array(
                         'type' => 'string',
                         'description' => 'Grade session end date.',
-                        'required' => 'false'
+                        'required' => 'false',
                     ),
-                )
+                ),
             ),
             'DELETE' => array(
                 'description' => 'Delete Grade session.',
@@ -182,16 +184,15 @@ class ApiGradeSessionHandler implements ApiRelationHandlerInterface
                     'id' => array(
                         'type' => 'integer|string',
                         'description' => 'Grade Id.',
-                        'required' => 'true'
+                        'required' => 'true',
                     ),
                     'grade_id' => array(
                         'type' => 'integer|string',
                         'description' => 'Grade session Id.',
-                        'required' => 'true'
+                        'required' => 'true',
                     ),
-                )
-            )
+                ),
+            ),
         );
-
     }
 }

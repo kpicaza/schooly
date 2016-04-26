@@ -1,12 +1,11 @@
 <?php
+
 namespace AppBundle\Model\Grade;
 
-use AppBundle\Model\Grade\GradeSessionGatewayInterface;
 use AppBundle\Model\FactoryInterface;
 
 /**
- * Class GradeSessionRepository
- * @package AppBundle\Model\Grade
+ * Class GradeSessionRepository.
  */
 class GradeSessionRepository
 {
@@ -25,7 +24,7 @@ class GradeSessionRepository
 
     /**
      * @param GradeSessionGatewayInterface $gateway
-     * @param FactoryInterface $factory
+     * @param FactoryInterface             $factory
      */
     public function __construct(GradeSessionGatewayInterface $gateway, FactoryInterface $factory, GradeGatewayInterface $gradeGateway)
     {
@@ -60,11 +59,11 @@ class GradeSessionRepository
     }
 
     /**
-     *
      * @param array $criteria
      * @param array $sort
-     * @param integer $limit
-     * @param integer $skip
+     * @param int   $limit
+     * @param int   $skip
+     *
      * @return array
      */
     public function findBy(array $criteria = array(), $sort = null, $limit = null, $skip = null)
@@ -77,6 +76,7 @@ class GradeSessionRepository
     /**
      * @param \DateTime|null $start_date
      * @param \DateTime|null $end_date
+     *
      * @return mixed
      */
     public function findNew($id, \DateTime $start_date = null, \DateTime $end_date = null, $formatted = false)
@@ -109,7 +109,7 @@ class GradeSessionRepository
     {
         return $this->gateway->update();
     }
-    
+
     /**
      * @param $id
      */

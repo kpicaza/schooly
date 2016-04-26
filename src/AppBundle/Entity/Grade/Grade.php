@@ -7,8 +7,9 @@ use Symfony\Component\HttpFoundation\File\File;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Doctrine\ORM\Mapping as ORM;
 use Hateoas\Configuration\Annotation as Hateoas;
+
 /**
- * Class Grade
+ * Class Grade.
  *
  * @ORM\Entity
  * @ORM\Table(name = "grade")
@@ -75,12 +76,9 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *          excludeIf = "expr(is_granted(['ROLE_ADMIN']))"
  *      )
  * )
- *
- * @package AppBundle\Entity\Grade
  */
 class Grade implements GradeInterface
 {
-
     /**
      * @ORM\Id
      * @ORM\Column(type="integer")
@@ -131,6 +129,7 @@ class Grade implements GradeInterface
 
     /**
      * Grade constructor.
+     *
      * @param null $subject
      * @param null $description
      */
@@ -141,7 +140,7 @@ class Grade implements GradeInterface
     }
 
     /**
-     * @return integer|string
+     * @return int|string
      */
     public function getId()
     {
@@ -172,27 +171,27 @@ class Grade implements GradeInterface
         return $this;
     }
     /**
-     * Get enabled
+     * Get enabled.
      *
-     * @return boolean
+     * @return bool
      */
     public function isEnabled()
     {
         return (bool) $this->enabled;
     }
     /**
-     * Get enabled
+     * Get enabled.
      *
-     * @return boolean
+     * @return bool
      */
     public function getEnabled()
     {
         return $this->enabled;
     }
     /**
-     * Get enabled
+     * Get enabled.
      *
-     * @return boolean
+     * @return bool
      */
     public function setEnabled($enabled)
     {
@@ -252,19 +251,21 @@ class Grade implements GradeInterface
     }
 
     /**
-     * Set updatedAt
+     * Set updatedAt.
      *
      * @param \DateTime $updatedAt
+     *
      * @return self
      */
     public function setUpdatedAt($updatedAt)
     {
         $this->updatedAt = $updatedAt;
+
         return $this;
     }
 
     /**
-     * Get updatedAt
+     * Get updatedAt.
      *
      * @return \DateTime $updatedAt
      */

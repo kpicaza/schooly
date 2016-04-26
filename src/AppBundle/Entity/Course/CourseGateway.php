@@ -1,8 +1,11 @@
 <?php
+
 namespace AppBundle\Entity\Course;
+
 use AppBundle\Model\Course\CourseGatewayInterface;
 use AppBundle\Model\Course\CourseInterface;
 use Doctrine\ORM\EntityRepository;
+
 class CourseGateway extends EntityRepository implements CourseGatewayInterface
 {
     /**
@@ -15,8 +18,8 @@ class CourseGateway extends EntityRepository implements CourseGatewayInterface
     /**
      * @param array $criteria
      * @param array $sort
-     * @param integer $limit
-     * @param integer $skip
+     * @param int   $limit
+     * @param int   $skip
      */
     public function findBy(array $criteria, array $sort = null, $limit = null, $skip = null)
     {
@@ -38,6 +41,7 @@ class CourseGateway extends EntityRepository implements CourseGatewayInterface
     }
     /**
      * @param CourseInterface $course
+     *
      * @return CourseInterface
      */
     public function insert($course)

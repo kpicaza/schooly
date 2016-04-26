@@ -1,12 +1,11 @@
 <?php
+
 namespace AppBundle\Model\Grade;
 
-use AppBundle\Model\Grade\GradeGatewayInterface;
 use AppBundle\Model\FactoryInterface;
 
 /**
- * Class GradeRepository
- * @package AppBundle\Model\Grade
+ * Class GradeRepository.
  */
 class GradeRepository
 {
@@ -21,7 +20,7 @@ class GradeRepository
 
     /**
      * @param GradeGatewayInterface $gateway
-     * @param FactoryInterface $factory
+     * @param FactoryInterface      $factory
      */
     public function __construct(GradeGatewayInterface $gateway, FactoryInterface $factory)
     {
@@ -55,11 +54,11 @@ class GradeRepository
     }
 
     /**
-     *
      * @param array $criteria
      * @param array $sort
-     * @param integer $limit
-     * @param integer $skip
+     * @param int   $limit
+     * @param int   $skip
+     *
      * @return array
      */
     public function findBy(array $criteria = array(), $sort = null, $limit = null, $skip = null)
@@ -70,6 +69,7 @@ class GradeRepository
     /**
      * @param null $subject
      * @param null $description
+     *
      * @return GradeInterface
      */
     public function findNew($subject = null, $description = null)
@@ -103,6 +103,7 @@ class GradeRepository
      * @param GradeInterface $course
      * @param $imageFile
      * @param $imageName
+     *
      * @return GradeInterface
      */
     public function addFile(GradeInterface $course, $imageFile, $imageName)

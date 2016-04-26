@@ -3,8 +3,7 @@
 namespace AppBundle\Model\Grade;
 
 /**
- * Interface GradeGatewayInterface
- * @package AppBundle\Model\Grade
+ * Interface GradeGatewayInterface.
  */
 interface GradeSessionGatewayInterface
 {
@@ -12,5 +11,4 @@ interface GradeSessionGatewayInterface
     public function insert(GradeSessionInterface $GradeSession);
     public function update();
     public function remove($id);
-
 }

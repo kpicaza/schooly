@@ -2,18 +2,17 @@
 
 namespace AppBundle\Model\Grade;
 
-use AppBundle\Model\Grade\GradeSessionInterface;
 use AppBundle\Model\FactoryInterface;
 
 /**
- * Class GradeSessionFactory
- * @package AppBundle\Model\Grade
+ * Class GradeSessionFactory.
  */
 class GradeSessionFactory implements FactoryInterface
 {
     /**
      * @param array $rawGradeSessions
      * @param array $params
+     *
      * @return array
      */
     public function makeAll(array $rawGradeSessions, array $params = array())
@@ -29,6 +28,7 @@ class GradeSessionFactory implements FactoryInterface
 
     /**
      * @param GradeSessionInterface $rawGradeSession
+     *
      * @return GradeSessionInterface
      */
     public function makeOne($rawGradeSession, array $params = array())
@@ -38,12 +38,13 @@ class GradeSessionFactory implements FactoryInterface
 
     /**
      * @param GradeSessionInterface $rawUser
+     *
      * @return GradeSessionInterface
      */
     public function make($rawGradeSession, array $params = array())
     {
         if (!$rawGradeSession instanceof GradeSessionInterface) {
-            return null;
+            return;
         }
 
         $rawGradeSession->setGrade(null);

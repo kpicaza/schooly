@@ -1,7 +1,7 @@
 <?php
+
 namespace AppBundle\Model\Course;
 
-use AppBundle\Model\Course\CourseGatewayInterface;
 use AppBundle\Model\FactoryInterface;
 
 /**
@@ -20,7 +20,7 @@ class CourseRepository
 
     /**
      * @param \AppBundle\Model\Course\CourseGatewayInterface $gateway
-     * @param \AppBundle\Model\FactoryInterface $factory
+     * @param \AppBundle\Model\FactoryInterface              $factory
      */
     public function __construct(CourseGatewayInterface $gateway, FactoryInterface $factory)
     {
@@ -54,11 +54,11 @@ class CourseRepository
     }
 
     /**
-     *
      * @param array $criteria
      * @param array $sort
-     * @param integer $limit
-     * @param integer $skip
+     * @param int   $limit
+     * @param int   $skip
+     *
      * @return array
      */
     public function findBy(array $criteria = array(), $sort = null, $limit = null, $skip = null)
@@ -100,6 +100,7 @@ class CourseRepository
      * @param CourseInterface $course
      * @param $imageFile
      * @param $imageName
+     *
      * @return CourseInterface
      */
     public function addFile(CourseInterface $course, $imageFile, $imageName)

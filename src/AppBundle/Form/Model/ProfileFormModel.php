@@ -25,10 +25,9 @@ class ProfileFormModel implements UserFormModelInterface
      *
      * @var string
      */
-    protected $description;    
+    protected $description;
     //protected $picture;
     /**
-     * 
      * @param type $username
      * @param type $email
      * @param type $description

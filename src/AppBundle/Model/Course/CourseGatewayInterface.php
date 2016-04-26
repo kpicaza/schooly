@@ -1,5 +1,7 @@
 <?php
+
 namespace AppBundle\Model\Course;
+
 use AppBundle\Model\GatewayInterface;
 
 /**
@@ -7,5 +9,4 @@ use AppBundle\Model\GatewayInterface;
  */
 interface CourseGatewayInterface extends GatewayInterface
 {
-
 }

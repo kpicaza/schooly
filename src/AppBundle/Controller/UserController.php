@@ -6,8 +6,6 @@ use FOS\RestBundle\Controller\FOSRestController;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
-use AppBundle\Form\Type\RegistrationFormType;
-use AppBundle\Form\Model\RegistrationFormModel;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -83,6 +81,7 @@ class UserController extends FOSRestController
             $request->request->all()
         );
         $view = $this->view($user);
+
         return $this->handleView($view);
     }
     /**
@@ -109,6 +108,7 @@ class UserController extends FOSRestController
         );
 
         $view = $this->view($user);
+
         return $this->handleView($view);
     }
     /**
@@ -131,5 +131,4 @@ class UserController extends FOSRestController
 
         return $this->handleView($view);
     }
-
 }

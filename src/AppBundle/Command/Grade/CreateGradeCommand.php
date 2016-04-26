@@ -6,7 +6,6 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Validator\Validation;
@@ -49,7 +48,6 @@ class CreateGradeCommand extends ContainerAwareCommand
             $handler = $this->getContainer()->get('app.api_grade_handler');
 
             $grade = $handler->post(array('subject' => $subject));
-
         } catch (RuntimeException $e) {
             $output->writeln('Error occurred creating a Grade.');
 
@@ -62,9 +60,9 @@ class CreateGradeCommand extends ContainerAwareCommand
     protected function validateSubject($answer)
     {
         $validator = Validation::createValidator();
-        $errors = $validator->validate($answer, array(new Assert\NotBlank(), new Assert\Regex("/^[A-Za-z0-9 _]*[A-Za-z]+[A-Za-z0-9 _]*$/")));
+        $errors = $validator->validate($answer, array(new Assert\NotBlank(), new Assert\Regex('/^[A-Za-z0-9 _]*[A-Za-z]+[A-Za-z0-9 _]*$/')));
         if (count($errors)) {
-            return null;
+            return;
         }
 
         return $answer;

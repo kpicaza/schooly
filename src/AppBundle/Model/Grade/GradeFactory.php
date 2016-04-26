@@ -2,18 +2,17 @@
 
 namespace AppBundle\Model\Grade;
 
-use AppBundle\Model\Grade\GradeInterface;
 use AppBundle\Model\FactoryInterface;
 
 /**
- * Class GradeFactory
- * @package AppBundle\Model\Course
+ * Class GradeFactory.
  */
 class GradeFactory implements FactoryInterface
 {
     /**
      * @param array $rawGrades
      * @param array $params
+     *
      * @return array
      */
     public function makeAll(array $rawGrades, array $params = array())
@@ -28,6 +27,7 @@ class GradeFactory implements FactoryInterface
     }
     /**
      * @param GradeInterface $rawGrade
+     *
      * @return GradeInterface
      */
     public function makeOne($rawGrade, array $params = array())
@@ -36,12 +36,13 @@ class GradeFactory implements FactoryInterface
     }
     /**
      * @param GradeInterface $rawUser
+     *
      * @return GradeInterface
      */
     public function make($rawGrade, array $params = array())
     {
         if (!$rawGrade instanceof GradeInterface) {
-            return null;
+            return;
         }
 
         // You can format object, in this case we left it to return as raw object, feedback is welcome!

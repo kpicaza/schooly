@@ -10,7 +10,6 @@ use Symfony\Component\HttpFoundation\File\File;
  */
 class FileFormModel
 {
-
     /**
      * NOTE: This is not a mapped field of entity metadata, just a simple property.
      *
@@ -87,19 +86,21 @@ class FileFormModel
     }
 
     /**
-     * Set updatedAt
+     * Set updatedAt.
      *
      * @param \DateTime $updatedAt
+     *
      * @return self
      */
     public function setUpdatedAt($updatedAt)
     {
         $this->updatedAt = $updatedAt;
+
         return $this;
     }
 
     /**
-     * Get updatedAt
+     * Get updatedAt.
      *
      * @return \DateTime $updatedAt
      */
@@ -107,5 +108,4 @@ class FileFormModel
     {
         return $this->updatedAt;
     }
-
 }

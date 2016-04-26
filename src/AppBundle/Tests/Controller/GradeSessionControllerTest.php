@@ -3,7 +3,6 @@
 namespace AppBundle\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class GradeSessionControllerTest extends WebTestCase
 {
@@ -53,7 +52,7 @@ class GradeSessionControllerTest extends WebTestCase
             sprintf(self::ROUTE, $this->getLastGrade()),
             array(
                 'start_date' => null,
-                'end_date' => 'sdasad lkjasd ljasld lk s'
+                'end_date' => 'sdasad lkjasd ljasld lk s',
             ),
             true
         );
@@ -175,5 +174,4 @@ class GradeSessionControllerTest extends WebTestCase
         parent::tearDown();
         $this->userTest->testDeleteUser();
     }
-
 }

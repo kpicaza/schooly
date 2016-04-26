@@ -15,7 +15,7 @@ class UserRepositoryTest extends WebTestCase
     const EMAIL = 'koldo@koldo.mail';
     const PASS = 'Demo1234';
     const DESC = 'Hola mondo';
-    const IMAGE_FILE = __DIR__ . '/../Resources/open-weather.jpg';
+    const IMAGE_FILE = __DIR__.'/../Resources/open-weather.jpg';
 
     /**
      * @var UserGateway

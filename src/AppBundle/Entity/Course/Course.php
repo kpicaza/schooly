@@ -69,7 +69,6 @@ use Hateoas\Configuration\Annotation as Hateoas;
  * ) */
 class Course implements CourseInterface
 {
-
     /**
      * @ORM\Id
      * @ORM\Column(type="integer")
@@ -121,7 +120,7 @@ class Course implements CourseInterface
      */
     protected $updatedAt;
     /**
-     * @return integer|string
+     * @return int|string
      */
     public function getId()
     {
@@ -138,6 +137,7 @@ class Course implements CourseInterface
 
     /**
      * @param string $name
+     *
      * @return \AppBundle\Entity\Course\Course
      */
     public function setName($name)
@@ -155,6 +155,7 @@ class Course implements CourseInterface
     }
     /**
      * @param string $description
+     *
      * @return \AppBundle\Entity\Course\Course
      */
     public function setDescription($description)
@@ -164,32 +165,32 @@ class Course implements CourseInterface
         return $this;
     }
     /**
-     * Get enabled
+     * Get enabled.
      *
-     * @return boolean
+     * @return bool
      */
     public function isEnabled()
     {
         return (bool) $this->enabled;
     }
     /**
-     * Get enabled
+     * Get enabled.
      *
-     * @return boolean
+     * @return bool
      */
     public function getEnabled()
     {
         return $this->enabled;
     }
     /**
-     * Get enabled
+     * Get enabled.
      *
-     * @return boolean
+     * @return bool
      */
     public function setEnabled($enabled)
     {
         $this->enabled = $enabled;
-        
+
         return $this;
     }
     /**
@@ -244,19 +245,21 @@ class Course implements CourseInterface
     }
 
     /**
-     * Set updatedAt
+     * Set updatedAt.
      *
      * @param date $updatedAt
+     *
      * @return self
      */
     public function setUpdatedAt($updatedAt)
     {
         $this->updatedAt = $updatedAt;
+
         return $this;
     }
 
     /**
-     * Get updatedAt
+     * Get updatedAt.
      *
      * @return date $updatedAt
      */

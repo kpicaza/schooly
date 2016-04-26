@@ -9,8 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Class GradeController
- * @package AppBundle\Controller
+ * Class GradeController.
  */
 class GradeController extends FOSRestController
 {
@@ -100,6 +99,7 @@ class GradeController extends FOSRestController
      * )
      *
      * @param Request $request
+     *
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function postGradePictureAction(Request $request, $id)

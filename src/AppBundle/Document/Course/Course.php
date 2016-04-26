@@ -1,8 +1,10 @@
 <?php
+
 namespace AppBundle\Document\Course;
+
 use AppBundle\Model\Course\CourseInterface;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
-use Doctrine\ODM\MongoDB\Mapping\Annotations\UniqueIndex;
+
 /**
  * Course.
  * 
@@ -20,7 +22,7 @@ class Course implements CourseInterface
      * @MongoDB\String
      */
     protected $name;
-    
+
     /**
      * @return type
      */
@@ -37,12 +39,13 @@ class Course implements CourseInterface
     }
     /**
      * @param type $name
+     *
      * @return \AppBundle\Document\Course\Course
      */
     public function setName($name)
     {
         $this->name = $name;
-        
+
         return $this;
     }
 }

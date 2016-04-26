@@ -1,20 +1,21 @@
 <?php
+
 namespace AppBundle\Model;
+
 /**
- * Interface GatewayInterface
- * @package AppBundle\Model
+ * Interface GatewayInterface.
  */
 interface GatewayInterface
 {
     /**
-     * @param integer|string|mixed $id
+     * @param int|string|mixed $id
      */
     public function find($id);
     /**
      * @param array $criteria
      * @param array $sort
-     * @param integer $limit
-     * @param integer $skip
+     * @param int   $limit
+     * @param int   $skip
      */
     public function findBy(array $criteria, array $sort = null, $limit = null, $skip = null);
     /**

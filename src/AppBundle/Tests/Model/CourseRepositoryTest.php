@@ -11,11 +11,10 @@ use Symfony\Component\HttpFoundation\File\File;
 
 class CourseRepositoryTest extends WebTestCase
 {
-
     const NAME = 'Test course';
     const DESCRIPTION = 'ha sido el texto de relleno estándar de las industrias desde el año 1500, ';
     const ENABLED = true;
-    const IMAGE_FILE = __DIR__ . '/../Resources/open-weather.jpg';
+    const IMAGE_FILE = __DIR__.'/../Resources/open-weather.jpg';
     const IMAGE_NAME = 'open-weather.jpg';
 
     /**
@@ -75,7 +74,6 @@ class CourseRepositoryTest extends WebTestCase
 
         $courses = $this->repository->findBy(array('name' => self::NAME), null, null, null);
         foreach ($courses as $key => $course) {
-
             $this->assertTrue($course instanceof Course);
             $this->assertEquals($course->getName(), $fakeCourses[$key]->getName());
             $this->assertEquals($course->getDescription(), $fakeCourses[$key]->getDescription());
@@ -97,5 +95,4 @@ class CourseRepositoryTest extends WebTestCase
         $this->assertEquals($course->getImageFile(), self::IMAGE_FILE);
         $this->assertEquals($course->getImageName(), self::IMAGE_NAME);
     }
-
 }

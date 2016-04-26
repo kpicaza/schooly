@@ -2,7 +2,6 @@
 
 namespace AppBundle\Model\User;
 
-use AppBundle\Model\User\UserInterface;
 use AppBundle\Model\FactoryInterface;
 
 /**
@@ -13,6 +12,7 @@ class UserFactory implements FactoryInterface
     /**
      * @param array $rawUsers
      * @param array $params
+     *
      * @return array
      */
     public function makeAll(array $rawUsers, array $params = array())
@@ -27,6 +27,7 @@ class UserFactory implements FactoryInterface
     }
     /**
      * @param UserInterface $rawUser
+     *
      * @return UserInterface
      */
     public function makeOne($rawUser, array $params = array())
@@ -35,6 +36,7 @@ class UserFactory implements FactoryInterface
     }
     /**
      * @param UserInterface $rawUser
+     *
      * @return UserInterface
      */
     public function make($rawUser, array $params = array())

@@ -53,7 +53,6 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class User extends BaseUser implements UserInterface
 {
-
     /**
      * @ORM\Id
      * @ORM\Column(type="integer")
@@ -122,6 +121,7 @@ class User extends BaseUser implements UserInterface
      * Plain password. Used for model validation. Must not be persisted.
      *
      * @Assert\NotBlank(groups={"create"})
+     *
      * @var string
      */
     protected $plainPassword;
@@ -294,9 +294,9 @@ class User extends BaseUser implements UserInterface
     }
 
     /**
-     * Get enabled
+     * Get enabled.
      *
-     * @return boolean
+     * @return bool
      */
     public function getEnabled()
     {
@@ -304,7 +304,7 @@ class User extends BaseUser implements UserInterface
     }
 
     /**
-     * Set salt
+     * Set salt.
      *
      * @param string $salt
      *
@@ -346,19 +346,21 @@ class User extends BaseUser implements UserInterface
     }
 
     /**
-     * Set updatedAt
+     * Set updatedAt.
      *
      * @param date $updatedAt
+     *
      * @return self
      */
     public function setUpdatedAt($updatedAt)
     {
         $this->updatedAt = $updatedAt;
+
         return $this;
     }
 
     /**
-     * Get updatedAt
+     * Get updatedAt.
      *
      * @return date $updatedAt
      */
@@ -370,20 +372,20 @@ class User extends BaseUser implements UserInterface
     public function setPlainPassword($password)
     {
         $this->plainPassword = $password;
-        
+
         if ($password) {
             // It is required that at least one field changes if you are using doctrine
             // otherwise the event listeners won't be called and the new password is lost
             $this->updatedAt = new \DateTime('now');
         }
-        
+
         return $this;
     }
 
     /**
-     * Get locked
+     * Get locked.
      *
-     * @return boolean
+     * @return bool
      */
     public function getLocked()
     {
@@ -391,9 +393,9 @@ class User extends BaseUser implements UserInterface
     }
 
     /**
-     * Get expired
+     * Get expired.
      *
-     * @return boolean
+     * @return bool
      */
     public function getExpired()
     {
@@ -401,7 +403,7 @@ class User extends BaseUser implements UserInterface
     }
 
     /**
-     * Get expiresAt
+     * Get expiresAt.
      *
      * @return \DateTime
      */
@@ -411,9 +413,9 @@ class User extends BaseUser implements UserInterface
     }
 
     /**
-     * Get credentialsExpired
+     * Get credentialsExpired.
      *
-     * @return boolean
+     * @return bool
      */
     public function getCredentialsExpired()
     {
@@ -421,7 +423,7 @@ class User extends BaseUser implements UserInterface
     }
 
     /**
-     * Get credentialsExpireAt
+     * Get credentialsExpireAt.
      *
      * @return \DateTime
      */
@@ -429,5 +431,4 @@ class User extends BaseUser implements UserInterface
     {
         return $this->credentialsExpireAt;
     }
-
 }

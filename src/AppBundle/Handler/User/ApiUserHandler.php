@@ -1,5 +1,7 @@
 <?php
+
 namespace AppBundle\Handler\User;
+
 use AppBundle\Model\User\UserRepository;
 use AppBundle\Model\User\UserInterface;
 use AppBundle\Form\Type\RegistrationFormType;
@@ -10,6 +12,7 @@ use AppBundle\Form\Model\UserFormModelInterface;
 use AppBundle\Handler\ApiHandlerInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormError;
+
 /**
  * ApiUserHandler.
  */
@@ -39,17 +42,17 @@ class ApiUserHandler implements ApiHandlerInterface
      * 
      * @param array $criteria
      * @param array $sort
-     * @param integer $limit
-     * @param integer $skip
+     * @param int   $limit
+     * @param int   $skip
      */
     public function getList(array $criteria, array $sort = null, $limit = null, $skip = null)
     {
-        return $this->repository->findBy($criteria, $sort , $limit , $skip );
+        return $this->repository->findBy($criteria, $sort, $limit, $skip);
     }
     /**
      * Get user from repository.
      * 
-     * @param integer $id
+     * @param int $id
      *
      * @return User
      */
@@ -73,6 +76,7 @@ class ApiUserHandler implements ApiHandlerInterface
             try {
                 $rawUser = $this->insertFromForm($form->getData());
                 $user = $this->repository->insert($rawUser);
+
                 return $this->repository->parse($user->getId());
             } catch (\Exception $ex) {
                 // throw new $ex;
@@ -80,6 +84,7 @@ class ApiUserHandler implements ApiHandlerInterface
                 // log this somewhere.
             }
         }
+
         return $form;
     }
     /**
@@ -128,6 +133,7 @@ class ApiUserHandler implements ApiHandlerInterface
             ->setUsernameCanonical($userModel->getUsername())
             ->setPlainPassword($userModel->getPlainPassword())
         ;
+
         return $this->fromForm($user, $userModel);
     }
     /**
@@ -156,6 +162,7 @@ class ApiUserHandler implements ApiHandlerInterface
             ->setEmailCanonical($userModel->getEmail())
             ->setEmail($userModel->getEmail())
         ;
+
         return $user;
     }
 }

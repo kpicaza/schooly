@@ -6,12 +6,11 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class UserControllerTest extends WebTestCase
 {
-
     const NAME = 'mico';
     const MAIL = 'mico@mail.com';
     const PASS = 'Demo1234';
     const DESCRIPTION = 'ha sido el texto de relleno estándar de las industrias desde el año 1500, '
-        . 'cuando un impresor (N. del T. persona que se dedica a la imprenta) desconocido';
+        .'cuando un impresor (N. del T. persona que se dedica a la imprenta) desconocido';
     const ROUTE = '/api/users/%s';
     const REGISTER_ROUTE = '/api/users';
 
@@ -20,6 +19,7 @@ class UserControllerTest extends WebTestCase
      *
      * @param string $username
      * @param string $password
+     *
      * @see https://github.com/lexik/LexikJWTAuthenticationBundle/blob/master/Resources/doc/3-functional-testing.md
      * 
      * @return \Symfony\Bundle\FrameworkBundle\Client
@@ -77,10 +77,10 @@ class UserControllerTest extends WebTestCase
     {
         if (true === $auth) {
             $client = $this->createAuthenticatedClient(self::NAME, self::PASS);
-        }
-        else {
+        } else {
             $client = static::createClient();
         }
+
         return $client;
     }
 
@@ -182,7 +182,7 @@ class UserControllerTest extends WebTestCase
         $id = $this->getLast($client);
 
         $response = $this->put(sprintf(self::ROUTE, $id), array(
-          'email' => 'asd' . self::MAIL,
+          'email' => 'asd'.self::MAIL,
           'description' => self::DESCRIPTION,
             ), true);
 
@@ -203,7 +203,7 @@ class UserControllerTest extends WebTestCase
         $client = $this->createAuthenticatedClient(self::NAME, self::PASS);
 
         $this->setRoles($client, array(
-          'ROLE_TEACHER'
+          'ROLE_TEACHER',
         ));
 
         $client->request('GET', self::REGISTER_ROUTE);
@@ -220,5 +220,4 @@ class UserControllerTest extends WebTestCase
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
     }
-
 }

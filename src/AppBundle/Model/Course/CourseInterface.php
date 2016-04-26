@@ -1,4 +1,5 @@
 <?php
+
 namespace AppBundle\Model\Course;
 
 interface CourseInterface

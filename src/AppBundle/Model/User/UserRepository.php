@@ -1,7 +1,9 @@
 <?php
+
 namespace AppBundle\Model\User;
-use AppBundle\Model\User\UserGatewayInterface;
+
 use AppBundle\Model\FactoryInterface;
+
 /**
  * UserRepository.
  */
@@ -17,7 +19,7 @@ class UserRepository
     private $factory;
     /**
      * @param \AppBundle\Model\User\UserGatewayInterface $gateway
-     * @param \AppBundle\Model\FactoryInterface $factory
+     * @param \AppBundle\Model\FactoryInterface          $factory
      */
     public function __construct(UserGatewayInterface $gateway, FactoryInterface $factory)
     {
@@ -25,11 +27,11 @@ class UserRepository
         $this->factory = $factory;
     }
     /**
-     * 
      * @param array $criteria
      * @param array $sort
-     * @param integer $limit
-     * @param integer $skip
+     * @param int   $limit
+     * @param int   $skip
+     *
      * @return array
      */
     public function findBy(array $criteria = array(), $sort = null, $limit = null, $skip = null)

@@ -1,4 +1,5 @@
 <?php
+
 namespace AppBundle\Handler\Course;
 
 use AppBundle\Form\Model\FileFormModel;
@@ -9,7 +10,6 @@ use AppBundle\Handler\ApiHandlerInterface;
 use AppBundle\Form\Model\CourseFormModel;
 use AppBundle\Form\Type\CourseFormType;
 use Symfony\Component\Form\FormFactoryInterface;
-use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\File\File;
 
 /**
@@ -29,7 +29,7 @@ class ApiCourseHandler implements ApiHandlerInterface
     /**
      * Init Handler.
      *
-     * @param CourseRepository $repository
+     * @param CourseRepository     $repository
      * @param FormFactoryInterface $formFactory
      */
     public function __construct(CourseRepository $repository, FormFactoryInterface $formFactory)
@@ -43,8 +43,8 @@ class ApiCourseHandler implements ApiHandlerInterface
      *
      * @param array $criteria
      * @param array $sort
-     * @param integer $limit
-     * @param integer $skip
+     * @param int   $limit
+     * @param int   $skip
      */
     public function getList(array $criteria, array $sort = null, $limit = null, $skip = null)
     {
@@ -54,7 +54,7 @@ class ApiCourseHandler implements ApiHandlerInterface
     /**
      * Get object from repository.
      *
-     * @param integer|string $id
+     * @param int|string $id
      */
     public function get($id)
     {
@@ -75,6 +75,7 @@ class ApiCourseHandler implements ApiHandlerInterface
         if ($form->isValid()) {
             $rawCourse = $this->insertFromForm($form->getData());
             $course = $this->repository->insert($rawCourse);
+
             return $course;
         }
 
@@ -82,8 +83,9 @@ class ApiCourseHandler implements ApiHandlerInterface
     }
 
     /**
-     * @param integer|string $course
-     * @param File $file
+     * @param int|string $course
+     * @param File       $file
+     *
      * @return CourseInterface|\Symfony\Component\Form\FormInterface
      */
     public function postPicture($id, File $file = null)
@@ -108,8 +110,8 @@ class ApiCourseHandler implements ApiHandlerInterface
     /**
      * Update object from repository.
      *
-     * @param integer|string $id
-     * @param array $params
+     * @param int|string $id
+     * @param array      $params
      */
     public function put($id, array $params)
     {
@@ -120,6 +122,7 @@ class ApiCourseHandler implements ApiHandlerInterface
         if ($form->isValid()) {
             $rawCourse = $this->updateFromForm($id, $form->getData());
             $this->repository->update();
+
             return $this->repository->find($rawCourse);
         }
 
@@ -127,7 +130,7 @@ class ApiCourseHandler implements ApiHandlerInterface
     }
 
     /**
-     * @param integer|string $id
+     * @param int|string $id
      */
     public function delete($id)
     {
@@ -147,7 +150,7 @@ class ApiCourseHandler implements ApiHandlerInterface
     }
 
     /**
-     * @param integer|string $id
+     * @param int|string      $id
      * @param CourseFormModel $courseModel
      *
      * @return CourseInterface
@@ -161,6 +164,7 @@ class ApiCourseHandler implements ApiHandlerInterface
 
     /**
      * @param CourseFormModel $courseModel
+     *
      * @return CourseInterface
      */
     protected function fromForm(CourseInterface $course, CourseFormModel $courseModel)

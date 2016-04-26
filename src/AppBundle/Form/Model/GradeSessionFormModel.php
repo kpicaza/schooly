@@ -26,6 +26,7 @@ class GradeSessionFormModel
 
     /**
      * GradeSessionFormModel constructor.
+     *
      * @param \DateTime|null $start_date
      * @param \DateTime|null $end_date
      */
@@ -64,13 +65,12 @@ class GradeSessionFormModel
     }
 
     /**
-     *
      * @param string $date_string
+     *
      * @return string
      */
-    function validateDate($date_string)
+    public function validateDate($date_string)
     {
-        return (bool)strtotime($date_string);
+        return (bool) strtotime($date_string);
     }
-
 }

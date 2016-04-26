@@ -1,5 +1,7 @@
 <?php
+
 namespace AppBundle\Exception;
+
 class InvalidFormException extends \RuntimeException
 {
     protected $form;
@@ -9,8 +11,8 @@ class InvalidFormException extends \RuntimeException
         $this->form = $form;
     }
     /**
-    * @return array|null
-    */
+     * @return array|null
+     */
     public function getForm()
     {
         return $this->form;

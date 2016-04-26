@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: kpicaza
  * Date: 9/04/16
- * Time: 23:48
+ * Time: 23:48.
  */
 
 namespace AppBundle\Handler\Grade;
@@ -19,8 +19,7 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\File\File;
 
 /**
- * Class ApiGradeHandler
- * @package AppBundle\Handler\Grade
+ * Class ApiGradeHandler.
  */
 class ApiGradeHandler implements ApiHandlerInterface
 {
@@ -36,7 +35,7 @@ class ApiGradeHandler implements ApiHandlerInterface
     /**
      * Init Handler.
      *
-     * @param GradeRepository $repository
+     * @param GradeRepository      $repository
      * @param FormFactoryInterface $formFactory
      */
     public function __construct(GradeRepository $repository, FormFactoryInterface $formFactory)
@@ -50,8 +49,8 @@ class ApiGradeHandler implements ApiHandlerInterface
      *
      * @param array $criteria
      * @param array $sort
-     * @param integer $limit
-     * @param integer $skip
+     * @param int   $limit
+     * @param int   $skip
      */
     public function getList(array $criteria, array $sort = null, $limit = null, $skip = null)
     {
@@ -61,7 +60,7 @@ class ApiGradeHandler implements ApiHandlerInterface
     /**
      * Get object from repository.
      *
-     * @param integer $id
+     * @param int $id
      */
     public function get($id)
     {
@@ -92,8 +91,9 @@ class ApiGradeHandler implements ApiHandlerInterface
     }
 
     /**
-     * @param integer|string $course
-     * @param File $file
+     * @param int|string $course
+     * @param File       $file
+     *
      * @return GradeInterface|\Symfony\Component\Form\FormInterface
      */
     public function postPicture($id, File $file = null)
@@ -143,7 +143,7 @@ class ApiGradeHandler implements ApiHandlerInterface
     }
 
     /**
-     * @param integer|string $id
+     * @param int|string $id
      */
     public function delete($id)
     {
