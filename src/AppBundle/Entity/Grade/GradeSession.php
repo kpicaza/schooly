@@ -119,7 +119,7 @@ class GradeSession implements GradeSessionInterface
      *
      * @return GradeSession
      */
-    public function setGrade(GradeInterface $grade = null)
+    public function setGrade(GradeInterface $grade)
     {
         $this->grade = $grade;
 
@@ -143,12 +143,13 @@ class GradeSession implements GradeSessionInterface
      *
      * @return GradeSession
      */
-    public function setGradeId(GradeInterface $grade = null)
+    public function setGradeId(GradeInterface $grade)
     {
         if (null === $grade) {
             return $this;
         }
 
+        $this->setGrade($grade);
         $this->grade_id = $grade->getId();
 
         return $this;

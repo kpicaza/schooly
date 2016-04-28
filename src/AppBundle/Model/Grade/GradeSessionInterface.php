@@ -9,5 +9,5 @@ interface GradeSessionInterface
     public function getEndDate();
     public function setEndDate($endDate);
     public function getGrade();
-    public function setGrade(GradeInterface $grade = null);
+    public function setGrade(GradeInterface $grade);
 }

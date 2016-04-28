@@ -6,16 +6,33 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use AppBundle\Model\User\UserInterface;
 
+/**
+ * Class UserVoter
+ * @package AppBundle\Security
+ */
 class UserVoter extends Voter
 {
     const EDIT = 'edit';
     const VIEW = 'view';
+
+    /**
+     * @param string $attribute
+     * @param mixed $subject
+     * @return bool
+     */
     public function supports($attribute, $subject)
     {
         return $subject instanceof UserInterface && in_array($attribute, array(
-              self::VIEW, self::EDIT,
+            self::VIEW, self::EDIT,
         ));
     }
+
+    /**
+     * @param string $attribute
+     * @param mixed $currentUser
+     * @param TokenInterface $token
+     * @return bool
+     */
     protected function voteOnAttribute($attribute, $currentUser, TokenInterface $token)
     {
         $user = $token->getUser();

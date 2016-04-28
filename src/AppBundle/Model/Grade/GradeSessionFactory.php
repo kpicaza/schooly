@@ -46,9 +46,7 @@ class GradeSessionFactory implements FactoryInterface
         if (!$rawGradeSession instanceof GradeSessionInterface) {
             return;
         }
-
-        $rawGradeSession->setGrade(null);
-
+        
         // You can format object, in this case we left it to return as raw object, feedback is welcome!
         return $rawGradeSession;
     }
